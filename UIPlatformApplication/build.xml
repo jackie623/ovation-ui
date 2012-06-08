@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="UIPlatformApplication" basedir=".">
+    <description>Builds the module suite UIPlatformApplication.</description>
+    <import file="nbproject/build-impl.xml"/>
+    
+    <property name="interfaces.jar.dir" value="interfacejar"/>
+    <property name="interfaces.src.dir" value="GlobalInterfaces/src/"/>
+    <property name="interfaces.class.dir" value="GlobalInterfaces/build/classes/"/>
+    <property name="ovation.jar.path" value="ovation.jar"/>
+    
+    <target name="recreate-interfaces-jar">
+        <mkdir dir="${interfaces.class.dir}"/>
+        <javac srcdir="${interfaces.src.dir}"
+               includes="**/*"
+               destdir="${interfaces.class.dir}"
+               classpath="${ovation.jar.path}"
+               includeAntRuntime="no"
+                />
+
+        <mkdir dir="${interfaces.jar.dir}"/>
+
+        <jar destfile="${interfaces.jar.dir}/interfaces.jar">
+            <fileset dir="${interfaces.class.dir}"/>
+        </jar>
+    </target>
+</project>

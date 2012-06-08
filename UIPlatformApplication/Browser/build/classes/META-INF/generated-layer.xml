@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
+                            "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="xml">
+        <folder name="entities">
+            <folder name="us_physionconsulting_ovation_browser">
+                <file name="Browser" url="nbres:/org/netbeans/modules/settings/resources/properties-1_0.dtd">
+                    <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
+                    <attr name="hint.originalPublicID" stringvalue="-//us.physionconsulting.ovation.browser//Browser//EN"/>
+                </file>
+            </folder>
+        </folder>
+        <folder name="memory">
+            <folder name="us">
+                <folder name="physionconsulting">
+                    <folder name="ovation">
+                        <folder name="browser">
+                            <file name="BrowserTopComponent">
+                                <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
+                                <attr name="settings.providerPath" stringvalue="xml/lookups//us_physionconsulting_ovation_browser/Browser.instance"/>
+                            </file>
+                        </folder>
+                    </folder>
+                </folder>
+            </folder>
+        </folder>
+        <folder name="lookups">
+            <folder name="us_physionconsulting_ovation_browser">
+                <file name="Browser.instance">
+                    <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.create" name="instanceCreate"/>
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.properties" name="settings.convertor"/>
+                    <attr name="settings.instanceClass" stringvalue="us.physionconsulting.ovation.browser.BrowserTopComponent"/>
+                    <attr name="settings.instanceOf" stringvalue="us.physionconsulting.ovation.browser.BrowserTopComponent"/>
+                    <attr boolvalue="true" name="xmlproperties.preventStoring"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+    <folder name="Menu">
+        <folder name="Window">
+            <file name="us-physionconsulting-ovation-browser-BrowserTopComponent.shadow">
+                <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
+                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-BrowserTopComponent.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Windows2">
+        <folder name="Components">
+            <file name="BrowserTopComponent.settings">
+                <!--us.physionconsulting.ovation.browser.BrowserTopComponent--><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE settings PUBLIC "-//NetBeans//DTD Session settings 1.0//EN" "http://www.netbeans.org/dtds/sessionsettings-1_0.dtd">
+<settings version="1.0">
+  <instance class="us.physionconsulting.ovation.browser.BrowserTopComponent"/>
+</settings>
+]]></file>
+        </folder>
+        <folder name="Modes">
+            <folder name="explorer">
+                <file name="BrowserTopComponent.wstcref">
+                    <!--us.physionconsulting.ovation.browser.BrowserTopComponent--><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tc-ref PUBLIC "-//NetBeans//DTD Top Component in Mode Properties 2.0//EN" "http://www.netbeans.org/dtds/tc-ref2_0.dtd">
+<tc-ref version="2.0">
+  <tc-id id="BrowserTopComponent"/>
+  <state opened="true"/>
+</tc-ref>
+]]></file>
+            </folder>
+        </folder>
+    </folder>
+    <folder name="Actions">
+        <folder name="Window">
+            <file name="us-physionconsulting-ovation-browser-BrowserTopComponent.instance">
+                <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
+                <attr
+                    methodvalue="org.openide.windows.TopComponent.openAction" name="instanceCreate"/>
+                <attr name="component" newvalue="us.physionconsulting.ovation.browser.BrowserTopComponent"/>
+                <attr name="preferredID" stringvalue="BrowserTopComponent"/>
+                <attr
+                    bundlevalue="us.physionconsulting.ovation.browser.Bundle#CTL_BrowserAction" name="displayName"/>
+            </file>
+        </folder>
+    </folder>
+</filesystem>

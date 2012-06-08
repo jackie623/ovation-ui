@@ -5,6 +5,7 @@
 package us.physionconsulting.ovation.browser;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
@@ -22,24 +23,11 @@ import us.physion.ovation.interfaces.ConnectionProvider;
 public class EntityChildFactory extends ChildFactory<EntityWrapper> {
 
     private EntityWrapper ew;
+    private Map<String, Node> treeMap;
 
-    EntityChildFactory(EntityWrapper node) {
+    EntityChildFactory(EntityWrapper node, Map<String, Node> map) {
         ew = node;
-    }
-
-    protected boolean createKeys2(List<EntityWrapper> list) {
-
-        Callable<IEntityBase> toCall = new Callable<IEntityBase>() {
-
-            @Override
-            public IEntityBase call() throws Exception {
-                return null;
-            }
-        };
-        for (int i = 0; i < 5; i++) {
-            list.add(new EntityWrapper("Node " + i, IEntityBase.class, toCall));
-        }
-        return true;
+        treeMap = map;
     }
 
     @Override
@@ -55,7 +43,6 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
             {
                 list.add(new EntityWrapper(p));
             }
-            
             for (Source p : c.getSources())
             {
                 list.add(new EntityWrapper(p));
@@ -96,25 +83,16 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
         }
         return false;
     }
-    
-    /*protected Node getNodeForKey(EntityWrapper key)
-    {
-        //find project node, then walk down the tree to key
-        Class entityClass = ew.getType();
-        if (entityClass.isAssignableFrom(Project.class)) {
-            Project entity = (Project) ew.getEntity();
-            for (Experiment e : entity.getExperiments()) {
-                list.add(new EntityWrapper(e));
-            }
-            return true;
-        } 
-    }*/
 
     @Override
     protected Node createNodeForKey(EntityWrapper key) {
       
-        Node n = new AbstractNode(Children.create(new EntityChildFactory(key), true), Lookups.singleton(key));
+        Node n = new AbstractNode(Children.create(new EntityChildFactory(key, treeMap), true), Lookups.singleton(key));
         n.setDisplayName(key.getDisplayName());
+        if (key.getURI() != null)
+        {
+            treeMap.put(key.getURI(), n);
+        }
         return n;
     }
 }

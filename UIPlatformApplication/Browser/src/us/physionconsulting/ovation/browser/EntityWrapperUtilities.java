@@ -4,69 +4,108 @@
  */
 package us.physionconsulting.ovation.browser;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import ovation.Epoch;
-import ovation.EpochGroup;
-import ovation.Experiment;
-import ovation.Project;
+import java.util.*;
+import org.openide.explorer.ExplorerManager;
+import org.openide.explorer.view.BeanTreeView;
+import org.openide.nodes.Node;
+import ovation.*;
 
 /**
  *
  * @author huecotanks
  */
 public class EntityWrapperUtilities {
+    private static String SEPARATOR = ";";
     
-    /*protected static List<EntityWrapper> getRootProject(EntityWrapper ew)
+    protected void expandNodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, BeanTreeView btv, ExplorerManager mgr)
     {
-        Class entityClass = ew.getType();
-        if (entityClass.isAssignableFrom(Project.class)) {
-            Project entity = (Project) ew.getEntity();
-            for (Experiment e : entity.getExperiments()) {
-                list.add(new EntityWrapper(e));
-            }
-            return true;
-        } else if (entityClass.isAssignableFrom(Experiment.class)) {
-            Experiment entity = (Experiment) ew.getEntity();
-
-            for (EpochGroup eg : entity.getEpochGroups()) {
-                list.add(new EntityWrapper(eg));
-            }
-            return true;
-        } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
-            EpochGroup entity = (EpochGroup) ew.getEntity();
-
-            for (EpochGroup eg : entity.getChildren()) {
-                list.add(new EntityWrapper(eg));
-            }
-            for (Epoch e : entity.getEpochs()) {
-                list.add(new EntityWrapper(e));
-            }
-            return true;
-        }
-    }*/
-    
-    /*protected static Set<EntityWrapper> getParent(EntityWrapper ew, List<EntityWrapper> list)
-    {
-        Class entityClass = ew.getType();
-        Set s = new HashSet();
-        if (entityClass.isAssignableFrom(Project.class)) {
-            s.add(ew);
-            return s;
-        } else if (entityClass.isAssignableFrom(Experiment.class)) {
-           
-            return new HashSet();
-        } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
-            EpochGroup entity = (EpochGroup) ew.getEntity();
-
-            for (EpochGroup eg : entity.getChildren()) {
-                list.add(new EntityWrapper(eg));
-            }
-            for (Epoch e : entity.getEpochs()) {
-                list.add(new EntityWrapper(e));
+        while (itr.hasNext())
+        {
+            IEntityBase e = itr.next();
+            String key = e.getURIString();
+            Node n;
+            if (!treeMap.containsKey(key))
+            {
+                String path = getParentInTree(e, treeMap, "");
+                String[] uris = path.split(SEPARATOR);
+                
+                Node parentInTree = treeMap.get(uris[0]);
+                if (parentInTree == null)
+                {
+                    parentInTree = mgr.getRootContext();
+                }
+                else
+                {
+                    uris = Arrays.copyOfRange(uris, 1, uris.length);
+                }
+                
+                for (String uri : uris)
+                {
+                    btv.expandNode(parentInTree);
+                    Node[] nodes = parentInTree.getChildren().getNodes();
+                    for (Node node : nodes) {
+                        EntityWrapper ew = (EntityWrapper) node.getLookup().lookup(EntityWrapper.class);
+                        if (ew.getURI().equals(uri)) {
+                            parentInTree = node;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                n = treeMap.get(key);
+                btv.expandNode(n);
             }
         }
-    }*/
+    }
     
+    protected static String getParentInTree(IEntityBase e, Map<String, Node> treeMap, String path)
+    {
+        IEntityBase parent = getParent(e);
+        if (parent == null)
+        {
+            return path;
+        }
+        String uri = parent.getURIString();
+        if (treeMap.containsKey(uri)) {
+            return uri + SEPARATOR + path;
+        }else {
+            return getParentInTree(parent, treeMap, uri + SEPARATOR + path);
+        }
+    }
+    
+    private static IEntityBase getParent(IEntityBase entity)
+    {
+        Class type = entity.getClass();
+        
+        if (type.isAssignableFrom(Experiment.class))
+        {
+            return ((Experiment)entity).getProjects()[0];
+        }
+        else if (type.isAssignableFrom(EpochGroup.class))
+        {
+            EpochGroup parent = ((EpochGroup)entity).getParent();
+            if (parent == null)
+            {
+                return ((EpochGroup)entity).getExperiment();
+            }
+            return parent;
+        }
+        else if (type.isAssignableFrom(Epoch.class))
+        {
+            return((Epoch)entity).getEpochGroup();
+        }
+        else if (type.isAssignableFrom(Response.class))
+        {
+            return((Response)entity).getEpoch();
+        }
+        else if (type.isAssignableFrom(Stimulus.class))
+        {
+            return((Stimulus)entity).getEpoch();
+        }
+        else if (type.isAssignableFrom(DerivedResponse.class))
+        {
+            return((DerivedResponse)entity).getEpoch();
+        }
+        return null;
+    }
 }

@@ -4,6 +4,7 @@
  */
 package us.physionconsulting.ovation.browser;
 
+import java.util.HashMap;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -12,6 +13,7 @@ import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 import org.openide.util.Lookup.Result;
 import org.openide.util.LookupEvent;
@@ -45,6 +47,7 @@ preferredID = "BrowserTopComponent")
 public final class BrowserTopComponent extends TopComponent implements ExplorerManager.Provider{
 
     private final ExplorerManager em = new ExplorerManager();
+    private HashMap<String, Node> browserMap = new HashMap();
     public BrowserTopComponent() {
         initComponents();
         setName(Bundle.CTL_BrowserTopComponent());
@@ -65,9 +68,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     
     private void recreateTreeComponent()
     {
-        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null), true)));
-        AbstractNode n = new AbstractNode(Children.LEAF);
-        
+        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, browserMap), true)));
     }
 
     /**
@@ -127,7 +128,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     @Override
     public void componentOpened() {
          //root node in tree view. true = asynchronously
-         em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null), true)));
+         recreateTreeComponent();
     }
 
     @Override

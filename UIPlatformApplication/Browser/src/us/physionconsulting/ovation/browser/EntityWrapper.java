@@ -50,39 +50,53 @@ public class EntityWrapper {
         }
         return c.objectWithURI(uri);
     }
-    
+    public String getURI()
+    {
+        return uri;
+    }
     public String getDisplayName() {return displayName;}
     public Class getType() { return type;}
 
-    /*public Set<EntityWrapper> getParents()
+    public EntityWrapper getParent()
     {
-        HashSet s = new HashSet();
         if (type.isAssignableFrom(Project.class))
         {
-            s.add(this);
+            return null;
         }else if (type.isAssignableFrom(Experiment.class))
         {
             Experiment entity = (Experiment)this.getEntity();
-            for (IEntityBase e : entity.getProjects())
-            {
-                s.add(new EntityWrapper(e));
-            }
+            return new EntityWrapper(entity.getProjects()[0]);
         }
         else if (type.isAssignableFrom(EpochGroup.class))
         {
             EpochGroup entity = (EpochGroup)this.getEntity();
-            for (IEntityBase e : entity.getExperiment().getProjects())
+            EpochGroup parent = entity.getParent();
+            if (parent == null)
             {
-                s.add(new EntityWrapper(e));
+                return new EntityWrapper(entity.getExperiment());
             }
+            return new EntityWrapper(parent);
         }
         else if (type.isAssignableFrom(Epoch.class))
         {
-            EpochGroup entity = (EpochGroup)this.getEntity();
-            for (IEntityBase e : entity.getExperiment().getProjects())
-            {
-                s.add(new EntityWrapper(e));
-            }
+            Epoch entity = (Epoch)this.getEntity();
+            return new EntityWrapper(entity.getEpochGroup());
         }
-    }*/
+        else if (type.isAssignableFrom(Response.class))
+        {
+            Response entity = (Response)this.getEntity();
+            return new EntityWrapper(entity.getEpoch());
+        }
+        else if (type.isAssignableFrom(Stimulus.class))
+        {
+            Stimulus entity = (Stimulus)this.getEntity();
+            return new EntityWrapper(entity.getEpoch());
+        }
+        else if (type.isAssignableFrom(DerivedResponse.class))
+        {
+            DerivedResponse entity = (DerivedResponse)this.getEntity();
+            return new EntityWrapper(entity.getEpoch());
+        }
+        return null;
+    }
 }

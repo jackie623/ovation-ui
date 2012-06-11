@@ -4,6 +4,7 @@
  */
 package us.physionconsulting.ovation.browser;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -33,30 +34,45 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
     @Override
     protected boolean createKeys(List<EntityWrapper> list) {
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+        if (dsc == null) {
+            return true;
+        }
         DataContext c = dsc.getContext();
         if (dsc == null) {
             return true;
         }
         if (ew == null) {
             //case root node: add entityWrapper for each project
-            for (Project p : c.getProjects())
-            {
+            for (Project p : c.getProjects()) {
                 list.add(new EntityWrapper(p));
             }
-            for (Source p : c.getSources())
+            Iterator<Source> itr = c.query(Source.class, "isNull(parent)");
+            while (itr.hasNext())
             {
-                list.add(new EntityWrapper(p));
+                Source s = itr.next();
+                list.add(new EntityWrapper(s));
             }
+           
             return true;
-            
+
         } else {
             return createKeysForEntity(ew, list);
         }
     }
 
     protected boolean createKeysForEntity(EntityWrapper ew, List<EntityWrapper> list) {
-        
+
         Class entityClass = ew.getType();
+        if (entityClass.isAssignableFrom(Source.class)) {
+            Source entity = (Source) ew.getEntity();
+            for (Source e : entity.getChildren()) {
+                list.add(new EntityWrapper(e));
+            }
+            for (Experiment e : entity.getExperiments()) {
+                list.add(new EntityWrapper(e));
+            }
+            return true;
+        }
         if (entityClass.isAssignableFrom(Project.class)) {
             Project entity = (Project) ew.getEntity();
             for (Experiment e : entity.getExperiments()) {
@@ -81,16 +97,15 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
             }
             return true;
         }
-        return false;
+        return true;
     }
 
     @Override
     protected Node createNodeForKey(EntityWrapper key) {
-      
+
         Node n = new AbstractNode(Children.create(new EntityChildFactory(key, treeMap), true), Lookups.singleton(key));
         n.setDisplayName(key.getDisplayName());
-        if (key.getURI() != null)
-        {
+        if (key.getURI() != null) {
             treeMap.put(key.getURI(), n);
         }
         return n;

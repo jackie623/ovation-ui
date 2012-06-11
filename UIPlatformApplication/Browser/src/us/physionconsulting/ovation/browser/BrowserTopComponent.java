@@ -4,7 +4,11 @@
  */
 package us.physionconsulting.ovation.browser;
 
+import com.physion.ebuilder.ExpressionBuilder;
+import com.physion.ebuilder.expression.ExpressionTree;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -21,8 +25,11 @@ import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.Lookups;
 import ovation.IAuthenticatedDataStoreCoordinator;
+import ovation.IEntityBase;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.ConnectionListener;
 
 /**
  * Top component which displays something.
@@ -47,28 +54,32 @@ preferredID = "BrowserTopComponent")
 public final class BrowserTopComponent extends TopComponent implements ExplorerManager.Provider{
 
     private final ExplorerManager em = new ExplorerManager();
-    private HashMap<String, Node> browserMap = new HashMap();
+    private final HashMap<String, Node> browserMap = new HashMap<String, Node>();
     public BrowserTopComponent() {
         initComponents();
         setName(Bundle.CTL_BrowserTopComponent());
         setToolTipText(Bundle.HINT_BrowserTopComponent());
         
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
-       
-        Lookup.Template template = new Lookup.Template(ConnectionProvider.class);
-        final Lookup.Result result = Lookup.getDefault().lookup(template);
-        result.addLookupListener(new LookupListener() {
+        
+        ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
+        ConnectionListener cn = new ConnectionListener(new Runnable(){
+
             @Override
-            public void resultChanged(LookupEvent e) {
-                recreateTreeComponent();
+            public void run() {
+                browserMap.clear();
+                recreateTreeComponent(browserMap, em);
             }
+            
         });
-        recreateTreeComponent();
+        
+        cp.addConnectionListener(cn);
+        recreateTreeComponent(browserMap, em);
     }
     
-    private void recreateTreeComponent()
+    private void recreateTreeComponent(Map<String, Node> map , ExplorerManager em)
     {
-        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, browserMap), true)));
+        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, map), true)));
     }
 
     /**
@@ -110,6 +121,11 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     }// </editor-fold>//GEN-END:initComponents
 
     private void plusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plusButtonActionPerformed
+        IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+        ExpressionTree result = ExpressionBuilder.editExpression().expressionTree;
+        Iterator itr = dsc.getContext().query(result);
+        EntityWrapperUtilities.expandNodesFromQuery(browserMap, itr, ((BeanTreeView)treeViewPane), getExplorerManager());
+        
         Result<EntityWrapper> r = getLookup().lookupResult(EntityWrapper.class);
         for (EntityWrapper ew :r.allInstances())
         {
@@ -128,7 +144,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     @Override
     public void componentOpened() {
          //root node in tree view. true = asynchronously
-         recreateTreeComponent();
+         recreateTreeComponent(browserMap, em);
     }
 
     @Override

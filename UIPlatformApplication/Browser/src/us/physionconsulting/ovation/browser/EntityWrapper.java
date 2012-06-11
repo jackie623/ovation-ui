@@ -27,7 +27,7 @@ public class EntityWrapper {
     {
         uri = e.getURIString();
         type = e.getClass();
-        displayName = e.toString();
+        displayName = inferDisplayName(e);
     }
     
     public EntityWrapper(String name, Class clazz, Callable<IEntityBase> toCall)
@@ -57,9 +57,17 @@ public class EntityWrapper {
     public String getDisplayName() {return displayName;}
     public Class getType() { return type;}
 
-    public EntityWrapper getParent()
+    /*public EntityWrapper getParent()
     {
-        if (type.isAssignableFrom(Project.class))
+        if (type.isAssignableFrom(Source.class)){
+            Source s= (Source)this.getEntity();
+            if (s.getParent() == null)
+            {
+                return null;
+            }
+            return new EntityWrapper(s.getParent());
+        }
+        else if (type.isAssignableFrom(Project.class))
         {
             return null;
         }else if (type.isAssignableFrom(Experiment.class))
@@ -98,5 +106,41 @@ public class EntityWrapper {
             return new EntityWrapper(entity.getEpoch());
         }
         return null;
+    }*/
+
+    private String inferDisplayName(IEntityBase e) {
+        
+        if (type.isAssignableFrom(Source.class))
+        {
+            return ((Source)e).getLabel();
+        }
+        else if (type.isAssignableFrom(Project.class))
+        {
+            return ((Project)e).getName();
+        }else if (type.isAssignableFrom(Experiment.class))
+        {
+            return ((Experiment)e).getStartTime().toString("MM/dd/yyyy-hh:mm:ss");
+        }
+        else if (type.isAssignableFrom(EpochGroup.class))
+        {
+            return ((EpochGroup)e).getLabel();
+        }
+        else if (type.isAssignableFrom(Epoch.class))
+        {
+            return ((Epoch)e).getProtocolID();
+        }
+        else if (type.isAssignableFrom(Response.class))
+        {
+            return ((Response)e).getExternalDevice().getName();
+        }
+        else if (type.isAssignableFrom(Stimulus.class))
+        {
+            return ((Stimulus)e).getExternalDevice().getName();
+        }
+        else if (type.isAssignableFrom(DerivedResponse.class))
+        {
+            return ((DerivedResponse)e).getName();
+        }
+        return "<no name>";
     }
 }

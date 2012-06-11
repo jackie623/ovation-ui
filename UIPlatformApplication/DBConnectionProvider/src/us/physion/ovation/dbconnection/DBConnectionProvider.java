@@ -4,13 +4,22 @@
  */
 package us.physion.ovation.dbconnection;
 
+import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.event.EventListenerList;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.openide.util.lookup.ServiceProvider;
 import ovation.IAuthenticatedDataStoreCoordinator;
+import us.physion.ovation.interfaces.ConnectionListener;
 import us.physion.ovation.interfaces.ConnectionProvider;
 
 @ServiceProvider(service=ConnectionProvider.class)
@@ -21,20 +30,25 @@ import us.physion.ovation.interfaces.ConnectionProvider;
 public class DBConnectionProvider implements ConnectionProvider{
 
     private IAuthenticatedDataStoreCoordinator dsc;
+    private ArrayList<ConnectionListener> connectionListeners;
     
-    public DBConnectionProvider(){};
+    public DBConnectionProvider(){
+        
+        connectionListeners = new ArrayList<ConnectionListener>();
+    };
 
     @Override
     public IAuthenticatedDataStoreCoordinator getConnection() {
         if (dsc == null)
         {
             try {
-                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                /*for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                     if ("Nimbus".equals(info.getName())) {
                         javax.swing.UIManager.setLookAndFeel(info.getClassName());
                         break;
                     }
-                }
+                }*/
             } catch (ClassNotFoundException ex) {
                 java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             } catch (InstantiationException ex) {
@@ -45,20 +59,32 @@ public class DBConnectionProvider implements ConnectionProvider{
                 java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             }
             
-            try {
-                java.awt.EventQueue.invokeAndWait(new Runnable() {
+            final ConnectionListener[] listeners = connectionListeners.toArray(new ConnectionListener[0]);
+            Runnable r = new Runnable() {
 
-                    public void run() {
-                        DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
+                public void run() {
+                    DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
 
-                        dialog.setVisible(true);
-                        
-                        if (!dialog.isCancelled())
-                        {
-                            DBConnectionProvider.this.dsc = dialog.getDataStoreCoordinator();
+                    dialog.setVisible(true);
+
+                    if (!dialog.isCancelled()) {
+                        DBConnectionProvider.this.dsc = dialog.getDataStoreCoordinator();
+
+                        for (PropertyChangeListener l : listeners) {
+                            dialog.addPropertyChangeListener(l);
                         }
+                        dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
                     }
-                });
+                }
+            };
+            try {
+                if (SwingUtilities.isEventDispatchThread())
+                {
+                    r.run();
+                }
+                else{
+                    SwingUtilities.invokeAndWait(r);
+                }
             } catch (InterruptedException ex) {
                 Exceptions.printStackTrace(ex);
             } catch (InvocationTargetException ex) {
@@ -67,5 +93,15 @@ public class DBConnectionProvider implements ConnectionProvider{
         }
         return dsc;
     }
-    
+
+    @Override
+    public void addConnectionListener(ConnectionListener cl) {
+        connectionListeners.add(cl);
+    }
+
+    @Override
+    public void removeConnectionListener(ConnectionListener cl) {
+        connectionListeners.remove(cl);
+    }
+
 }

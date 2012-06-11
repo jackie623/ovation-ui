@@ -17,7 +17,7 @@ import ovation.*;
 public class EntityWrapperUtilities {
     private static String SEPARATOR = ";";
     
-    protected void expandNodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, BeanTreeView btv, ExplorerManager mgr)
+    protected static void expandNodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, BeanTreeView btv, ExplorerManager mgr)
     {
         while (itr.hasNext())
         {
@@ -76,8 +76,10 @@ public class EntityWrapperUtilities {
     private static IEntityBase getParent(IEntityBase entity)
     {
         Class type = entity.getClass();
-        
-        if (type.isAssignableFrom(Experiment.class))
+        if (type.isAssignableFrom(Source.class)){
+            return ((Source)entity).getParent();
+        }
+        else if (type.isAssignableFrom(Experiment.class))
         {
             return ((Experiment)entity).getProjects()[0];
         }

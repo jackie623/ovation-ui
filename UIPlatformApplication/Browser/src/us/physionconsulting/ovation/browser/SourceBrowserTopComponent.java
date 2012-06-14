@@ -94,7 +94,7 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
     }// </editor-fold>//GEN-END:initComponents
 
     private void queryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queryButtonActionPerformed
-        BrowserUtilities.queryActionPerformed((BeanTreeView)jScrollPane1, em, browserMap);
+        BrowserUtilities.queryActionPerformed((BeanTreeView)jScrollPane1, em, browserMap, false);
     }//GEN-LAST:event_queryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

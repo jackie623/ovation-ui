@@ -6,8 +6,7 @@ package us.physionconsulting.ovation.browser;
 
 import com.physion.ebuilder.ExpressionBuilder;
 import com.physion.ebuilder.expression.ExpressionTree;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import javax.swing.ActionMap;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
@@ -52,16 +51,37 @@ public class BrowserUtilities {
     
     public static void queryActionPerformed(BeanTreeView btv, 
                                             ExplorerManager em,
-                                            Map<String, Node> browserMap)
+                                            Map<String, Node> browserMap,
+                                            boolean projectView)
     {
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         ExpressionTree result = ExpressionBuilder.editExpression().expressionTree;
         if (result == null)
             return;
-        
-        Iterator itr = dsc.getContext().query(result);
-        //((BeanTreeView)treeViewPane).collapseNode(em.getRootContext());
-        EntityWrapperUtilities.expandNodesFromQuery(browserMap, itr, btv, em);
+        if (getSupportedClasses(projectView).contains(result.getClassUnderQualification()))
+        {
+            Iterator itr = dsc.getContext().query(result);
+            //((BeanTreeView)treeViewPane).collapseNode(em.getRootContext());
+            EntityWrapperUtilities.expandNodesFromQuery(browserMap, itr, btv, em);
+        }
+    }
     
+    public static Set<String> getSupportedClasses(boolean projectView)
+    {
+        Set s = new HashSet<String>();
+        if (projectView)
+        {
+            s.add("Project");
+            s.add("Experiment");
+            s.add("EpochGroup");
+            s.add("Epoch");
+            
+        } else {
+            s.add("Source");
+            s.add("Experiment");
+            s.add("EpochGroup");
+            s.add("Epoch");
+        }
+        return s;
     }
 }

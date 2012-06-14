@@ -104,7 +104,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     }// </editor-fold>//GEN-END:initComponents
 
     private void queryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queryButtonActionPerformed
-        BrowserUtilities.queryActionPerformed(((BeanTreeView)treeViewPane), getExplorerManager(), browserMap);
+        BrowserUtilities.queryActionPerformed(((BeanTreeView)treeViewPane), getExplorerManager(), browserMap, true);
     }//GEN-LAST:event_queryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

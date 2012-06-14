@@ -25,10 +25,12 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
 
     private EntityWrapper ew;
     private Map<String, Node> treeMap;
+    private boolean projectView;
 
-    EntityChildFactory(EntityWrapper node, Map<String, Node> map) {
+    EntityChildFactory(EntityWrapper node, Map<String, Node> map, boolean pView) {
         ew = node;
         treeMap = map;
+        projectView = pView;
     }
 
     @Override
@@ -43,16 +45,18 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
         }
         if (ew == null) {
             //case root node: add entityWrapper for each project
-            for (Project p : c.getProjects()) {
-                list.add(new EntityWrapper(p));
+            if (projectView) {
+                for (Project p : c.getProjects()) {
+                    list.add(new EntityWrapper(p));
+                }
+            } else {
+                Iterator<Source> itr = c.query(Source.class, "isNull(parent)");
+                while (itr.hasNext()) {
+                    Source s = itr.next();
+                    list.add(new EntityWrapper(s));
+                }
             }
-            Iterator<Source> itr = c.query(Source.class, "isNull(parent)");
-            while (itr.hasNext())
-            {
-                Source s = itr.next();
-                list.add(new EntityWrapper(s));
-            }
-           
+
             return true;
 
         } else {
@@ -63,23 +67,27 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
     protected boolean createKeysForEntity(EntityWrapper ew, List<EntityWrapper> list) {
 
         Class entityClass = ew.getType();
-        if (entityClass.isAssignableFrom(Source.class)) {
-            Source entity = (Source) ew.getEntity();
-            for (Source e : entity.getChildren()) {
-                list.add(new EntityWrapper(e));
+        if (projectView) {
+            if (entityClass.isAssignableFrom(Project.class)) {
+                Project entity = (Project) ew.getEntity();
+                for (Experiment e : entity.getExperiments()) {
+                    list.add(new EntityWrapper(e));
+                }
+                return true;
             }
-            for (Experiment e : entity.getExperiments()) {
-                list.add(new EntityWrapper(e));
+        } else {
+            if (entityClass.isAssignableFrom(Source.class)) {
+                Source entity = (Source) ew.getEntity();
+                for (Source e : entity.getChildren()) {
+                    list.add(new EntityWrapper(e));
+                }
+                for (Experiment e : entity.getExperiments()) {
+                    list.add(new EntityWrapper(e));
+                }
+                return true;
             }
-            return true;
         }
-        if (entityClass.isAssignableFrom(Project.class)) {
-            Project entity = (Project) ew.getEntity();
-            for (Experiment e : entity.getExperiments()) {
-                list.add(new EntityWrapper(e));
-            }
-            return true;
-        } else if (entityClass.isAssignableFrom(Experiment.class)) {
+        if (entityClass.isAssignableFrom(Experiment.class)) {
             Experiment entity = (Experiment) ew.getEntity();
 
             for (EpochGroup eg : entity.getEpochGroups()) {
@@ -103,11 +111,21 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
     @Override
     protected Node createNodeForKey(EntityWrapper key) {
 
-        Node n = new AbstractNode(Children.create(new EntityChildFactory(key, treeMap), true), Lookups.singleton(key));
+        AbstractNode n = new AbstractNode(Children.create(new EntityChildFactory(key, treeMap, projectView), true), Lookups.singleton(key));
         n.setDisplayName(key.getDisplayName());
+        setIconForType(n, key.getType());
         if (key.getURI() != null) {
             treeMap.put(key.getURI(), n);
         }
         return n;
+    }
+
+    protected void setIconForType(AbstractNode n, Class entityClass) {
+        if (entityClass.isAssignableFrom(Experiment.class)) {
+            n.setIconBaseWithExtension("");
+
+        } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
+            n.setIconBaseWithExtension("");
+        }
     }
 }

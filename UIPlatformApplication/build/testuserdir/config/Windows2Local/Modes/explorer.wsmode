@@ -9,7 +9,7 @@
     <path orientation="horizontal" number="20" weight="0.3"/>
     <path orientation="vertical" number="20" weight="0.5"/>
   </constraints>
-  <bounds x="256" y="292" width="819" height="664" />
+  <bounds x="144" y="192" width="460" height="437" />
   <frame state="0"/>
     <active-tc  id="BrowserTopComponent" />
     <empty-behavior permanent="true"/>

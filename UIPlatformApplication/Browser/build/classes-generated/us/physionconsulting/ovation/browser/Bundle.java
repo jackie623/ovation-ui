@@ -10,7 +10,7 @@ class Bundle {
         return org.openide.util.NbBundle.getMessage(Bundle.class, "CTL_BrowserAction");
     }
     /**
-     * @return <i>Browser Window</i>
+     * @return <i>Project Navigator</i>
      * @see BrowserTopComponent
      */
     static String CTL_BrowserTopComponent() {

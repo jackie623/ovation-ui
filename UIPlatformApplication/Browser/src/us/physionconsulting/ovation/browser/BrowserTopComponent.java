@@ -48,7 +48,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "BrowserTopComponent")
 @Messages({
     "CTL_BrowserAction=Browser",
-    "CTL_BrowserTopComponent=Browser Window",
+    "CTL_BrowserTopComponent=Project Navigator",
     "HINT_BrowserTopComponent=Browse your Ovation Database"
 })
 public final class BrowserTopComponent extends TopComponent implements ExplorerManager.Provider{
@@ -79,7 +79,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     
     private void recreateTreeComponent(Map<String, Node> map , ExplorerManager em)
     {
-        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, map), true)));
+        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, map, true), true)));
     }
 
     /**
@@ -90,13 +90,15 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSplitPane1 = new javax.swing.JSplitPane();
         treeViewPane = new BeanTreeView();
-        plusButton = new javax.swing.JButton();
+        queryButton = new javax.swing.JButton();
+        jSplitPane2 = new javax.swing.JSplitPane();
 
-        org.openide.awt.Mnemonics.setLocalizedText(plusButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.plusButton.text")); // NOI18N
-        plusButton.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(queryButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.queryButton.text")); // NOI18N
+        queryButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                plusButtonActionPerformed(evt);
+                queryButtonActionPerformed(evt);
             }
         });
 
@@ -104,41 +106,40 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(treeViewPane, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(treeViewPane)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(plusButton)
-                .addContainerGap(319, Short.MAX_VALUE))
+                .addComponent(queryButton)
+                .addGap(18, 18, 18)
+                .addComponent(jSplitPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 262, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(treeViewPane, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(treeViewPane, javax.swing.GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(plusButton)
-                .addContainerGap(8, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(queryButton)
+                    .addComponent(jSplitPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void plusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_plusButtonActionPerformed
+    private void queryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queryButtonActionPerformed
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         ExpressionTree result = ExpressionBuilder.editExpression().expressionTree;
-        Iterator itr = dsc.getContext().query(result);
-        EntityWrapperUtilities.expandNodesFromQuery(browserMap, itr, ((BeanTreeView)treeViewPane), getExplorerManager());
+        if (result == null)
+            return;
         
-        Result<EntityWrapper> r = getLookup().lookupResult(EntityWrapper.class);
-        for (EntityWrapper ew :r.allInstances())
-        {
-            plusButton.setText(ew.getDisplayName());
-        }
-        if (r.allInstances().size() == 0)
-        {
-            plusButton.setText("+");
-        }
-    }//GEN-LAST:event_plusButtonActionPerformed
+        Iterator itr = dsc.getContext().query(result);
+        //((BeanTreeView)treeViewPane).collapseNode(em.getRootContext());
+        EntityWrapperUtilities.expandNodesFromQuery(browserMap, itr, ((BeanTreeView)treeViewPane), getExplorerManager());
+    }//GEN-LAST:event_queryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton plusButton;
+    private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JSplitPane jSplitPane2;
+    private javax.swing.JButton queryButton;
     private javax.swing.JScrollPane treeViewPane;
     // End of variables declaration//GEN-END:variables
     @Override

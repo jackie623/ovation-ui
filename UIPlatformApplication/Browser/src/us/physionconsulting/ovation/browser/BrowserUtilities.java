@@ -19,6 +19,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import ovation.IAuthenticatedDataStoreCoordinator;
+import ovation.IEntityBase;
 import us.physion.ovation.interfaces.ConnectionListener;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.ExpressionTreeProvider;
@@ -80,20 +81,20 @@ public class BrowserUtilities {
     {
         if (result == null)
             return;
+        
+        em.setRootContext(new AbstractNode(Children.LEAF));
         if (getSupportedClasses(projectView).contains(result.getClassUnderQualification()))
         {
             final IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
-            //((BeanTreeView)treeViewPane).collapseNode(em.getRootContext());
-            boolean b = SwingUtilities.isEventDispatchThread();
             Iterator itr = dsc.getContext().query(result);
-            final Set<Node> selectedNodes = EntityWrapperUtilities.nodesFromQuery(browserMap, itr, em);
-            EventQueue.invokeLater(new Runnable(){
+            EntityWrapperUtilities.createNodesFromQuery(em, itr);
+            /*EventQueue.invokeLater(new Runnable(){
 
                 @Override
                 public void run() {
                     EntityWrapperUtilities.expandNodes(selectedNodes, btv, em);
                 }
-            });
+            });*/
         }
     }
     public static void queryActionPerformed(BeanTreeView btv, 
@@ -115,7 +116,7 @@ public class BrowserUtilities {
     
     public static Set<String> getSupportedClasses(boolean projectView)
     {
-        Set s = new HashSet<String>();
+        Set<String> s = new HashSet<String>();
         if (projectView)
         {
             s.add("Project");

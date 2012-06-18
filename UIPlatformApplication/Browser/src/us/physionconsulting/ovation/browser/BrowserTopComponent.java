@@ -75,12 +75,20 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
 
         jSplitPane1 = new javax.swing.JSplitPane();
         treeViewPane = new BeanTreeView();
-        queryButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
-        org.openide.awt.Mnemonics.setLocalizedText(queryButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.queryButton.text")); // NOI18N
-        queryButton.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.jButton1.text")); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                queryButtonActionPerformed(evt);
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        org.openide.awt.Mnemonics.setLocalizedText(jButton2, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.jButton2.text")); // NOI18N
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
             }
         });
 
@@ -88,28 +96,38 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(treeViewPane)
+            .addComponent(treeViewPane, javax.swing.GroupLayout.DEFAULT_SIZE, 605, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(queryButton)
-                .addGap(0, 524, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton2)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(treeViewPane, javax.swing.GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(queryButton)
-                .addGap(10, 10, 10))
+                .addComponent(treeViewPane, javax.swing.GroupLayout.PREFERRED_SIZE, 565, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addGap(0, 6, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void queryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queryButtonActionPerformed
-        BrowserUtilities.queryActionPerformed(((BeanTreeView)treeViewPane), getExplorerManager(), browserMap, true);
-    }//GEN-LAST:event_queryButtonActionPerformed
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        ((BeanTreeView)treeViewPane).collapseNode(em.getRootContext());
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        ((BeanTreeView)treeViewPane).expandAll();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JButton queryButton;
     private javax.swing.JScrollPane treeViewPane;
     // End of variables declaration//GEN-END:variables
     @Override

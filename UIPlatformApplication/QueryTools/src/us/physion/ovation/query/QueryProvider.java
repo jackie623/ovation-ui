@@ -20,7 +20,7 @@ import us.physion.ovation.interfaces.QueryListener;
 public class QueryProvider implements ExpressionTreeProvider{
 
     private ExpressionTree et;
-    private ArrayList<QueryListener> listeners = new ArrayList();
+    private ArrayList<QueryListener> listeners = new ArrayList<QueryListener>();
     
     protected synchronized void setExpressionTree(ExpressionTree tree)
     {

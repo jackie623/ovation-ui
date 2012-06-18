@@ -91,12 +91,12 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         usernameTextField = new javax.swing.JTextField();
         passwordTextField = new javax.swing.JPasswordField();
         errorTextField = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setFocusCycleRoot(false);
 
         connectButton.setBackground(new java.awt.Color(153, 153, 153));
-        connectButton.setFont(new java.awt.Font("Lucida Grande", 0, 16)); // NOI18N
         connectButton.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.connectButton.text")); // NOI18N
         connectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -163,6 +163,8 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         errorTextField.setEditable(false);
         errorTextField.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.errorTextField.text")); // NOI18N
 
+        jButton1.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.jButton1.text")); // NOI18N
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -179,21 +181,20 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                         .add(chooseButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 34, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(18, 18, 18))))
             .add(layout.createSequentialGroup()
+                .add(48, 48, 48)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
-                        .add(48, 48, 48)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(errorTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 457, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                    .add(layout.createSequentialGroup()
-                        .add(134, 134, 134)
-                        .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 273, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                        .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 123, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 129, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(errorTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 457, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(8, Short.MAX_VALUE)
+                .addContainerGap()
                 .add(connectionFileLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -203,9 +204,11 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .add(16, 16, 16)
                 .add(errorTextField)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 55, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(23, 23, 23))
+                .add(18, 18, 18)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(27, 27, 27))
         );
 
         pack();
@@ -297,6 +300,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     private javax.swing.JComboBox connectionFileComboBox;
     private javax.swing.JLabel connectionFileLabel;
     private javax.swing.JTextField errorTextField;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel passwordLabel;
     private javax.swing.JPasswordField passwordTextField;

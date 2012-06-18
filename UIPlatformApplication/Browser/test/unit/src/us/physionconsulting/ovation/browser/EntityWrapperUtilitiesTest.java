@@ -57,7 +57,7 @@ public class EntityWrapperUtilitiesTest {
         Iterator<IEntityBase> itr = null;
         BeanTreeView btv = null;
         ExplorerManager mgr = null;
-        EntityWrapperUtilities.expandNodesFromQuery(treeMap, itr, btv, mgr);
+        EntityWrapperUtilities.nodesFromQuery(treeMap, itr, mgr);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }

@@ -38,7 +38,7 @@ preferredID = "SourceBrowserTopComponent")
 public final class SourceBrowserTopComponent extends TopComponent implements ExplorerManager.Provider{
 
     private ExplorerManager em = new ExplorerManager();
-    private HashMap browserMap = new HashMap<String, Node>();
+    private HashMap<String, Node> browserMap = new HashMap<String, Node>();
     public SourceBrowserTopComponent() {
         initComponents();
         setName(Bundle.CTL_SourceBrowserTopComponent());
@@ -60,16 +60,24 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         jButton1 = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox();
         jScrollPane1 = new BeanTreeView();
-        queryButton = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.jButton1.text")); // NOI18N
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        org.openide.awt.Mnemonics.setLocalizedText(queryButton, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.queryButton.text")); // NOI18N
-        queryButton.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(jButton2, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.jButton2.text")); // NOI18N
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                queryButtonActionPerformed(evt);
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        org.openide.awt.Mnemonics.setLocalizedText(jButton3, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.jButton3.text")); // NOI18N
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
             }
         });
 
@@ -77,30 +85,40 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(queryButton)
-                .addGap(0, 319, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jButton2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton3)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(queryButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton2)
+                    .addComponent(jButton3))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void queryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queryButtonActionPerformed
-        BrowserUtilities.queryActionPerformed((BeanTreeView)jScrollPane1, em, browserMap, false);
-    }//GEN-LAST:event_queryButtonActionPerformed
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        ((BeanTreeView)jScrollPane1).expandAll();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        ((BeanTreeView)jScrollPane1).collapseNode(em.getRootContext());
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JButton queryButton;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {

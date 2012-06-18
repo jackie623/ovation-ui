@@ -111,21 +111,6 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
     @Override
     protected Node createNodeForKey(EntityWrapper key) {
 
-        AbstractNode n = new AbstractNode(Children.create(new EntityChildFactory(key, treeMap, projectView), true), Lookups.singleton(key));
-        n.setDisplayName(key.getDisplayName());
-        setIconForType(n, key.getType());
-        if (key.getURI() != null) {
-            treeMap.put(key.getURI(), n);
-        }
-        return n;
-    }
-
-    protected void setIconForType(AbstractNode n, Class entityClass) {
-        if (entityClass.isAssignableFrom(Experiment.class)) {
-            n.setIconBaseWithExtension("");
-
-        } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
-            n.setIconBaseWithExtension("");
-        }
+        return EntityWrapperUtilities.createNode(key, treeMap, Children.create(new EntityChildFactory(key, treeMap, projectView), true));
     }
 }

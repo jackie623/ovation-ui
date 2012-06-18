@@ -10,10 +10,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.BeanTreeView;
+import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.Lookups;
 import ovation.*;
 
 /**
@@ -23,8 +25,35 @@ import ovation.*;
 public class EntityWrapperUtilities {
 
     private static String SEPARATOR = ";";
+    
+    protected static void createNodesFromQuery(ExplorerManager mgr, Iterator<IEntityBase> itr)
+    {
+        HashSet<Node> selectedNodes = new HashSet();
+        Map<String, Node> treeMap = new HashMap<String, Node>();
+        while (itr.hasNext()) {
+            IEntityBase e = itr.next();
+            String key = e.getURIString();
+            String pathToExistingAncestor = getParentInTree(e, treeMap, e.getURIString());
+            String[] uris = pathToExistingAncestor.split(SEPARATOR);
+         
+            Node parentInTree = treeMap.get(uris[0]);
+            if (parentInTree == null) {
+                parentInTree = mgr.getRootContext();
+            } else {
+                uris = Arrays.copyOfRange(uris, 1, uris.length);
+            }
 
-    protected static Set<Node> nodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, ExplorerManager mgr) {
+            for (String uri : uris) {
+                //ArrayList l = parentInTree.getChildren().Keys.getKeys();
+                Node n = EntityWrapperUtilities.createNode(new EntityWrapper(e), treeMap, Children.LEAF);
+                parentInTree.getChildren().add(new Node[]{n});
+                Children ch = parentInTree.getChildren();
+                parentInTree = n;
+            }
+        }
+    }
+            
+    protected static Set<Node> existingNodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, ExplorerManager mgr) {
         HashSet<Node> selectedNodes = new HashSet();
         while (itr.hasNext()) {
             IEntityBase e = itr.next();
@@ -60,22 +89,8 @@ public class EntityWrapperUtilities {
         return selectedNodes;
     }
 
+    //expand each path from root to the given set of nodes in the tree view
     protected static void expandNodes(Set<Node> nodes, BeanTreeView btv, ExplorerManager mgr) {
-        //Delete me
-        /*for (Node o : mgr.getRootContext().getChildren().getNodes(true)) {
-            for (Node p : o.getChildren().getNodes(true)) {
-                p.getChildren().getNodes(true);
-                for (Node l : p.getChildren().getNodes(true)) {
-                    for (Node m : l.getChildren().getNodes(true)) {
-                        for (Node q : m.getChildren().getNodes(true)) {
-                            for (Node r : q.getChildren().getNodes(true)) {
-                                r.getChildren().getNodes(true);
-                            }
-                        }
-                    }
-                }
-            }
-        }*/
         
         //btv = Utilities.actionsGlobalContext().lookup(BeanTreeView.class); 
         Set<Node> toExpand = new HashSet<Node>();
@@ -141,5 +156,25 @@ public class EntityWrapperUtilities {
             return ((DerivedResponse) entity).getEpoch();
         }
         return null;
+    }
+    
+    protected static Node createNode(EntityWrapper key, Map<String, Node> treeMap, Children c)
+    {
+        AbstractNode n = new AbstractNode(c, Lookups.singleton(key));
+        n.setDisplayName(key.getDisplayName());
+        setIconForType(n, key.getType());
+        if (key.getURI() != null) {
+            treeMap.put(key.getURI(), n);
+        }
+        return n;
+    }
+    
+    protected static void setIconForType(AbstractNode n, Class entityClass) {
+        if (entityClass.isAssignableFrom(Experiment.class)) {
+            n.setIconBaseWithExtension("");
+
+        } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
+            n.setIconBaseWithExtension("");
+        }
     }
 }

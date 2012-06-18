@@ -46,8 +46,7 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
         
-        BrowserUtilities.initBrowser(em, browserMap, false);
-
+        BrowserUtilities.initBrowser((BeanTreeView)jScrollPane1, em, browserMap, false);
     }
 
     /**

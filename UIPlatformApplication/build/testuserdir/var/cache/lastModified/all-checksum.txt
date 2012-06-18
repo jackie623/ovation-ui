@@ -1,7 +1,0 @@
-/Applications/NetBeans/NetBeans 7.1.2.app/Contents/Resources/NetBeans/platform=1338430183000
-/Users/jackie/Ovation/ovation-ui/UIPlatformApplication/build/cluster=1339680500000
-/Applications/NetBeans/NetBeans 7.1.2.app/Contents/Resources/NetBeans/platform=1338430183000
-/Users/jackie/Ovation/ovation-ui/UIPlatformApplication/build/testuserdir=1339680500000
-crc=7
-locale=en_US
-branding=uiplatformapplication

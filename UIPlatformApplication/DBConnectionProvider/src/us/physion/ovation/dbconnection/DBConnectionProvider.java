@@ -38,69 +38,80 @@ public class DBConnectionProvider implements ConnectionProvider{
     };
 
     @Override
-    public IAuthenticatedDataStoreCoordinator getConnection() {
-        if (dsc == null)
+    public synchronized IAuthenticatedDataStoreCoordinator getConnection() {
+        if (dsc != null)
         {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                /*for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                    if ("Nimbus".equals(info.getName())) {
-                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                        break;
-                    }
-                }*/
-            } catch (ClassNotFoundException ex) {
-                java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            } catch (InstantiationException ex) {
-                java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            } catch (IllegalAccessException ex) {
-                java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-                java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-            }
-            
-            final ConnectionListener[] listeners = connectionListeners.toArray(new ConnectionListener[0]);
-            Runnable r = new Runnable() {
-
-                public void run() {
-                    DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
-
-                    dialog.setVisible(true);
-
-                    if (!dialog.isCancelled()) {
-                        DBConnectionProvider.this.dsc = dialog.getDataStoreCoordinator();
-
-                        for (PropertyChangeListener l : listeners) {
-                            dialog.addPropertyChangeListener(l);
-                        }
-                        dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
-                    }
-                }
-            };
-            try {
-                if (SwingUtilities.isEventDispatchThread())
-                {
-                    r.run();
-                }
-                else{
-                    SwingUtilities.invokeAndWait(r);
-                }
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (InvocationTargetException ex) {
-                Exceptions.printStackTrace(ex);
-            }
+            return dsc;
         }
+        final ConnectionListener[] listeners = connectionListeners.toArray(new ConnectionListener[0]);
+        
+        Runnable r = new Runnable() {
+
+            public void run() {
+                /*if (DBConnectionProvider.this.dsc != null) {
+                    return;
+                }*/
+
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    /*
+                     * for (javax.swing.UIManager.LookAndFeelInfo info :
+                     * javax.swing.UIManager.getInstalledLookAndFeels()) { if
+                     * ("Nimbus".equals(info.getName())) {
+                     * javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                     * break; }
+                }
+                     */
+
+                } catch (ClassNotFoundException ex) {
+                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                } catch (InstantiationException ex) {
+                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                }
+                DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
+                
+                dialog.setLocationRelativeTo(null);
+                dialog.pack();
+                dialog.setVisible(true);
+
+                if (!dialog.isCancelled()) {
+                    DBConnectionProvider.this.dsc = dialog.getDataStoreCoordinator();
+
+                    for (PropertyChangeListener l : listeners) {
+                        dialog.addPropertyChangeListener(l);
+                    }
+                    dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
+                }
+            }
+        };
+        r.run(); //TODO: Clean up. Looks like we don't need to create a runnable
+        
+        //new Thread (r).start ();
+        /*try {
+            if (SwingUtilities.isEventDispatchThread()) {
+                r.run();
+            } else {
+                SwingUtilities.invokeAndWait(r);
+            }
+        } catch (InterruptedException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (InvocationTargetException ex) {
+            Exceptions.printStackTrace(ex);
+        }*/
         return dsc;
     }
 
     @Override
-    public void addConnectionListener(ConnectionListener cl) {
+    public synchronized void addConnectionListener(ConnectionListener cl) {
         connectionListeners.add(cl);
     }
 
     @Override
-    public void removeConnectionListener(ConnectionListener cl) {
+    public synchronized void removeConnectionListener(ConnectionListener cl) {
         connectionListeners.remove(cl);
     }
 

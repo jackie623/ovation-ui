@@ -1,3 +1,6 @@
 /UIPlatformApplication/OvationAPI/nbproject/private/
 
 *.class
+/UIPlatformApplication/QueryTools/build/*
+/UIPlatformApplication/build/*
+*/build/*

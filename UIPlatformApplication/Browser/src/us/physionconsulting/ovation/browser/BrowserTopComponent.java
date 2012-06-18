@@ -62,7 +62,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
         
-        BrowserUtilities.initBrowser(em, browserMap, true);
+        BrowserUtilities.initBrowser((BeanTreeView)treeViewPane, em, browserMap, true);
     }
 
     /**
@@ -115,7 +115,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     @Override
     public void componentOpened() {
          //root node in tree view. true = asynchronously
-         BrowserUtilities.recreateTreeComponent(em, browserMap, true);
+         BrowserUtilities.createTreeComponent(em, browserMap, true);
     }
 
     @Override

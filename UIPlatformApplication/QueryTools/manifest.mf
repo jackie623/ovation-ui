@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+OpenIDE-Module: us.physion.ovation.query
+OpenIDE-Module-Install: us/physion/ovation/query/Installer.class
+OpenIDE-Module-Localizing-Bundle: us/physion/ovation/query/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

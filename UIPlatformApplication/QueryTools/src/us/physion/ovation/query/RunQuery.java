@@ -13,6 +13,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingDeque;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
@@ -80,7 +81,7 @@ public final class RunQuery implements ActionListener {
                                 }*/
                             }
                         }
-                        return false;
+                        return ret;
                     }
                 });
                 p.start();

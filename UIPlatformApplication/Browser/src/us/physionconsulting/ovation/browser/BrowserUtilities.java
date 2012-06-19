@@ -7,6 +7,7 @@ package us.physionconsulting.ovation.browser;
 import com.physion.ebuilder.ExpressionBuilder;
 import com.physion.ebuilder.expression.ExpressionTree;
 import java.awt.EventQueue;
+import java.io.IOException;
 import java.util.*;
 import javax.swing.ActionMap;
 import javax.swing.SwingUtilities;
@@ -16,6 +17,7 @@ import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import ovation.IAuthenticatedDataStoreCoordinator;
@@ -29,20 +31,17 @@ import us.physion.ovation.interfaces.QueryListener;
  *
  * @author jackie
  */
-public class BrowserUtilities {
-    public static Node rootNode = null;
+public class BrowserUtilities{
+    protected static Node rootNode = null;
+    protected static Map<String, Node> browserMap = new HashMap<String, Node>();
+    protected static Set<ExplorerManager> registeredViewManagers;
     
-    public static void createTreeComponent(ExplorerManager em, 
-                                             Map<String, Node> browserMap, 
-                                             boolean projectView)
+    public static Map<String, Node> getNodeMap()
     {
-        if (rootNode == null) {
-            em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, browserMap, projectView), true)));
-        }
-    }
-    public static void initBrowser(final BeanTreeView btv,
-                                   final ExplorerManager em, 
-                                   final Map<String, Node> browserMap, 
+        return browserMap;
+    }    
+    
+    protected static void initBrowser(final ExplorerManager em, 
                                    final boolean projectView)
     {
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
@@ -52,7 +51,7 @@ public class BrowserUtilities {
             public void run() {
                 browserMap.clear();
                 rootNode = null;
-                createTreeComponent(em, browserMap, projectView);
+                em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
             }
             
         });
@@ -65,56 +64,42 @@ public class BrowserUtilities {
                 @Override
                 public void run() {
                     ExpressionTree result = etp.getExpressionTree();
-                    setTree(result, btv, em, browserMap, projectView);
+                    setTree(result, em);
                 }
             });
             etp.addQueryListener(ql);
         }
-        createTreeComponent(em, browserMap, projectView);
+
+        if (rootNode == null) {
+            em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
+        }
     }
     
     protected static void setTree(final ExpressionTree result,
-                                  final BeanTreeView btv, 
-                                  final ExplorerManager em,
-                                  final Map<String, Node> browserMap,
-                                  final boolean projectView)
+                                  final ExplorerManager em)
     {
         if (result == null)
             return;
         
-        em.setRootContext(new AbstractNode(Children.LEAF));
-        if (getSupportedClasses(projectView).contains(result.getClassUnderQualification()))
-        {
-            final IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
-            Iterator itr = dsc.getContext().query(result);
-            EntityWrapperUtilities.createNodesFromQuery(em, itr);
-            /*EventQueue.invokeLater(new Runnable(){
-
-                @Override
-                public void run() {
-                    EntityWrapperUtilities.expandNodes(selectedNodes, btv, em);
-                }
-            });*/
-        }
-    }
-    public static void queryActionPerformed(BeanTreeView btv, 
-                                            ExplorerManager em,
-                                            Map<String, Node> browserMap,
-                                            boolean projectView)
-    {
-        //TODO: figure out how to call your RunQuery action from here
-        ExpressionTreeProvider etp = Lookup.getDefault().lookup(ExpressionTreeProvider.class);
-        ExpressionTree prev = null;
-        if (etp != null)
-        {
-            prev = etp.getExpressionTree();
-        }
-        ExpressionTree result = ExpressionBuilder.editExpression(prev).expressionTree;
-        boolean b = SwingUtilities.isEventDispatchThread();
-        setTree(result, btv, em, browserMap, projectView);
+        /*try {
+            em.getRootContext().destroy();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }*/
+        em.setRootContext(new AbstractNode(new QueryChildren()));
+        final IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+        Iterator itr = dsc.getContext().query(result);
+        browserMap = EntityWrapperUtilities.createNodesFromQuery(em, itr);
+        /*
+         * EventQueue.invokeLater(new Runnable(){
+         *
+         * @Override public void run() {
+         * EntityWrapperUtilities.expandNodes(selectedNodes, btv, em); }
+            });
+         */
     }
     
-    public static Set<String> getSupportedClasses(boolean projectView)
+    /*public static Set<String> getSupportedClasses(boolean projectView)
     {
         Set<String> s = new HashSet<String>();
         if (projectView)
@@ -131,5 +116,5 @@ public class BrowserUtilities {
             s.add("Epoch");
         }
         return s;
-    }
+    }*/
 }

@@ -24,12 +24,10 @@ import us.physion.ovation.interfaces.ConnectionProvider;
 public class EntityChildFactory extends ChildFactory<EntityWrapper> {
 
     private EntityWrapper ew;
-    private Map<String, Node> treeMap;
     private boolean projectView;
 
-    EntityChildFactory(EntityWrapper node, Map<String, Node> map, boolean pView) {
+    EntityChildFactory(EntityWrapper node, boolean pView) {
         ew = node;
-        treeMap = map;
         projectView = pView;
     }
 
@@ -111,6 +109,6 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
     @Override
     protected Node createNodeForKey(EntityWrapper key) {
 
-        return EntityWrapperUtilities.createNode(key, treeMap, Children.create(new EntityChildFactory(key, treeMap, projectView), true));
+        return EntityWrapperUtilities.createNode(key, Children.create(new EntityChildFactory(key, projectView), true));
     }
 }

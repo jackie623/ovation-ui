@@ -12,8 +12,10 @@ import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import ovation.*;
@@ -26,34 +28,29 @@ public class EntityWrapperUtilities {
 
     private static String SEPARATOR = ";";
     
-    protected static void createNodesFromQuery(ExplorerManager mgr, Iterator<IEntityBase> itr)
+    
+    protected static Map<String, Node> createNodesFromQuery(ExplorerManager mgr, Iterator<IEntityBase> itr)
     {
-        HashSet<Node> selectedNodes = new HashSet();
         Map<String, Node> treeMap = new HashMap<String, Node>();
         while (itr.hasNext()) {
             IEntityBase e = itr.next();
-            String key = e.getURIString();
-            String pathToExistingAncestor = getParentInTree(e, treeMap, e.getURIString());
-            String[] uris = pathToExistingAncestor.split(SEPARATOR);
-         
-            Node parentInTree = treeMap.get(uris[0]);
+            Stack<EntityWrapper> path = new Stack();
+            path.push(new EntityWrapper(e));
+            getParentInTree(e, treeMap, path);
+            
+            EntityWrapper first = path.pop();
+            Node parentInTree = treeMap.get(first);
             if (parentInTree == null) {
                 parentInTree = mgr.getRootContext();
-            } else {
-                uris = Arrays.copyOfRange(uris, 1, uris.length);
-            }
-
-            for (String uri : uris) {
-                //ArrayList l = parentInTree.getChildren().Keys.getKeys();
-                Node n = EntityWrapperUtilities.createNode(new EntityWrapper(e), treeMap, Children.LEAF);
-                parentInTree.getChildren().add(new Node[]{n});
-                Children ch = parentInTree.getChildren();
-                parentInTree = n;
-            }
+                path.push(first);
+            } 
+            QueryChildren q = (QueryChildren)(parentInTree.getChildren());
+            q.addPath(path);
         }
+        return treeMap;
     }
             
-    protected static Set<Node> existingNodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, ExplorerManager mgr) {
+    /*protected static Set<Node> existingNodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, ExplorerManager mgr) {
         HashSet<Node> selectedNodes = new HashSet();
         while (itr.hasNext()) {
             IEntityBase e = itr.next();
@@ -87,10 +84,10 @@ public class EntityWrapperUtilities {
             }
         }
         return selectedNodes;
-    }
+    }*/
 
     //expand each path from root to the given set of nodes in the tree view
-    protected static void expandNodes(Set<Node> nodes, BeanTreeView btv, ExplorerManager mgr) {
+    /*protected static void expandNodes(Set<Node> nodes, BeanTreeView btv, ExplorerManager mgr) {
         
         //btv = Utilities.actionsGlobalContext().lookup(BeanTreeView.class); 
         Set<Node> toExpand = new HashSet<Node>();
@@ -111,26 +108,28 @@ public class EntityWrapperUtilities {
             mgr.setSelectedNodes((Node[]) (nodes.toArray(new Node[0])));
         } catch (PropertyVetoException ex) {
         } 
-    }
+    }*/
 
-    protected static TreePath createTreePath(Node currentNode, List<Node> ancestors) {
+    /*protected static TreePath createTreePath(Node currentNode, List<Node> ancestors) {
         ancestors.add(currentNode);
         if (currentNode.getParentNode() == null) {
             return new TreePath(ancestors);
         }
         return createTreePath(currentNode.getParentNode(), ancestors);
-    }
+    }*/
 
-    protected static String getParentInTree(IEntityBase e, Map<String, Node> treeMap, String path) {
+    
+    protected static void getParentInTree(IEntityBase e, Map<String, Node> treeMap, Stack<EntityWrapper> path) {
         IEntityBase parent = getParent(e);
         if (parent == null) {
-            return path;
+            return;
         }
+        path.push(new EntityWrapper(parent));
         String uri = parent.getURIString();
         if (treeMap.containsKey(uri)) {
-            return uri + SEPARATOR + path;
+            return;
         } else {
-            return getParentInTree(parent, treeMap, uri + SEPARATOR + path);
+            getParentInTree(parent, treeMap, path);
         }
     }
 
@@ -140,6 +139,7 @@ public class EntityWrapperUtilities {
             return ((Source) entity).getParent();
         } else if (type.isAssignableFrom(Experiment.class)) {
             return ((Experiment) entity).getProjects()[0];
+            //TODO: return multiple parents
         } else if (type.isAssignableFrom(EpochGroup.class)) {
             EpochGroup parent = ((EpochGroup) entity).getParent();
             if (parent == null) {
@@ -158,12 +158,24 @@ public class EntityWrapperUtilities {
         return null;
     }
     
+    protected static Node createNode(EntityWrapper key, Children c)
+    {
+        return createNode(key, BrowserUtilities.getNodeMap(), c);
+    }
+    
     protected static Node createNode(EntityWrapper key, Map<String, Node> treeMap, Children c)
     {
+        String uri = key.getURI();
+        if (uri != null && treeMap.containsKey(uri)) {
+            //create a node that just proxies the existing node
+            return new FilterNode(treeMap.get(uri));
+        }
+        
+        //otherwise, create an AbstractNode representing this object
         AbstractNode n = new AbstractNode(c, Lookups.singleton(key));
         n.setDisplayName(key.getDisplayName());
         setIconForType(n, key.getType());
-        if (key.getURI() != null) {
+        if (uri != null) {//TODO: test this for nodes that don't have uris
             treeMap.put(key.getURI(), n);
         }
         return n;

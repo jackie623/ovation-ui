@@ -2,23 +2,33 @@ package us.physion.ovation.interfaces;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.concurrent.Callable;
+import java.util.concurrent.Runnable;
 import javax.swing.SwingUtilities;
+import java.util.concurrent.FutureTask;
 
 //TODO: call it something other than a listner
 public class QueryListener {//implements PropertyChangeListener{
 
-    private Runnable toRun;
+    private FutureTask<Boolean> toRun;
 
     public QueryListener(Runnable r)
     {
-        toRun = r;
+        toRun = new FutureTask<Boolean>(r, true);
     }
     
-    public void run()
+    public FutureTask<Boolean> run()
     {
-        toRun.run();
+	toRun.run();  
+        return toRun;
     }
+
+    public boolean cancel()
+    {
+	if (toRun.isCancelled() || toRun.isDone())
+	    return true;
+	return toRun.cancel(true);
+    }
+
 
     /*@Override
 	public void propertyChange(PropertyChangeEvent pce) {

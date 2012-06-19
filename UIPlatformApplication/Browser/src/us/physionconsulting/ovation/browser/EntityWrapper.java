@@ -23,6 +23,16 @@ public class EntityWrapper {
     private Callable<IEntityBase> retrieveEntity;
     private String projectPath;
     
+    public EntityWrapper(String objectURI)
+    {
+        uri = objectURI;
+        IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+        DataContext c = dsc.getContext();
+        IEntityBase e = (IEntityBase)c.objectWithURI(objectURI);
+        type = e.getClass();
+        displayName = inferDisplayName(e);
+    }
+    
     public EntityWrapper(IEntityBase e)
     {
         uri = e.getURIString();

@@ -38,7 +38,6 @@ preferredID = "SourceBrowserTopComponent")
 public final class SourceBrowserTopComponent extends TopComponent implements ExplorerManager.Provider{
 
     private ExplorerManager em = new ExplorerManager();
-    private HashMap<String, Node> browserMap = new HashMap<String, Node>();
     public SourceBrowserTopComponent() {
         initComponents();
         setName(Bundle.CTL_SourceBrowserTopComponent());
@@ -46,7 +45,7 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
         
-        BrowserUtilities.initBrowser((BeanTreeView)jScrollPane1, em, browserMap, false);
+        BrowserUtilities.initBrowser(em, false);
     }
 
     /**

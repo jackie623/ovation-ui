@@ -53,16 +53,14 @@ preferredID = "BrowserTopComponent")
 })
 public final class BrowserTopComponent extends TopComponent implements ExplorerManager.Provider{
 
-    private final ExplorerManager em = new ExplorerManager();
-    private final HashMap<String, Node> browserMap = new HashMap<String, Node>();
+    private ExplorerManager em = new ExplorerManager();
     public BrowserTopComponent() {
         initComponents();
         setName(Bundle.CTL_BrowserTopComponent());
         setToolTipText(Bundle.HINT_BrowserTopComponent());
         
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
-        
-        BrowserUtilities.initBrowser((BeanTreeView)treeViewPane, em, browserMap, true);
+        BrowserUtilities.initBrowser(em, true);
     }
 
     /**
@@ -132,8 +130,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
-         //root node in tree view. true = asynchronously
-         BrowserUtilities.createTreeComponent(em, browserMap, true);
+         //BrowserUtilities.createTreeComponent(em, true);
     }
 
     @Override

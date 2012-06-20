@@ -21,7 +21,6 @@ public class EntityWrapper {
     private Class type;
     private String displayName;
     private Callable<IEntityBase> retrieveEntity;
-    private String projectPath;
     
     public EntityWrapper(String objectURI)
     {

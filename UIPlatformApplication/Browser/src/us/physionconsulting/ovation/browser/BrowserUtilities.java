@@ -64,7 +64,7 @@ public class BrowserUtilities{
                 @Override
                 public void run() {
                     ExpressionTree result = etp.getExpressionTree();
-                    setTree(result, em);
+                    setTree(result, em, projectView);
                 }
             });
             etp.addQueryListener(ql);
@@ -76,27 +76,16 @@ public class BrowserUtilities{
     }
     
     protected static void setTree(final ExpressionTree result,
-                                  final ExplorerManager em)
+                                  final ExplorerManager em,
+                                  final boolean projectView)
     {
         if (result == null)
             return;
         
-        /*try {
-            em.getRootContext().destroy();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }*/
-        em.setRootContext(new AbstractNode(new QueryChildren()));
+        em.setRootContext(new AbstractNode(new QueryChildren(projectView)));
         final IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         Iterator itr = dsc.getContext().query(result);
         browserMap = EntityWrapperUtilities.createNodesFromQuery(em, itr);
-        /*
-         * EventQueue.invokeLater(new Runnable(){
-         *
-         * @Override public void run() {
-         * EntityWrapperUtilities.expandNodes(selectedNodes, btv, em); }
-            });
-         */
     }
     
     /*public static Set<String> getSupportedClasses(boolean projectView)

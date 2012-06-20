@@ -31,21 +31,24 @@ public class EntityWrapperUtilities {
     
     protected static Map<String, Node> createNodesFromQuery(ExplorerManager mgr, Iterator<IEntityBase> itr)
     {
-        Map<String, Node> treeMap = new HashMap<String, Node>();
+        Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
         while (itr.hasNext()) {
             IEntityBase e = itr.next();
-            Stack<EntityWrapper> path = new Stack();
-            path.push(new EntityWrapper(e));
-            getParentInTree(e, treeMap, path);
+            Stack<EntityWrapper> p= new Stack();
+            p.push(new EntityWrapper(e));
+            Set<Stack<EntityWrapper>> paths = getParentsInTree(e, p);
             
-            EntityWrapper first = path.pop();
-            Node parentInTree = treeMap.get(first);
-            if (parentInTree == null) {
-                parentInTree = mgr.getRootContext();
-                path.push(first);
-            } 
-            QueryChildren q = (QueryChildren)(parentInTree.getChildren());
-            q.addPath(path);
+            for (Stack<EntityWrapper> path : paths)
+            {
+                EntityWrapper first = path.pop();
+                Node parentInTree = treeMap.get(first);
+                if (parentInTree == null) {
+                    parentInTree = mgr.getRootContext();
+                    path.push(first);
+                }
+                QueryChildren q = (QueryChildren) (parentInTree.getChildren());
+                q.addPath(path);
+            }
         }
         return treeMap;
     }
@@ -118,44 +121,71 @@ public class EntityWrapperUtilities {
         return createTreePath(currentNode.getParentNode(), ancestors);
     }*/
 
-    
-    protected static void getParentInTree(IEntityBase e, Map<String, Node> treeMap, Stack<EntityWrapper> path) {
-        IEntityBase parent = getParent(e);
-        if (parent == null) {
-            return;
+    //not tail recursive but oh well
+    protected static Set<Stack<EntityWrapper>> getParentsInTree(IEntityBase e, Stack<EntityWrapper> path)
+    {
+        Set<Stack<EntityWrapper>> paths = new HashSet<Stack<EntityWrapper>>();
+        String uri = e.getURIString();
+
+        Set<IEntityBase> parents = getParents(e);
+        if (parents.isEmpty())
+        {
+            paths.add(path);
+            return paths;
         }
-        path.push(new EntityWrapper(parent));
-        String uri = parent.getURIString();
-        if (treeMap.containsKey(uri)) {
-            return;
-        } else {
-            getParentInTree(parent, treeMap, path);
+        
+        for (IEntityBase parent: parents)
+        {
+            Stack newPath = new Stack();
+            for (int i = 0; i < path.size(); i++) {
+                newPath.push(path.get(i));
+            }
+            newPath.push(new EntityWrapper(parent));
+            paths.addAll(getParentsInTree(parent, newPath));
         }
+       
+        return paths;
+       
     }
 
-    private static IEntityBase getParent(IEntityBase entity) {
+    private static Set<IEntityBase> getParents(IEntityBase entity) {
+        Set<IEntityBase> parents = new HashSet();
         Class type = entity.getClass();
-        if (type.isAssignableFrom(Source.class)) {
-            return ((Source) entity).getParent();
+        if (type.isAssignableFrom(Source.class)) 
+        {
+            Source parent = ((Source) entity).getParent();
+            if (parent != null)
+            {
+                parents.add(parent);
+            }
         } else if (type.isAssignableFrom(Experiment.class)) {
-            return ((Experiment) entity).getProjects()[0];
-            //TODO: return multiple parents
+            for (Project p : ((Experiment) entity).getProjects())
+            {
+                parents.add(p);
+            }
+            
+            for (Source p : ((Experiment) entity).getSources())
+            {
+                parents.add(p);
+            }
         } else if (type.isAssignableFrom(EpochGroup.class)) {
             EpochGroup parent = ((EpochGroup) entity).getParent();
             if (parent == null) {
-                return ((EpochGroup) entity).getExperiment();
+                parents.add(((EpochGroup) entity).getExperiment());
             }
-            return parent;
+            else{
+                parents.add(parent);
+            }
         } else if (type.isAssignableFrom(Epoch.class)) {
-            return ((Epoch) entity).getEpochGroup();
+            parents.add(((Epoch) entity).getEpochGroup());
         } else if (type.isAssignableFrom(Response.class)) {
-            return ((Response) entity).getEpoch();
+            parents.add(((Response) entity).getEpoch());
         } else if (type.isAssignableFrom(Stimulus.class)) {
-            return ((Stimulus) entity).getEpoch();
+            parents.add( ((Stimulus) entity).getEpoch());
         } else if (type.isAssignableFrom(DerivedResponse.class)) {
-            return ((DerivedResponse) entity).getEpoch();
+            parents.add( ((DerivedResponse) entity).getEpoch());
         }
-        return null;
+        return parents;
     }
     
     protected static Node createNode(EntityWrapper key, Children c)

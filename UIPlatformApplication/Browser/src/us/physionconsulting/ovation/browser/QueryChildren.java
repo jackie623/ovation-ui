@@ -7,6 +7,8 @@ package us.physionconsulting.ovation.browser;
 import java.util.*;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import ovation.Project;
+import ovation.Source;
 
 /**
  *
@@ -17,11 +19,17 @@ public class QueryChildren extends Children.Keys<EntityWrapper> {
     Set<EntityWrapper> keys = new HashSet<EntityWrapper>();
     Set<Stack<EntityWrapper>> paths = new HashSet();
     Set<String> keyURIs = new HashSet<String>();
+    private boolean projectView;
     
-    protected QueryChildren() {}
-    
-    protected QueryChildren(Set<Stack<EntityWrapper>> paths)
+    protected QueryChildren(boolean pView) 
     {
+        projectView = pView;
+    }
+    
+    protected QueryChildren(Set<Stack<EntityWrapper>> paths, boolean pView)
+    {
+        this(pView);
+        
         if (paths == null)
             return;
         for (Stack<EntityWrapper> path : paths)
@@ -32,7 +40,7 @@ public class QueryChildren extends Children.Keys<EntityWrapper> {
     
     @Override
     protected Node[] createNodes(EntityWrapper key) {
-        return new Node[]{ EntityWrapperUtilities.createNode(key, new QueryChildren(paths))};
+        return new Node[]{ EntityWrapperUtilities.createNode(key, new QueryChildren(paths, projectView))};
     }
     
     @Override
@@ -47,14 +55,25 @@ public class QueryChildren extends Children.Keys<EntityWrapper> {
         setKeys(Collections.EMPTY_SET);
     }
     
-    protected void addKey(EntityWrapper key)
+    protected boolean shouldAdd(EntityWrapper e)
     {
-        keys.add(key);
-    }
-    
-    protected void addKeys(Collection<EntityWrapper> toAdd)
-    {
-        keys.addAll(toAdd);
+        if (projectView)
+        {
+            if (e.getType().isAssignableFrom(Source.class))
+            {
+                return false;
+            }
+        }else {
+            if (e.getType().isAssignableFrom(Project.class))
+            {
+                return false;
+            }
+        }
+        if (keyURIs.contains(e.getURI()))
+        {
+            return false;
+        }
+        return true;
     }
     
     protected void addPath(Stack<EntityWrapper> path)
@@ -64,14 +83,14 @@ public class QueryChildren extends Children.Keys<EntityWrapper> {
             return;
         }
         EntityWrapper e = path.pop();
-        if (keyURIs.contains(e.getURI()))
+        
+        if (shouldAdd(e)) 
         {
-            return;
+            keyURIs.add(e.getURI());
+            keys.add(e);
+            addNotify();
+            paths.add(path);
         }
-        keyURIs.add(e.getURI());
-        keys.add(e);
-        addNotify();
-        paths.add(path);
     }
     
 }

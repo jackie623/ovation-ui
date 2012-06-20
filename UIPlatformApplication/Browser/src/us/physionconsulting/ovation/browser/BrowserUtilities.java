@@ -9,6 +9,7 @@ import com.physion.ebuilder.expression.ExpressionTree;
 import java.awt.EventQueue;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.ActionMap;
 import javax.swing.SwingUtilities;
 import org.openide.explorer.ExplorerManager;
@@ -33,8 +34,9 @@ import us.physion.ovation.interfaces.QueryListener;
  */
 public class BrowserUtilities{
     protected static Node rootNode = null;
-    protected static Map<String, Node> browserMap = new HashMap<String, Node>();
-    protected static Set<ExplorerManager> registeredViewManagers;
+    protected static Map<String, Node> browserMap = new ConcurrentHashMap<String, Node>();
+    protected static Map<ExplorerManager, Boolean> registeredViewManagers = new HashMap<ExplorerManager, Boolean>();
+    protected static QueryListener ql;
     
     public static Map<String, Node> getNodeMap()
     {
@@ -44,6 +46,7 @@ public class BrowserUtilities{
     protected static void initBrowser(final ExplorerManager em, 
                                    final boolean projectView)
     {
+        registeredViewManagers.put(em, projectView);
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         ConnectionListener cn = new ConnectionListener(new Runnable(){
 
@@ -58,21 +61,33 @@ public class BrowserUtilities{
         
         cp.addConnectionListener(cn);
         
-        final ExpressionTreeProvider etp = Lookup.getDefault().lookup(ExpressionTreeProvider.class);
-        if (etp != null) {
-            QueryListener ql = new QueryListener(new Runnable() {
-                @Override
-                public void run() {
-                    ExpressionTree result = etp.getExpressionTree();
-                    setTree(result, em, projectView);
-                }
-            });
-            etp.addQueryListener(ql);
+        if (ql == null)
+        {
+            final ExpressionTreeProvider etp = Lookup.getDefault().lookup(ExpressionTreeProvider.class);
+            if (etp != null) {
+                ql = new QueryListener(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        ExpressionTree result = etp.getExpressionTree();
+                        for (ExplorerManager mgr : registeredViewManagers.keySet())
+                        {
+                            setTree(result, mgr, registeredViewManagers.get(mgr));
+                        }
+                    }
+                });
+                etp.addQueryListener(ql);
+            }
         }
 
         if (rootNode == null) {
             em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
         }
+    }
+    
+    protected static void resetView(ExplorerManager em, boolean projectView)
+    {
+        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
     }
     
     protected static void setTree(final ExpressionTree result,
@@ -85,25 +100,7 @@ public class BrowserUtilities{
         em.setRootContext(new AbstractNode(new QueryChildren(projectView)));
         final IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         Iterator itr = dsc.getContext().query(result);
-        browserMap = EntityWrapperUtilities.createNodesFromQuery(em, itr);
+        EntityWrapperUtilities.createNodesFromQuery(em, itr);
     }
     
-    /*public static Set<String> getSupportedClasses(boolean projectView)
-    {
-        Set<String> s = new HashSet<String>();
-        if (projectView)
-        {
-            s.add("Project");
-            s.add("Experiment");
-            s.add("EpochGroup");
-            s.add("Epoch");
-            
-        } else {
-            s.add("Source");
-            s.add("Experiment");
-            s.add("EpochGroup");
-            s.add("Epoch");
-        }
-        return s;
-    }*/
 }

@@ -29,13 +29,17 @@ public class EntityWrapperUtilities {
     private static String SEPARATOR = ";";
     
     
-    protected static Map<String, Node> createNodesFromQuery(ExplorerManager mgr, Iterator<IEntityBase> itr)
+    protected static Set<EntityWrapper> createNodesFromQuery(ExplorerManager mgr, Iterator<IEntityBase> itr)
     {
         Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
+        Set<EntityWrapper> resultSet = new HashSet<EntityWrapper>();
         while (itr.hasNext()) {
             IEntityBase e = itr.next();
+            EntityWrapper ew = new EntityWrapper(e);
+            resultSet.add(ew);
+            
             Stack<EntityWrapper> p= new Stack();
-            p.push(new EntityWrapper(e));
+            p.push(ew);
             Set<Stack<EntityWrapper>> paths = getParentsInTree(e, p);
             
             for (Stack<EntityWrapper> path : paths)
@@ -50,78 +54,9 @@ public class EntityWrapperUtilities {
                 q.addPath(path);
             }
         }
-        return treeMap;
+        return resultSet;
     }
-            
-    /*protected static Set<Node> existingNodesFromQuery(Map<String, Node> treeMap, Iterator<IEntityBase> itr, ExplorerManager mgr) {
-        HashSet<Node> selectedNodes = new HashSet();
-        while (itr.hasNext()) {
-            IEntityBase e = itr.next();
-            String key = e.getURIString();
-            Node n;
-            if (!treeMap.containsKey(key)) {
-                String pathToOpenParent = getParentInTree(e, treeMap, e.getURIString());
-                String[] uris = pathToOpenParent.split(SEPARATOR);
 
-                Node parentInTree = treeMap.get(uris[0]);
-                if (parentInTree == null) {
-                    parentInTree = mgr.getRootContext();
-                } else {
-                    uris = Arrays.copyOfRange(uris, 1, uris.length);
-                }
-
-                for (String uri : uris) {
-                    Node[] nodes = parentInTree.getChildren().getNodes(true);
-                    for (Node node : nodes) {
-                        EntityWrapper ew = (EntityWrapper) node.getLookup().lookup(EntityWrapper.class);
-                        if (ew.getURI().equals(uri)) {
-                            parentInTree = node;
-                            break;
-                        }
-                    }
-                }
-                selectedNodes.add(parentInTree);
-            } else {
-                n = treeMap.get(key);
-                selectedNodes.add(n);
-            }
-        }
-        return selectedNodes;
-    }*/
-
-    //expand each path from root to the given set of nodes in the tree view
-    /*protected static void expandNodes(Set<Node> nodes, BeanTreeView btv, ExplorerManager mgr) {
-        
-        //btv = Utilities.actionsGlobalContext().lookup(BeanTreeView.class); 
-        Set<Node> toExpand = new HashSet<Node>();
-        for (Node n : nodes) {
-            ArrayList<Node> ancestors = new ArrayList();
-            Node parent = n.getParentNode();
-            while (parent != null && !toExpand.contains(parent)) {
-                ancestors.add(parent);
-                toExpand.add(parent);
-                parent = parent.getParentNode();
-            }
-            Node[] ancestorNodes = ancestors.toArray(new Node[0]);
-            for (int i = ancestorNodes.length - 1; i >= 0; --i) {
-                    btv.expandNode(ancestorNodes[i]);
-            }
-        }
-        try {
-            mgr.setSelectedNodes((Node[]) (nodes.toArray(new Node[0])));
-        } catch (PropertyVetoException ex) {
-        } 
-    }*/
-
-    /*protected static TreePath createTreePath(Node currentNode, List<Node> ancestors) {
-        ancestors.add(currentNode);
-        if (currentNode.getParentNode() == null) {
-            return new TreePath(ancestors);
-        }
-        return createTreePath(currentNode.getParentNode(), ancestors);
-    }*/
-
-    //not tail recursive but oh well
     protected static Set<Stack<EntityWrapper>> getParentsInTree(IEntityBase e, Stack<EntityWrapper> path)
     {
         Set<Stack<EntityWrapper>> paths = new HashSet<Stack<EntityWrapper>>();
@@ -212,11 +147,23 @@ public class EntityWrapperUtilities {
     }
     
     protected static void setIconForType(AbstractNode n, Class entityClass) {
-        if (entityClass.isAssignableFrom(Experiment.class)) {
-            n.setIconBaseWithExtension("");
+        if (entityClass.isAssignableFrom(Source.class)) {
+            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/source-icon-2.png");
 
-        } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
-            n.setIconBaseWithExtension("");
+        } else if (entityClass.isAssignableFrom(Project.class)) {
+            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/project-icon-2.png");
+        }
+        else if (entityClass.isAssignableFrom(Experiment.class)) {
+            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/experiments_badge.png");
+        }
+        else if (entityClass.isAssignableFrom(EpochGroup.class)) {
+            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/experiment-icon-2.png");
+        }
+        else if (entityClass.isAssignableFrom(Epoch.class)) {
+            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/epoch-icon.png");
+        }
+        else if (entityClass.isAssignableFrom(AnalysisRecord.class)) {
+            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/analysis-record-icon.png");
         }
     }
 }

@@ -38,7 +38,7 @@ public class EntityWrapperUtilitiesTest {
     
     @Before
     public void setUp() throws UserAuthenticationException {
-        ctx = Ovation.connect("/Users/huecotanks/test-ui/test-ui.connection", "TestUser", "password");
+        ctx = Ovation.connect("test-ui.connection", "TestUser", "password");
         treeMap = new HashMap<String, Node>();
         em = new ExplorerManager();
     }
@@ -47,12 +47,6 @@ public class EntityWrapperUtilitiesTest {
     public void tearDown() {
     }
 
-
-    @Test
-    public void testCreateNodesFromQuery() {
-        
-    }
-    
     @Test
     public void testCreateNodeForNodeThatAlreadyExists()
     {
@@ -66,7 +60,9 @@ public class EntityWrapperUtilitiesTest {
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
         Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
         
-        EntityWrapperUtilities.createNodesFromQuery(em, itr);
+        Set s = new HashSet<ExplorerManager>();
+        s.add(em);
+        EntityWrapperUtilities.createNodesFromQuery(s, itr);
         
         Node[] projects = em.getRootContext().getChildren().getNodes(true);
         Set<String> projectSet = new HashSet<String>();
@@ -91,7 +87,9 @@ public class EntityWrapperUtilitiesTest {
         em.setRootContext(new AbstractNode(new QueryChildren(false)));
         Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
         
-        EntityWrapperUtilities.createNodesFromQuery(em, itr);
+        Set mgrSet = new HashSet<ExplorerManager>();
+        mgrSet.add(em);
+        EntityWrapperUtilities.createNodesFromQuery(mgrSet, itr);
         
         Node[] sources = em.getRootContext().getChildren().getNodes(true);
         Set<String> sourcesSet = new HashSet<String>();
@@ -119,7 +117,9 @@ public class EntityWrapperUtilitiesTest {
         em.setRootContext(new AbstractNode(new QueryChildren(false)));
         Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
         
-        EntityWrapperUtilities.createNodesFromQuery(em, itr);
+        Set mgrSet = new HashSet<ExplorerManager>();
+        mgrSet.add(em);
+        EntityWrapperUtilities.createNodesFromQuery(mgrSet, itr);
         while(itr.hasNext())
         {
             try {
@@ -158,8 +158,6 @@ public class EntityWrapperUtilitiesTest {
             }
         }
         assertTrue(entitySet.isEmpty());
-        
-        
     }
     
     @Test
@@ -169,7 +167,9 @@ public class EntityWrapperUtilitiesTest {
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
         Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
         
-        EntityWrapperUtilities.createNodesFromQuery(em, itr);
+        Set mgrSet = new HashSet<ExplorerManager>();
+        mgrSet.add(em);
+        EntityWrapperUtilities.createNodesFromQuery(mgrSet, itr);
         
         ArrayList<Node> projectChildren = new ArrayList();
         for (Node n : em.getRootContext().getChildren().getNodes(true))

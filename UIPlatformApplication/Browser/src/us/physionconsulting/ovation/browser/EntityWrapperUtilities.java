@@ -29,7 +29,7 @@ public class EntityWrapperUtilities {
     private static String SEPARATOR = ";";
     
     
-    protected static Set<EntityWrapper> createNodesFromQuery(ExplorerManager mgr, Iterator<IEntityBase> itr)
+    protected static Set<EntityWrapper> createNodesFromQuery(Set<ExplorerManager> mgrs, Iterator<IEntityBase> itr)
     {
         Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
         Set<EntityWrapper> resultSet = new HashSet<EntityWrapper>();
@@ -44,14 +44,31 @@ public class EntityWrapperUtilities {
             
             for (Stack<EntityWrapper> path : paths)
             {
-                EntityWrapper first = path.pop();
-                Node parentInTree = treeMap.get(first);
+                Node parentInTree = treeMap.get(path.peek());
                 if (parentInTree == null) {
-                    parentInTree = mgr.getRootContext();
-                    path.push(first);
+                    for (ExplorerManager mgr : mgrs)
+                    {
+                        Stack<EntityWrapper> copiedPath = new Stack<EntityWrapper>();
+                        //QueryChildren.addPath() modifies path
+                        if (mgrs.size() ==1)
+                        {
+                            copiedPath = path;
+                        }
+                        else{
+                            for (int i = 0; i < path.size(); i++) {
+                                copiedPath.push(path.get(i));
+                            }
+                        }
+                        parentInTree = mgr.getRootContext();
+                        QueryChildren q = (QueryChildren) (parentInTree.getChildren());
+                        q.addPath(copiedPath);
+                    }
+                } else {
+                    path.pop();
+                    QueryChildren q = (QueryChildren) (parentInTree.getChildren());
+                    q.addPath(path);
                 }
-                QueryChildren q = (QueryChildren) (parentInTree.getChildren());
-                q.addPath(path);
+                
             }
         }
         return resultSet;
@@ -125,15 +142,18 @@ public class EntityWrapperUtilities {
     
     protected static Node createNode(EntityWrapper key, Children c)
     {
-        return createNode(key, BrowserUtilities.getNodeMap(), c);
+        return createNode(key, c, false);
     }
     
-    protected static Node createNode(EntityWrapper key, Map<String, Node> treeMap, Children c)
+    protected static Node createNode(EntityWrapper key, Children c, boolean forceCreateNode)
     {
+        Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
         String uri = key.getURI();
-        if (uri != null && treeMap.containsKey(uri)) {
-            //create a node that just proxies the existing node
-            return new FilterNode(treeMap.get(uri));
+        if (!forceCreateNode) {//use a filter node, instead of a duplicate node
+            if (uri != null && treeMap.containsKey(uri)) {
+                //create a node that just proxies the existing node
+                return new FilterNode(treeMap.get(uri));
+            }
         }
         
         //otherwise, create an AbstractNode representing this object

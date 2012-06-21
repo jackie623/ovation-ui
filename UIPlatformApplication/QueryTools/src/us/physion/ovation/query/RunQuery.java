@@ -60,51 +60,15 @@ public final class RunQuery implements ActionListener {
         if (result == null)
             return;
       
-        Runnable run = new Runnable() {
-
-            public void run() {
-                ProgressHandle p = ProgressHandleFactory.createHandle("Querying", new Cancellable() {
-
-                    @Override
-                    public boolean cancel() {
-                        boolean ret = true;
-                        QueryProvider qp = getQueryProvider();
-                        if (qp != null) {
-                            qp.setExpressionTree(result);
-
-                            //TODO: fire events, so these things could happen in parallel, 
-                            //or at least in order of currently selected
-                            for (QueryListener listener : qp.getListeners()) {
-                                if (!listener.cancel())
-                                {
-                                    ret = false;
-                                }
-                            }
-                        }
-                        return ret;
-                    }
-                });
-                p.start();
-                try {
-                    Thread.sleep(1000000);
-                } catch (InterruptedException e) {
-                    p.finish();
-                }
-            }
-        };
-        Thread t = new Thread(run);
-        t.start();
         if (etp instanceof QueryProvider) {
             QueryProvider qp = (QueryProvider)etp;
             qp.setExpressionTree(result);
 
-            //TODO: fire events, so these things could happen in parallel, 
-            //or at least in order of currently selected
+            //TODO: fire events
             for (QueryListener listener : qp.getListeners()) {
                 listener.run();
             }
         }
-        //t.interrupt();
     }
     
     protected ExpressionTreeProvider getOrCreateExpressionTreeProvider()

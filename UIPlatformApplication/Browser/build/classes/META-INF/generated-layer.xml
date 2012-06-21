@@ -2,6 +2,18 @@
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
                             "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
+    <folder name="Menu">
+        <folder name="Window">
+            <file name="us-physionconsulting-ovation-browser-BrowserTopComponent.shadow">
+                <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
+                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-BrowserTopComponent.instance"/>
+            </file>
+            <file name="us-physionconsulting-ovation-browser-SourceBrowserTopComponent.shadow">
+                <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent-->
+                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-SourceBrowserTopComponent.instance"/>
+            </file>
+        </folder>
+    </folder>
     <folder name="xml">
         <folder name="entities">
             <folder name="us_physionconsulting_ovation_browser">
@@ -56,18 +68,6 @@
                     <attr boolvalue="true" name="xmlproperties.preventStoring"/>
                 </file>
             </folder>
-        </folder>
-    </folder>
-    <folder name="Menu">
-        <folder name="Window">
-            <file name="us-physionconsulting-ovation-browser-BrowserTopComponent.shadow">
-                <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
-                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-BrowserTopComponent.instance"/>
-            </file>
-            <file name="us-physionconsulting-ovation-browser-SourceBrowserTopComponent.shadow">
-                <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent-->
-                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-SourceBrowserTopComponent.instance"/>
-            </file>
         </folder>
     </folder>
     <folder name="Windows2">

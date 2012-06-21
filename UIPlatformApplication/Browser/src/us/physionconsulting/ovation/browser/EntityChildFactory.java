@@ -25,10 +25,17 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
 
     private EntityWrapper ew;
     private boolean projectView;
+    private boolean createNodeIfItExists = false;
 
     EntityChildFactory(EntityWrapper node, boolean pView) {
         ew = node;
         projectView = pView;
+    }
+    
+    EntityChildFactory(EntityWrapper node, boolean pView, boolean createNewNode)
+    {
+        this(node, pView);
+        createNodeIfItExists = createNewNode;
     }
 
     @Override
@@ -109,6 +116,6 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
     @Override
     protected Node createNodeForKey(EntityWrapper key) {
 
-        return EntityWrapperUtilities.createNode(key, Children.create(new EntityChildFactory(key, projectView), true));
+        return EntityWrapperUtilities.createNode(key, Children.create(new EntityChildFactory(key, projectView), createNodeIfItExists));
     }
 }

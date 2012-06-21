@@ -134,7 +134,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        BrowserUtilities.resetView(em, true);
+        BrowserUtilities.resetView();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -54,6 +54,14 @@ public class BrowserUtilities{
             public void run() {
                 browserMap.clear();
                 rootNode = null;
+                try {
+                    if (em.getRootContext() != null)
+                    {
+                        em.getRootContext().destroy();
+                    }
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
                 em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
             }
             
@@ -69,6 +77,7 @@ public class BrowserUtilities{
 
                     @Override
                     public void run() {
+                        browserMap.clear();
                         ExpressionTree result = etp.getExpressionTree();
                         for (ExplorerManager mgr : registeredViewManagers.keySet())
                         {
@@ -85,9 +94,16 @@ public class BrowserUtilities{
         }
     }
     
-    protected static void resetView(ExplorerManager em, boolean projectView)
+    protected static void resetView()
     {
-        em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
+        for (ExplorerManager mgr : registeredViewManagers.keySet()) {
+            try {
+                mgr.getRootContext().destroy();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            mgr.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, registeredViewManagers.get(mgr)), false)));
+        }
     }
     
     protected static void setTree(final ExpressionTree result,

@@ -17,80 +17,76 @@ import ovation.Source;
 public class QueryChildren extends Children.Keys<EntityWrapper> {
 
     Set<EntityWrapper> keys = new HashSet<EntityWrapper>();
-    Set<Stack<EntityWrapper>> paths = new HashSet();
     Set<String> keyURIs = new HashSet<String>();
     private boolean projectView;
-    
-    protected QueryChildren(boolean pView) 
-    {
+    private HashMap<String, QueryChildren> childrenMap = new HashMap<String, QueryChildren>();
+    private HashMap<String, Set<Stack<EntityWrapper>>> pathMap = new HashMap<String, Set<Stack<EntityWrapper>>>();
+
+    protected QueryChildren(boolean pView) {
         projectView = pView;
     }
-    
-    protected QueryChildren(Set<Stack<EntityWrapper>> paths, boolean pView)
-    {
+
+    protected QueryChildren(Set<Stack<EntityWrapper>> paths, boolean pView) {
         this(pView);
-        
-        if (paths == null)
+
+        if (paths == null) {
             return;
-        for (Stack<EntityWrapper> path : paths)
-        {
+        }
+        for (Stack<EntityWrapper> path : paths) {
             addPath(path);
         }
     }
-    
+
     @Override
     protected Node[] createNodes(EntityWrapper key) {
-        return new Node[]{ EntityWrapperUtilities.createNode(key, new QueryChildren(paths, projectView))};
+        QueryChildren children = new QueryChildren(pathMap.get(key.getURI()), projectView);
+        childrenMap.put(key.getURI(), children);
+        return new Node[]{EntityWrapperUtilities.createNode(key, children)};
     }
-    
+
     @Override
-    protected void addNotify()
-    {
+    protected void addNotify() {
         setKeys(keys);
     }
-    
+
     @Override
-    protected void removeNotify()
-    {
+    protected void removeNotify() {
         setKeys(Collections.EMPTY_SET);
     }
-    
-    protected boolean shouldAdd(EntityWrapper e)
-    {
-        if (projectView)
-        {
-            if (e.getType().isAssignableFrom(Source.class))
-            {
+
+    protected boolean shouldAdd(EntityWrapper e) {
+        if (projectView) {
+            if (e.getType().isAssignableFrom(Source.class)) {
                 return false;
             }
-        }else {
-            if (e.getType().isAssignableFrom(Project.class))
-            {
+        } else {
+            if (e.getType().isAssignableFrom(Project.class)) {
                 return false;
             }
-        }
-        if (keyURIs.contains(e.getURI()))
-        {
-            return false;
         }
         return true;
     }
-    
-    protected void addPath(Stack<EntityWrapper> path)
-    {
-        if (path ==null || path.isEmpty())
-        {
+
+    protected void addPath(Stack<EntityWrapper> path) {
+        if (path == null || path.isEmpty()) {
             return;
         }
         EntityWrapper e = path.pop();
-        
-        if (shouldAdd(e)) 
-        {
-            keyURIs.add(e.getURI());
-            keys.add(e);
-            addNotify();
+
+        if (shouldAdd(e)) {
+            if (!keyURIs.contains(e.getURI())) {
+                keyURIs.add(e.getURI());
+                keys.add(e);
+                pathMap.put(e.getURI(), new HashSet<Stack<EntityWrapper>>());
+                addNotify();
+                refresh();//in case the node is already created
+            }
+            Set<Stack<EntityWrapper>> paths = pathMap.get(e.getURI());
             paths.add(path);
+            QueryChildren children = childrenMap.get(e.getURI());
+            if (children != null) {
+                children.addPath(path);
+            }
         }
     }
-    
 }

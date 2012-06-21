@@ -75,10 +75,10 @@ public final class RunQuery implements ActionListener {
                             //TODO: fire events, so these things could happen in parallel, 
                             //or at least in order of currently selected
                             for (QueryListener listener : qp.getListeners()) {
-                                /*if (!listener.cancel())
+                                if (!listener.cancel())
                                 {
                                     ret = false;
-                                }*/
+                                }
                             }
                         }
                         return ret;

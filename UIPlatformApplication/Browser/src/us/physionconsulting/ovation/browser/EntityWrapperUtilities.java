@@ -79,6 +79,11 @@ public class EntityWrapperUtilities {
         Set<Stack<EntityWrapper>> paths = new HashSet<Stack<EntityWrapper>>();
         String uri = e.getURIString();
 
+        if (isPerUser(e))
+        {
+            path.push(new PerUserEntityWrapper(e.getOwner().getUsername()));
+        }
+        
         Set<IEntityBase> parents = getParents(e);
         if (parents.isEmpty())
         {
@@ -136,8 +141,20 @@ public class EntityWrapperUtilities {
             parents.add( ((Stimulus) entity).getEpoch());
         } else if (type.isAssignableFrom(DerivedResponse.class)) {
             parents.add( ((DerivedResponse) entity).getEpoch());
+        } else if (type.isAssignableFrom(AnalysisRecord.class)){
+            parents.add(((AnalysisRecord) entity).getProject());
         }
         return parents;
+    }
+    
+    private static boolean isPerUser(IEntityBase e)
+    {
+        if (e instanceof AnalysisRecord ||
+            e instanceof DerivedResponse)
+        {
+            return true;
+        }
+        return false;
     }
     
     protected static Node createNode(EntityWrapper key, Children c)

@@ -35,7 +35,6 @@ import us.physion.ovation.interfaces.QueryListener;
  * @author jackie
  */
 public class BrowserUtilities{
-    protected static Node rootNode = null;
     protected static Map<String, Node> browserMap = new ConcurrentHashMap<String, Node>();
     protected static Map<ExplorerManager, Boolean> registeredViewManagers = new HashMap<ExplorerManager, Boolean>();
     protected static QueryListener ql;
@@ -55,7 +54,6 @@ public class BrowserUtilities{
             @Override
             public void run() {
                 browserMap.clear();
-                rootNode = null;
                 try {
                     if (em.getRootContext() != null)
                     {
@@ -64,7 +62,7 @@ public class BrowserUtilities{
                 } catch (IOException ex) {
                     Exceptions.printStackTrace(ex);
                 }
-                em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
+                em.setRootContext(new AbstractNode(new EntityChildren(null, projectView)));
             }
             
         });
@@ -88,9 +86,7 @@ public class BrowserUtilities{
             }
         }
 
-        if (rootNode == null) {
-            em.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, projectView), true)));
-        }
+        em.setRootContext(new AbstractNode(new EntityChildren(null, projectView)));
     }
     
     protected static void resetView()
@@ -107,7 +103,7 @@ public class BrowserUtilities{
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
-            mgr.setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, registeredViewManagers.get(mgr)), true)));
+            mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr))));
         }
     }
     
@@ -128,7 +124,7 @@ public class BrowserUtilities{
         Runnable run = new Runnable() {
 
             public void run() {
-                ProgressHandle p = ProgressHandleFactory.createHandle("Querying");
+                ProgressHandle p = ProgressHandleFactory.createHandle("Query Running");
                 /*, new Cancellable() {
 
                     @Override

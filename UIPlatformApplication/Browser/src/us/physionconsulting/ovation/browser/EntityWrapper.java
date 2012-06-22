@@ -39,12 +39,27 @@ public class EntityWrapper {
         displayName = inferDisplayName(e);
     }
     
-    public EntityWrapper(String name, Class clazz, Callable<IEntityBase> toCall)
+    //used by the PerUserEntityWrapper object
+    protected EntityWrapper(String name, Class clazz)
+    {
+        type = clazz;
+        displayName = name;
+    }
+    
+    //If EntityWrapper is unique, it's corresponding Node in a tree view should *not* be a FilterNode
+    public Boolean isUnique()
+    {
+        return false;
+    }
+    
+    //we have to look up the entitybase on creation, because I index on the object's URI. 
+    //If this changes, we should use this constructor for large objects
+    /*public EntityWrapper(String name, Class clazz, Callable<IEntityBase> toCall)
     {
         type = clazz;
         displayName = name;
         retrieveEntity = toCall;
-    }
+    }*/
     
     public IEntityBase getEntity(){
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
@@ -66,57 +81,7 @@ public class EntityWrapper {
     public String getDisplayName() {return displayName;}
     public Class getType() { return type;}
 
-   /* public EntityWrapper getParent()
-    {
-        if (type.isAssignableFrom(Source.class)){
-            Source s= (Source)this.getEntity();
-            if (s.getParent() == null)
-            {
-                return null;
-            }
-            return new EntityWrapper(s.getParent());
-        }
-        else if (type.isAssignableFrom(Project.class))
-        {
-            return null;
-        }else if (type.isAssignableFrom(Experiment.class))
-        {
-            Experiment entity = (Experiment)this.getEntity();
-            return new EntityWrapper(entity.getProjects()[0]);
-        }
-        else if (type.isAssignableFrom(EpochGroup.class))
-        {
-            EpochGroup entity = (EpochGroup)this.getEntity();
-            EpochGroup parent = entity.getParent();
-            if (parent == null)
-            {
-                return new EntityWrapper(entity.getExperiment());
-            }
-            return new EntityWrapper(parent);
-        }
-        else if (type.isAssignableFrom(Epoch.class))
-        {
-            Epoch entity = (Epoch)this.getEntity();
-            return new EntityWrapper(entity.getEpochGroup());
-        }
-        else if (type.isAssignableFrom(Response.class))
-        {
-            Response entity = (Response)this.getEntity();
-            return new EntityWrapper(entity.getEpoch());
-        }
-        else if (type.isAssignableFrom(Stimulus.class))
-        {
-            Stimulus entity = (Stimulus)this.getEntity();
-            return new EntityWrapper(entity.getEpoch());
-        }
-        else if (type.isAssignableFrom(DerivedResponse.class))
-        {
-            DerivedResponse entity = (DerivedResponse)this.getEntity();
-            return new EntityWrapper(entity.getEpoch());
-        }
-        return null;
-    }*/
-
+   
     private String inferDisplayName(IEntityBase e) {
         
         if (type.isAssignableFrom(Source.class))
@@ -149,6 +114,10 @@ public class EntityWrapper {
         else if (type.isAssignableFrom(DerivedResponse.class))
         {
             return ((DerivedResponse)e).getName();
+        }
+        else if (type.isAssignableFrom(AnalysisRecord.class))
+        {
+            return ((AnalysisRecord)e).getName();
         }
         return "<no name>";
     }

@@ -66,7 +66,7 @@ public final class RunQuery implements ActionListener {
 
             //TODO: fire events
             for (QueryListener listener : qp.getListeners()) {
-                listener.run();
+                FutureTask t = listener.run();
             }
         }
     }

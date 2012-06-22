@@ -1,7 +1,5 @@
 package us.physion.ovation.interfaces;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.lang.Runnable;
 import javax.swing.SwingUtilities;
 import java.util.concurrent.FutureTask;

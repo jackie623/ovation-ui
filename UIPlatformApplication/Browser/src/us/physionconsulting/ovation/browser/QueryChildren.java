@@ -36,12 +36,15 @@ public class QueryChildren extends Children.Keys<EntityWrapper> {
             addPath(path);
         }
     }
-
+  
     @Override
     protected Node[] createNodes(EntityWrapper key) {
-        QueryChildren children = new QueryChildren(pathMap.get(key.getURI()), projectView);
+        QueryChildren children;
+        
+        children = new QueryChildren(pathMap.get(key.getURI()), projectView);
         childrenMap.put(key.getURI(), children);
-        return new Node[]{EntityWrapperUtilities.createNode(key, children)};
+
+        return new Node[]{EntityWrapperUtilities.createNode(key, children, key.isUnique())};
     }
 
     @Override

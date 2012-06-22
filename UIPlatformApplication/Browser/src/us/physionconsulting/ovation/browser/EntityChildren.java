@@ -4,16 +4,14 @@
  */
 package us.physionconsulting.ovation.browser;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
-import org.openide.util.lookup.Lookups;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
 
@@ -21,34 +19,49 @@ import us.physion.ovation.interfaces.ConnectionProvider;
  *
  * @author huecotanks
  */
-public class EntityChildFactory extends ChildFactory<EntityWrapper> {
+public class EntityChildren extends Children.Keys<EntityWrapper>{
 
-    private EntityWrapper ew;
-    private boolean projectView;
-    private boolean createNodeIfItExists = false;
-
-    EntityChildFactory(EntityWrapper node, boolean pView) {
-        ew = node;
+    EntityWrapper parent;
+    boolean projectView;
+    
+    EntityChildren(EntityWrapper e, boolean pView)
+    {
+        parent = e;
         projectView = pView;
+        setKeys(createKeys());
     }
     
-    EntityChildFactory(EntityWrapper node, boolean pView, boolean createNewNode)
+    private EntityChildren(List<EntityWrapper> children, boolean pView)
     {
-        this(node, pView);
-        createNodeIfItExists = createNewNode;
+        projectView = pView;
+        setKeys(children);
     }
-
+    
     @Override
-    protected boolean createKeys(List<EntityWrapper> list) {
+    protected Node[] createNodes(EntityWrapper key) {
+        
+        EntityChildren children;
+        //right now, all PerUserEntityWrappers' children are childless. If this changes, the logic here should change
+        if (key instanceof PerUserEntityWrapper)
+        {
+            children = new EntityChildren(((PerUserEntityWrapper)key).getChildren(), projectView);
+        }else{
+            children = new EntityChildren(key, projectView);
+        }
+        return new Node[] {EntityWrapperUtilities.createNode(key, children, key.isUnique())};
+    }
+    
+    protected List<EntityWrapper> createKeys() {
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         if (dsc == null) {
-            return true;
+            return new LinkedList();
         }
         DataContext c = dsc.getContext();
         if (dsc == null) {
-            return true;
+            return new LinkedList();
         }
-        if (ew == null) {
+        if (parent == null) {
+            List<EntityWrapper> list = new LinkedList<EntityWrapper>();
             //case root node: add entityWrapper for each project
             if (projectView) {
                 for (Project p : c.getProjects()) {
@@ -62,15 +75,16 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
                 }
             }
 
-            return true;
+            return list;
 
         } else {
-            return createKeysForEntity(ew, list);
+            return createKeysForEntity(c, parent);
         }
     }
 
-    protected boolean createKeysForEntity(EntityWrapper ew, List<EntityWrapper> list) {
+    protected List<EntityWrapper> createKeysForEntity(DataContext c, EntityWrapper ew) {
 
+        List<EntityWrapper> list = new LinkedList<EntityWrapper>();
         Class entityClass = ew.getType();
         if (projectView) {
             if (entityClass.isAssignableFrom(Project.class)) {
@@ -78,8 +92,24 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
                 for (Experiment e : entity.getExperiments()) {
                     list.add(new EntityWrapper(e));
                 }
-                return true;
-            }
+                String currentUser = c.currentAuthenticatedUser().getUsername();
+               
+                for (String username : c.getUsernames())
+                {
+                    Iterator<AnalysisRecord> itr = entity.getAnalysisRecordsIterable(username).iterator();
+                    if (itr.hasNext())
+                    {
+                        List<EntityWrapper> l = new LinkedList();
+                        while(itr.hasNext())
+                        {
+                            l.add(new EntityWrapper(itr.next()));
+                        }
+                        list.add(new PerUserEntityWrapper(username, l));
+                    }
+                }
+             
+                return list;
+            } 
         } else {
             if (entityClass.isAssignableFrom(Source.class)) {
                 Source entity = (Source) ew.getEntity();
@@ -89,7 +119,7 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
                 for (Experiment e : entity.getExperiments()) {
                     list.add(new EntityWrapper(e));
                 }
-                return true;
+                return list;
             }
         }
         if (entityClass.isAssignableFrom(Experiment.class)) {
@@ -98,7 +128,7 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
             for (EpochGroup eg : entity.getEpochGroups()) {
                 list.add(new EntityWrapper(eg));
             }
-            return true;
+            return list;
         } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
             EpochGroup entity = (EpochGroup) ew.getEntity();
 
@@ -108,14 +138,8 @@ public class EntityChildFactory extends ChildFactory<EntityWrapper> {
             for (Epoch e : entity.getEpochs()) {
                 list.add(new EntityWrapper(e));
             }
-            return true;
+            return list;
         }
-        return true;
-    }
-
-    @Override
-    protected Node createNodeForKey(EntityWrapper key) {
-
-        return EntityWrapperUtilities.createNode(key, Children.create(new EntityChildFactory(key, projectView), createNodeIfItExists));
+        return list;
     }
 }

@@ -4,6 +4,8 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractListModel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -32,6 +34,25 @@ preferredID = "TagsViewTopComponent")
 })
 public final class TagsViewTopComponent extends TopComponent {
 
+    private AbstractListModel listModel = new AbstractListModel() {
+
+        String[] tags = {"<nothing selected>"};
+
+        @Override
+        public int getSize() {
+            return tags.length;
+        }
+
+        @Override
+        public Object getElementAt(int i) {
+            return tags[i];
+        }
+        
+        protected void setTags(String[] newTags)
+        {
+            tags = newTags;
+        }
+    };
     public TagsViewTopComponent() {
         initComponents();
         setName(Bundle.CTL_TagsViewTopComponent());
@@ -62,11 +83,7 @@ public final class TagsViewTopComponent extends TopComponent {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(TagsViewTopComponent.class, "TagsViewTopComponent.jLabel1.text")); // NOI18N
 
-        jList1.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
+        jList1.setModel(listModel);
         jScrollPane1.setViewportView(jList1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

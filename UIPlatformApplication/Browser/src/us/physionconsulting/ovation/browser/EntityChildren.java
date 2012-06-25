@@ -94,8 +94,11 @@ public class EntityChildren extends Children.Keys<EntityWrapper>{
                 }
                 String currentUser = c.currentAuthenticatedUser().getUsername();
                
-                for (String username : c.getUsernames())
+                Iterator<User> userItr = c.getUsersIterator();
+                while (userItr.hasNext())
                 {
+                    User user = userItr.next();
+                    String username = user.getUsername();
                     Iterator<AnalysisRecord> itr = entity.getAnalysisRecordsIterable(username).iterator();
                     if (itr.hasNext())
                     {
@@ -104,7 +107,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper>{
                         {
                             l.add(new EntityWrapper(itr.next()));
                         }
-                        list.add(new PerUserEntityWrapper(username, l));
+                        list.add(new PerUserEntityWrapper(username, user.getURIString(), l));
                     }
                 }
              

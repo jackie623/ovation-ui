@@ -15,14 +15,14 @@ import ovation.User;
 public class PerUserEntityWrapper extends EntityWrapper{
     
     List<EntityWrapper> children;
-    public PerUserEntityWrapper(String username, List<EntityWrapper> children)
+    public PerUserEntityWrapper(String username, String uri, List<EntityWrapper> children)
     {
-        super(username, User.class);
+        super(username, User.class, uri);
         this.children = children;
     }
-    protected PerUserEntityWrapper(String username)
+    protected PerUserEntityWrapper(String username, String uri)
     {
-        super(username, User.class);
+        super(username, User.class, uri);
     }
     
     @Override

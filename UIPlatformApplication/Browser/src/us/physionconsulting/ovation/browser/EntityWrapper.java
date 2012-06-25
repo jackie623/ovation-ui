@@ -40,10 +40,11 @@ public class EntityWrapper {
     }
     
     //used by the PerUserEntityWrapper object
-    protected EntityWrapper(String name, Class clazz)
+    protected EntityWrapper(String name, Class clazz, String uri)
     {
         type = clazz;
         displayName = name;
+        this.uri = uri;
     }
     
     //If EntityWrapper is unique, it's corresponding Node in a tree view should *not* be a FilterNode

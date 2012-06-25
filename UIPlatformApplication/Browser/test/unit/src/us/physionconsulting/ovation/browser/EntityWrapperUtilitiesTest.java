@@ -38,7 +38,7 @@ public class EntityWrapperUtilitiesTest {
     
     @Before
     public void setUp() throws UserAuthenticationException {
-        ctx = Ovation.connect("test-ui.connection", "TestUser", "password");
+        ctx = Ovation.connect("/Users/huecotanks/test-ui/test-ui.connection", "TestUser", "password");
         treeMap = new HashMap<String, Node>();
         em = new ExplorerManager();
     }
@@ -192,6 +192,51 @@ public class EntityWrapperUtilitiesTest {
             EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
             if (ew.getType().isAssignableFrom(Experiment.class))
             {
+                assertTrue(entitySet.contains(ew.getURI()));
+                entitySet.remove(ew.getURI());
+            }
+            else
+            {
+                fail("Project node's child was something other than an Experment");
+            }
+        }
+        assertTrue(entitySet.isEmpty());
+    }
+    
+    @Test
+    public void testQuerySetsAnalysisRecordNodesAppropriatelyInProjectView()
+    {
+        ExplorerManager em = new ExplorerManager();
+        em.setRootContext(new AbstractNode(new QueryChildren(true)));
+        Iterator<IEntityBase> itr = ctx.query(AnalysisRecord.class, "true");
+
+        Set mgrSet = new HashSet<ExplorerManager>();
+        mgrSet.add(em);
+        EntityWrapperUtilities.createNodesFromQuery(mgrSet, itr);
+
+        ArrayList<Node> analysisRecordNodes = new ArrayList();
+        for (Node n : em.getRootContext().getChildren().getNodes(true)) {
+            for (Node child : n.getChildren().getNodes(true)) {
+                for (Node grandChild : child.getChildren().getNodes(true)) {
+                    analysisRecordNodes.add(grandChild);
+                }
+            }
+        }
+        Set<String> entitySet = new HashSet<String>();
+        Iterator<User> userItr = ctx.getUsersIterator();
+        while (userItr.hasNext())
+        {
+            User user = userItr.next();
+            for (Project p : ctx.getProjects()) {
+                for (AnalysisRecord e : p.getAnalysisRecords(user.getUsername())) {
+                    entitySet.add(e.getURIString());
+                }
+            }
+        }
+        
+        for (Node n : analysisRecordNodes) {
+            EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
+            if (ew.getType().isAssignableFrom(Experiment.class)) {
                 assertTrue(entitySet.contains(ew.getURI()));
                 entitySet.remove(ew.getURI());
             }

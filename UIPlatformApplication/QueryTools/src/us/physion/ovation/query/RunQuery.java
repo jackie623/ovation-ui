@@ -13,6 +13,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingDeque;
 import org.netbeans.api.progress.ProgressHandle;
@@ -22,6 +23,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.Cancellable;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.lookup.ServiceProvider;
@@ -64,10 +66,38 @@ public final class RunQuery implements ActionListener {
             QueryProvider qp = (QueryProvider)etp;
             qp.setExpressionTree(result);
 
+            /*Runnable run = new Runnable() {
+
+                public void run() {
+                    ProgressHandle p = ProgressHandleFactory.createHandle("Query Running");
+                    /*
+                     * , new Cancellable() {
+                     *
+                     * @Override public boolean cancel() { // }
+                });
+                     */
+                   /* p.start();
+                    try {
+                        Thread.sleep(1000000);
+                    } catch (InterruptedException e) {
+                        p.finish();
+                    }
+                }
+            };
+            Thread t = new Thread(run);
+            t.start();*/
             //TODO: fire events
             for (QueryListener listener : qp.getListeners()) {
-                FutureTask t = listener.run();
+                FutureTask task = listener.run();
+                try {
+                    task.get();
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (ExecutionException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
+            //t.interrupt();
         }
     }
     

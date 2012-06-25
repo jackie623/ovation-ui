@@ -27,34 +27,28 @@ import ovation.*;
 public class EntityWrapperUtilities {
 
     private static String SEPARATOR = ";";
-    
-    
-    protected static Set<EntityWrapper> createNodesFromQuery(Set<ExplorerManager> mgrs, Iterator<IEntityBase> itr)
-    {
+
+    protected static Set<EntityWrapper> createNodesFromQuery(Set<ExplorerManager> mgrs, Iterator<IEntityBase> itr) {
         Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
         Set<EntityWrapper> resultSet = new HashSet<EntityWrapper>();
         while (itr.hasNext()) {
             IEntityBase e = itr.next();
             EntityWrapper ew = new EntityWrapper(e);
             resultSet.add(ew);
-            
-            Stack<EntityWrapper> p= new Stack();
+
+            Stack<EntityWrapper> p = new Stack();
             p.push(ew);
             Set<Stack<EntityWrapper>> paths = getParentsInTree(e, p);
-            
-            for (Stack<EntityWrapper> path : paths)
-            {
+
+            for (Stack<EntityWrapper> path : paths) {
                 Node parentInTree = treeMap.get(path.peek());
                 if (parentInTree == null) {
-                    for (ExplorerManager mgr : mgrs)
-                    {
+                    for (ExplorerManager mgr : mgrs) {
                         Stack<EntityWrapper> copiedPath = new Stack<EntityWrapper>();
                         //QueryChildren.addPath() modifies path
-                        if (mgrs.size() ==1)
-                        {
+                        if (mgrs.size() == 1) {
                             copiedPath = path;
-                        }
-                        else{
+                        } else {
                             for (int i = 0; i < path.size(); i++) {
                                 copiedPath.push(path.get(i));
                             }
@@ -68,31 +62,27 @@ public class EntityWrapperUtilities {
                     QueryChildren q = (QueryChildren) (parentInTree.getChildren());
                     q.addPath(path);
                 }
-                
+
             }
         }
         return resultSet;
     }
 
-    protected static Set<Stack<EntityWrapper>> getParentsInTree(IEntityBase e, Stack<EntityWrapper> path)
-    {
+    protected static Set<Stack<EntityWrapper>> getParentsInTree(IEntityBase e, Stack<EntityWrapper> path) {
         Set<Stack<EntityWrapper>> paths = new HashSet<Stack<EntityWrapper>>();
         String uri = e.getURIString();
 
-        if (isPerUser(e))
-        {
-            path.push(new PerUserEntityWrapper(e.getOwner().getUsername()));
+        if (isPerUser(e)) {
+            path.push(new PerUserEntityWrapper(e.getOwner().getUsername(), e.getOwner().getURIString()));
         }
-        
-        Set<IEntityBase> parents = getParents(e);
-        if (parents.isEmpty())
-        {
+
+        Set<IEntityBase> parents = getParents(e, path);
+        if (parents.isEmpty()) {
             paths.add(path);
             return paths;
         }
-        
-        for (IEntityBase parent: parents)
-        {
+
+        for (IEntityBase parent : parents) {
             Stack newPath = new Stack();
             for (int i = 0; i < path.size(); i++) {
                 newPath.push(path.get(i));
@@ -100,37 +90,46 @@ public class EntityWrapperUtilities {
             newPath.push(new EntityWrapper(parent));
             paths.addAll(getParentsInTree(parent, newPath));
         }
-       
+
         return paths;
-       
+
     }
 
-    private static Set<IEntityBase> getParents(IEntityBase entity) {
+    private static Set<IEntityBase> getParents(IEntityBase entity, Stack<EntityWrapper> path) {
         Set<IEntityBase> parents = new HashSet();
         Class type = entity.getClass();
-        if (type.isAssignableFrom(Source.class)) 
-        {
+        if (type.isAssignableFrom(Source.class)) {
             Source parent = ((Source) entity).getParent();
-            if (parent != null)
-            {
+            if (parent != null) {
                 parents.add(parent);
             }
         } else if (type.isAssignableFrom(Experiment.class)) {
-            for (Project p : ((Experiment) entity).getProjects())
-            {
+            for (Project p : ((Experiment) entity).getProjects()) {
                 parents.add(p);
             }
-            
-            for (Source p : ((Experiment) entity).getSources())
+
+            boolean epochGroupsInPath = false;
+            for (EntityWrapper ew : path)
             {
-                parents.add(p);
+                if (ew.getType().isAssignableFrom(EpochGroup.class))
+                {
+                    epochGroupsInPath = true;
+                    Source s = ((EpochGroup)ew.getEntity()).getSource();
+                    if (s != null)
+                        parents.add(s);
+                }
+            }
+            if (!epochGroupsInPath)
+            {
+                for (Source p : ((Experiment) entity).getSources()) {
+                    parents.add(p);
+                }
             }
         } else if (type.isAssignableFrom(EpochGroup.class)) {
             EpochGroup parent = ((EpochGroup) entity).getParent();
             if (parent == null) {
                 parents.add(((EpochGroup) entity).getExperiment());
-            }
-            else{
+            } else {
                 parents.add(parent);
             }
         } else if (type.isAssignableFrom(Epoch.class)) {
@@ -138,32 +137,28 @@ public class EntityWrapperUtilities {
         } else if (type.isAssignableFrom(Response.class)) {
             parents.add(((Response) entity).getEpoch());
         } else if (type.isAssignableFrom(Stimulus.class)) {
-            parents.add( ((Stimulus) entity).getEpoch());
+            parents.add(((Stimulus) entity).getEpoch());
         } else if (type.isAssignableFrom(DerivedResponse.class)) {
-            parents.add( ((DerivedResponse) entity).getEpoch());
-        } else if (type.isAssignableFrom(AnalysisRecord.class)){
+            parents.add(((DerivedResponse) entity).getEpoch());
+        } else if (type.isAssignableFrom(AnalysisRecord.class)) {
             parents.add(((AnalysisRecord) entity).getProject());
         }
         return parents;
     }
-    
-    private static boolean isPerUser(IEntityBase e)
-    {
-        if (e instanceof AnalysisRecord ||
-            e instanceof DerivedResponse)
-        {
+
+    private static boolean isPerUser(IEntityBase e) {
+        if (e instanceof AnalysisRecord
+                || e instanceof DerivedResponse) {
             return true;
         }
         return false;
     }
-    
-    protected static Node createNode(EntityWrapper key, Children c)
-    {
+
+    protected static Node createNode(EntityWrapper key, Children c) {
         return createNode(key, c, false);
     }
-    
-    protected static Node createNode(EntityWrapper key, Children c, boolean forceCreateNode)
-    {
+
+    protected static Node createNode(EntityWrapper key, Children c, boolean forceCreateNode) {
         Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
         String uri = key.getURI();
         if (!forceCreateNode) {//use a filter node, instead of a duplicate node
@@ -172,7 +167,7 @@ public class EntityWrapperUtilities {
                 return new FilterNode(treeMap.get(uri));
             }
         }
-        
+
         //otherwise, create an AbstractNode representing this object
         AbstractNode n = new AbstractNode(c, Lookups.singleton(key));
         n.setDisplayName(key.getDisplayName());
@@ -182,24 +177,20 @@ public class EntityWrapperUtilities {
         }
         return n;
     }
-    
+
     protected static void setIconForType(AbstractNode n, Class entityClass) {
         if (entityClass.isAssignableFrom(Source.class)) {
             n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/source-icon-2.png");
 
         } else if (entityClass.isAssignableFrom(Project.class)) {
             n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/project-icon-2.png");
-        }
-        else if (entityClass.isAssignableFrom(Experiment.class)) {
+        } else if (entityClass.isAssignableFrom(Experiment.class)) {
             n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/experiments_badge.png");
-        }
-        else if (entityClass.isAssignableFrom(EpochGroup.class)) {
+        } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
             n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/experiment-icon-2.png");
-        }
-        else if (entityClass.isAssignableFrom(Epoch.class)) {
+        } else if (entityClass.isAssignableFrom(Epoch.class)) {
             n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/epoch-icon.png");
-        }
-        else if (entityClass.isAssignableFrom(AnalysisRecord.class)) {
+        } else if (entityClass.isAssignableFrom(AnalysisRecord.class)) {
             n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/analysis-record-icon.png");
         }
     }

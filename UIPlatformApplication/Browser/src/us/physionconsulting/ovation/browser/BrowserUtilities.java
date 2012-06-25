@@ -54,14 +54,6 @@ public class BrowserUtilities{
             @Override
             public void run() {
                 browserMap.clear();
-                try {
-                    if (em.getRootContext() != null)
-                    {
-                        em.getRootContext().destroy();
-                    }
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
                 em.setRootContext(new AbstractNode(new EntityChildren(null, projectView)));
             }
             
@@ -78,7 +70,7 @@ public class BrowserUtilities{
                     @Override
                     public void run() {
                         browserMap.clear();
-                        ExpressionTree result = etp.getExpressionTree();
+                        ExpressionTree result = Lookup.getDefault().lookup(ExpressionTreeProvider.class).getExpressionTree();
                         setTrees(result);
                     }
                 });
@@ -97,12 +89,8 @@ public class BrowserUtilities{
         for (SourceBrowserTopComponent btc : Lookup.getDefault().lookupAll(SourceBrowserTopComponent.class)){
             btc.getExplorerManager().setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, f), false)));
         }*/
+        browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-            try {
-                mgr.getRootContext().destroy();
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
             mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr))));
         }
     }
@@ -121,29 +109,8 @@ public class BrowserUtilities{
         
         final IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         Iterator itr = dsc.getContext().query(result);
-        Runnable run = new Runnable() {
-
-            public void run() {
-                ProgressHandle p = ProgressHandleFactory.createHandle("Query Running");
-                /*, new Cancellable() {
-
-                    @Override
-                    public boolean cancel() {
-                        //
-                    }
-                });*/
-                p.start();
-                try {
-                    Thread.sleep(1000000);
-                } catch (InterruptedException e) {
-                    p.finish();
-                }
-            }
-        };
-        Thread t = new Thread(run);
-        t.start();
+        
         EntityWrapperUtilities.createNodesFromQuery(mgrs, itr);
-        t.interrupt();
     }
     
 }

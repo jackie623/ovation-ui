@@ -7,24 +7,33 @@ import java.util.concurrent.FutureTask;
 //TODO: call it something other than a listner
 public class QueryListener {//implements PropertyChangeListener{
 
-    private FutureTask<Boolean> toRun;
+    private Runnable toRun;
+    private FutureTask<Boolean> task;
 
     public QueryListener(Runnable r)
     {
-        toRun = new FutureTask<Boolean>(r, true);
+        toRun = r;
     }
     
     public FutureTask<Boolean> run()
     {
-	toRun.run();  
-        return toRun;
+	task = new FutureTask<Boolean>(toRun, true);
+	task.run();  
+        return task;
     }
 
     public boolean cancel()
     {
-	if (toRun.isCancelled() || toRun.isDone())
+	if (task == null)
+	{
 	    return true;
-	return toRun.cancel(true);
+	}
+	if (task.isCancelled() || task.isDone())
+	    return true;
+	
+	boolean cancelled = task.cancel(true);
+	task = null;
+	return cancelled;
     }
 
 

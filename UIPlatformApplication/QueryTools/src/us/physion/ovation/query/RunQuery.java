@@ -65,28 +65,7 @@ public final class RunQuery implements ActionListener {
         if (etp instanceof QueryProvider) {
             QueryProvider qp = (QueryProvider)etp;
             qp.setExpressionTree(result);
-
-            /*Runnable run = new Runnable() {
-
-                public void run() {
-                    ProgressHandle p = ProgressHandleFactory.createHandle("Query Running");
-                    /*
-                     * , new Cancellable() {
-                     *
-                     * @Override public boolean cancel() { // }
-                });
-                     */
-                   /* p.start();
-                    try {
-                        Thread.sleep(1000000);
-                    } catch (InterruptedException e) {
-                        p.finish();
-                    }
-                }
-            };
-            Thread t = new Thread(run);
-            t.start();*/
-            //TODO: fire events
+            
             for (QueryListener listener : qp.getListeners()) {
                 FutureTask task = listener.run();
                 try {
@@ -97,7 +76,6 @@ public final class RunQuery implements ActionListener {
                     Exceptions.printStackTrace(ex);
                 }
             }
-            //t.interrupt();
         }
     }
     

@@ -4,7 +4,9 @@
  */
 package us.physionconsulting.ovation.browser;
 
+import java.io.File;
 import java.util.*;
+import org.apache.log4j.Level;
 import org.junit.*;
 import static org.junit.Assert.*;
 import org.openide.explorer.ExplorerManager;
@@ -13,6 +15,7 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import ovation.*;
+import ovation.database.DatabaseManager;
 
 /**
  *
@@ -21,19 +24,27 @@ import ovation.*;
 public class EntityWrapperUtilitiesTest {
     
     public EntityWrapperUtilitiesTest() {
-        String s = System.getProperty("OVATION_TEST");
+        /*String s = System.getProperty("OVATION_TEST");
         System.setProperty("OVATION_TEST", "true");
         s = System.getProperty("OVATION_TEST");
-        String s2 = s.toString();
+        String s2 = s.toString();*/
     }
     
     ExplorerManager em;
     Map<String, Node> treeMap;
-    DataContext ctx;
-    
+    IAuthenticatedDataStoreCoordinator dsc;
+    static BrowserTestManager tm = new BrowserTestManager();
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+       
+       File f = new File(tm.getConnectionFile());
+       if (!f.exists())
+       {
+           DatabaseManager db = new DatabaseManager();
+           db.createDB(tm.getConnectionFile(), "127.0.0.1");
+       }
+       
     }
 
     @AfterClass
@@ -41,15 +52,27 @@ public class EntityWrapperUtilitiesTest {
     }
     
     @Before
-    public void setUp() throws UserAuthenticationException 
+    public void setUp()
     {
-        ctx = Ovation.connect("/Users/huecotanks/test-ui/test-ui.connection", "TestUser", "password");
-        treeMap = new HashMap<String, Node>();
-        em = new ExplorerManager();
+        //try {
+            try {
+                dsc = tm.setupDatabase();
+            } catch (Exception e) {
+                tearDown();
+                fail(e.getMessage());
+            }
+
+       
+            treeMap = new HashMap<String, Node>();
+            em = new ExplorerManager();
+        /*} catch (Exception ue) {
+            ue.printStackTrace();
+        }*/
     }
 
     @After
     public void tearDown() {
+        tm.tearDownDatabase();
     }
 
     @Test
@@ -61,9 +84,9 @@ public class EntityWrapperUtilitiesTest {
     @Test
     public void testQuerySetsProjectViewRootNodeAppropriately()
     {
-        ExplorerManager em = new ExplorerManager();
+        em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
-        Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
+        Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
         
         Set s = new HashSet<ExplorerManager>();
         s.add(em);
@@ -71,7 +94,7 @@ public class EntityWrapperUtilitiesTest {
         
         Node[] projects = em.getRootContext().getChildren().getNodes(true);
         Set<String> projectSet = new HashSet<String>();
-        for (Project p : ctx.getProjects())
+        for (Project p : dsc.getContext().getProjects())
         {
             projectSet.add(p.getURIString());
         }
@@ -90,7 +113,7 @@ public class EntityWrapperUtilitiesTest {
     {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(false)));
-        Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
+        Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
         
         Set mgrSet = new HashSet<ExplorerManager>();
         mgrSet.add(em);
@@ -99,7 +122,7 @@ public class EntityWrapperUtilitiesTest {
         Node[] sources = em.getRootContext().getChildren().getNodes(true);
         Set<String> sourcesSet = new HashSet<String>();
         
-        for (Source s : ctx.getSources())
+        for (Source s : dsc.getContext().getSources())
         {
             if (s.getParent() == null)
             {
@@ -120,7 +143,7 @@ public class EntityWrapperUtilitiesTest {
     {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(false)));
-        Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
+        Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
         
         Set mgrSet = new HashSet<ExplorerManager>();
         mgrSet.add(em);
@@ -144,7 +167,7 @@ public class EntityWrapperUtilitiesTest {
         }
         Set<String> entitySet = new HashSet<String>();
         
-        for (Source s : ctx.getSources())
+        for (Source s : dsc.getContext().getSources())
         {
             if (s.getParent() == null)
             {
@@ -170,7 +193,7 @@ public class EntityWrapperUtilitiesTest {
     {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
-        Iterator<IEntityBase> itr = ctx.query(Experiment.class, "true");
+        Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
         
         Set mgrSet = new HashSet<ExplorerManager>();
         mgrSet.add(em);
@@ -185,7 +208,7 @@ public class EntityWrapperUtilitiesTest {
             }
         }
         Set<String> entitySet = new HashSet<String>();
-        for (Project p : ctx.getProjects())
+        for (Project p : dsc.getContext().getProjects())
         {
             for (Experiment e : p.getExperiments())
             {
@@ -213,7 +236,7 @@ public class EntityWrapperUtilitiesTest {
     {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
-        Iterator<IEntityBase> itr = ctx.query(AnalysisRecord.class, "true");
+        Iterator<IEntityBase> itr = dsc.getContext().query(AnalysisRecord.class, "true");
 
         Set mgrSet = new HashSet<ExplorerManager>();
         mgrSet.add(em);
@@ -228,11 +251,11 @@ public class EntityWrapperUtilitiesTest {
             }
         }
         Set<String> entitySet = new HashSet<String>();
-        Iterator<User> userItr = ctx.getUsersIterator();
+        Iterator<User> userItr = dsc.getContext().getUsersIterator();
         while (userItr.hasNext())
         {
             User user = userItr.next();
-            for (Project p : ctx.getProjects()) {
+            for (Project p : dsc.getContext().getProjects()) {
                 for (AnalysisRecord e : p.getAnalysisRecords(user.getUsername())) {
                     entitySet.add(e.getURIString());
                 }

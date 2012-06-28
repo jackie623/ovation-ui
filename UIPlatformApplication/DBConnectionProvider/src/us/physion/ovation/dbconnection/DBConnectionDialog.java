@@ -19,25 +19,23 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     DefaultComboBoxModel connectionComboBoxModel;
     IAuthenticatedDataStoreCoordinator dsc;
     Boolean cancelled = false;
-    
-    public boolean isCancelled()
-    {
+
+    public boolean isCancelled() {
         return cancelled;
     }
-    
-    public IAuthenticatedDataStoreCoordinator getDataStoreCoordinator()
-    {
+
+    public IAuthenticatedDataStoreCoordinator getDataStoreCoordinator() {
         return dsc;
     }
-    
+
     /**
      * Creates new form DBConnectionDialog
      */
     public DBConnectionDialog(java.awt.Frame parent, boolean modal, ConnectionHistoryProvider prefProvider) {
         super(parent, modal);
         initComponents();
-    
-        
+
+
         this.addWindowListener(new java.awt.event.WindowAdapter() {
 
             @Override
@@ -48,25 +46,30 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 dispose();
             }
         });
-        
+
         prefs = prefProvider;
         connectionComboBoxModel = new DefaultComboBoxModel(prefs.getConnectionHistory().toArray(new String[0]));
         connectionFileComboBox.setModel(connectionComboBoxModel);
-        errorTextArea.getParent().setVisible(false);
+        errorTextField.setVisible(false);
     }
-    
+
     /**
      * Creates new form DBConnectionDialog
      */
     public DBConnectionDialog(java.awt.Frame parent) {
         this(parent, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
     }
-    
-    private void showErrors(Exception e)
-    {
-        errorTextArea.setText("**Error: " +  e.getLocalizedMessage());
-        errorTextArea.setForeground(Color.RED);
-        errorTextArea.getParent().setVisible(true);
+
+    private void showErrors(Exception e) {
+        errorTextField.setVisible(true);
+        this.pack();
+        if (e instanceof UserAuthenticationException) {
+            errorTextField.setText("**Error: Username and password combination was not found.");
+        }
+        else {
+            errorTextField.setText("**Error: " + e.getLocalizedMessage());
+        }
+        errorTextField.setForeground(Color.RED);
     }
 
     /**
@@ -79,33 +82,25 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         connectButton = new javax.swing.JButton();
-        usernameTextField = new javax.swing.JTextField();
-        passwordTextField = new javax.swing.JPasswordField();
         chooseButton = new javax.swing.JButton();
         connectionFileComboBox = new javax.swing.JComboBox();
+        connectionFileLabel = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
         usernameLabel = new javax.swing.JLabel();
         passwordLabel = new javax.swing.JLabel();
-        errorPanel = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        errorTextArea = new javax.swing.JTextArea();
-        connectionFileLabel = new javax.swing.JLabel();
+        usernameTextField = new javax.swing.JTextField();
+        passwordTextField = new javax.swing.JPasswordField();
+        errorTextField = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setFocusCycleRoot(false);
 
+        connectButton.setBackground(new java.awt.Color(153, 153, 153));
         connectButton.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.connectButton.text")); // NOI18N
         connectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 connectButtonActionPerformed(evt);
-            }
-        });
-
-        usernameTextField.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.usernameTextField.text")); // NOI18N
-
-        passwordTextField.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.passwordTextField.text")); // NOI18N
-        passwordTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                passwordTextFieldActionPerformed(evt);
             }
         });
 
@@ -116,95 +111,109 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             }
         });
 
-        connectionFileComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        connectionFileComboBox.setEditable(true);
+        connectionFileComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "<your connection file here>" }));
+
+        connectionFileLabel.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.connectionFileLabel.text")); // NOI18N
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.usernameLabel.text")); // NOI18N
 
         passwordLabel.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.passwordLabel.text")); // NOI18N
 
-        errorPanel.setVisible(false);
+        usernameTextField.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.usernameTextField.text")); // NOI18N
 
-        errorTextArea.setColumns(20);
-        errorTextArea.setRows(5);
-        errorTextArea.setEnabled(false);
-        jScrollPane1.setViewportView(errorTextArea);
-        errorPanel.add(errorTextArea);
+        passwordTextField.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.passwordTextField.text")); // NOI18N
+        passwordTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                passwordTextFieldActionPerformed(evt);
+            }
+        });
 
-        org.jdesktop.layout.GroupLayout errorPanelLayout = new org.jdesktop.layout.GroupLayout(errorPanel);
-        errorPanel.setLayout(errorPanelLayout);
-        errorPanelLayout.setHorizontalGroup(
-            errorPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(errorPanelLayout.createSequentialGroup()
-                .add(41, 41, 41)
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 347, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(58, Short.MAX_VALUE))
+        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(passwordLabel)
+                    .add(usernameLabel))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                    .add(passwordTextField, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 377, Short.MAX_VALUE)
+                    .add(usernameTextField))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        errorPanelLayout.setVerticalGroup(
-            errorPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, errorPanelLayout.createSequentialGroup()
-                .add(0, 0, Short.MAX_VALUE)
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 39, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jPanel1Layout.createSequentialGroup()
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(usernameLabel)
+                    .add(usernameTextField))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(passwordLabel)
+                    .add(passwordTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
-        connectionFileLabel.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.connectionFileLabel.text")); // NOI18N
+        errorTextField.setEditable(false);
+        errorTextField.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.errorTextField.text")); // NOI18N
+
+        jButton1.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.jButton1.text")); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(connectButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-            .add(layout.createSequentialGroup()
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
+                .add(43, 43, 43)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .add(errorPanel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(0, 3, Short.MAX_VALUE))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(connectionFileComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 348, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(42, 42, 42))
+                        .add(connectionFileLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(75, 75, 75))
                     .add(layout.createSequentialGroup()
-                        .add(47, 47, 47)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(usernameLabel)
-                            .add(passwordLabel))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                            .add(usernameTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 246, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(passwordTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 246, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                        .add(55, 55, 55)))
-                .addContainerGap(3, Short.MAX_VALUE))
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                .add(34, 34, 34)
-                .add(connectionFileLabel)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(chooseButton)
-                .add(38, 38, 38))
+                        .add(connectionFileComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(chooseButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 34, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(18, 18, 18))))
+            .add(layout.createSequentialGroup()
+                .add(48, 48, 48)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(layout.createSequentialGroup()
+                        .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 123, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 129, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(errorTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 457, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
-                .add(errorPanel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(18, 18, 18)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(connectionFileLabel)
-                    .add(chooseButton))
+                .addContainerGap()
+                .add(connectionFileLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(connectionFileComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(chooseButton)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, connectionFileComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(16, 16, 16)
+                .add(errorTextField)
                 .add(18, 18, 18)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(usernameTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(usernameLabel))
-                .add(17, 17, 17)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(passwordTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(passwordLabel))
-                .add(34, 34, 34)
-                .add(connectButton)
-                .add(69, 69, 69))
+                    .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(27, 27, 27))
         );
 
         pack();
@@ -247,6 +256,11 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         dispose();
     }//GEN-LAST:event_connectButtonActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        cancelled = true;
+        dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -285,7 +299,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
 
             public void run() {
                 DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
-                
+
                 dialog.setVisible(true);
             }
         });
@@ -295,9 +309,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     private javax.swing.JButton connectButton;
     private javax.swing.JComboBox connectionFileComboBox;
     private javax.swing.JLabel connectionFileLabel;
-    private javax.swing.JPanel errorPanel;
-    private javax.swing.JTextArea errorTextArea;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField errorTextField;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel passwordLabel;
     private javax.swing.JPasswordField passwordTextField;
     private javax.swing.JLabel usernameLabel;

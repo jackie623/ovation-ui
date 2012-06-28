@@ -10,8 +10,9 @@ import us.physion.ovation.interfaces.ConnectionProvider;
 
 public class Installer extends ModuleInstall {
 
+    private ConnectionProvider dbc;
     @Override
     public void restored() {
-        new DBConnectionProvider();
+        dbc = new DBConnectionProvider();
     }
 }

@@ -1,0 +1,13 @@
+/UIPlatformApplication/OvationAPI/nbproject/private/
+
+*.class
+/UIPlatformApplication/QueryTools/build/*
+/UIPlatformApplication/build/*
+*/build/*
+/UIPlatformApplication/DBConnectionProvider/build/
+/UIPlatformApplication/QueryTools/nbproject/private/
+/UIPlatformApplication/OvationAPI/build/
+/UIPlatformApplication/GlobalInterfaceLibrary/build/
+/UIPlatformApplication/SelectionDetails/build/
+/UIPlatformApplication/SelectionDetails/nbproject/private/
+/UIPlatformApplication/Browser/build/

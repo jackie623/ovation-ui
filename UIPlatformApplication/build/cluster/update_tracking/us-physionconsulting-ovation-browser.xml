@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="us.physionconsulting.ovation.browser">
-    <module_version install_time="1339185373429" last="true" origin="installer" specification_version="1.0">
-        <file crc="2123857904" name="config/Modules/us-physionconsulting-ovation-browser.xml"/>
-        <file crc="3920383626" name="modules/ext/ovation.jar"/>
-        <file crc="1535343743" name="modules/us-physionconsulting-ovation-browser.jar"/>
-    </module_version>
-</module>

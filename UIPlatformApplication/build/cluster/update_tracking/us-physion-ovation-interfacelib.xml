@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="us.physion.ovation.interfacelib">
-    <module_version install_time="1339179197484" last="true" origin="installer" specification_version="1.0">
-        <file crc="988694867" name="config/Modules/us-physion-ovation-interfacelib.xml"/>
-        <file crc="2482460495" name="modules/ext/interfaces.jar"/>
-        <file crc="1861172318" name="modules/us-physion-ovation-interfacelib.jar"/>
-    </module_version>
-</module>

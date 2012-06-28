@@ -2,12 +2,28 @@
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
                             "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
+    <folder name="Menu">
+        <folder name="Window">
+            <file name="us-physionconsulting-ovation-browser-BrowserTopComponent.shadow">
+                <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
+                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-BrowserTopComponent.instance"/>
+            </file>
+            <file name="us-physionconsulting-ovation-browser-SourceBrowserTopComponent.shadow">
+                <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent-->
+                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-SourceBrowserTopComponent.instance"/>
+            </file>
+        </folder>
+    </folder>
     <folder name="xml">
         <folder name="entities">
             <folder name="us_physionconsulting_ovation_browser">
                 <file name="Browser" url="nbres:/org/netbeans/modules/settings/resources/properties-1_0.dtd">
                     <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
                     <attr name="hint.originalPublicID" stringvalue="-//us.physionconsulting.ovation.browser//Browser//EN"/>
+                </file>
+                <file name="SourceBrowser" url="nbres:/org/netbeans/modules/settings/resources/properties-1_0.dtd">
+                    <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent-->
+                    <attr name="hint.originalPublicID" stringvalue="-//us.physionconsulting.ovation.browser//SourceBrowser//EN"/>
                 </file>
             </folder>
         </folder>
@@ -19,6 +35,10 @@
                             <file name="BrowserTopComponent">
                                 <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
                                 <attr name="settings.providerPath" stringvalue="xml/lookups//us_physionconsulting_ovation_browser/Browser.instance"/>
+                            </file>
+                            <file name="SourceBrowserTopComponent">
+                                <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent-->
+                                <attr name="settings.providerPath" stringvalue="xml/lookups//us_physionconsulting_ovation_browser/SourceBrowser.instance"/>
                             </file>
                         </folder>
                     </folder>
@@ -37,15 +57,17 @@
                     <attr name="settings.instanceOf" stringvalue="us.physionconsulting.ovation.browser.BrowserTopComponent"/>
                     <attr boolvalue="true" name="xmlproperties.preventStoring"/>
                 </file>
+                <file name="SourceBrowser.instance">
+                    <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent-->
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.create" name="instanceCreate"/>
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.properties" name="settings.convertor"/>
+                    <attr name="settings.instanceClass" stringvalue="us.physionconsulting.ovation.browser.SourceBrowserTopComponent"/>
+                    <attr name="settings.instanceOf" stringvalue="us.physionconsulting.ovation.browser.SourceBrowserTopComponent"/>
+                    <attr boolvalue="true" name="xmlproperties.preventStoring"/>
+                </file>
             </folder>
-        </folder>
-    </folder>
-    <folder name="Menu">
-        <folder name="Window">
-            <file name="us-physionconsulting-ovation-browser-BrowserTopComponent.shadow">
-                <!--us.physionconsulting.ovation.browser.BrowserTopComponent-->
-                <attr name="originalFile" stringvalue="Actions/Window/us-physionconsulting-ovation-browser-BrowserTopComponent.instance"/>
-            </file>
         </folder>
     </folder>
     <folder name="Windows2">
@@ -57,6 +79,13 @@
   <instance class="us.physionconsulting.ovation.browser.BrowserTopComponent"/>
 </settings>
 ]]></file>
+            <file name="SourceBrowserTopComponent.settings">
+                <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent--><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE settings PUBLIC "-//NetBeans//DTD Session settings 1.0//EN" "http://www.netbeans.org/dtds/sessionsettings-1_0.dtd">
+<settings version="1.0">
+  <instance class="us.physionconsulting.ovation.browser.SourceBrowserTopComponent"/>
+</settings>
+]]></file>
         </folder>
         <folder name="Modes">
             <folder name="explorer">
@@ -65,6 +94,14 @@
 <!DOCTYPE tc-ref PUBLIC "-//NetBeans//DTD Top Component in Mode Properties 2.0//EN" "http://www.netbeans.org/dtds/tc-ref2_0.dtd">
 <tc-ref version="2.0">
   <tc-id id="BrowserTopComponent"/>
+  <state opened="true"/>
+</tc-ref>
+]]></file>
+                <file name="SourceBrowserTopComponent.wstcref">
+                    <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent--><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tc-ref PUBLIC "-//NetBeans//DTD Top Component in Mode Properties 2.0//EN" "http://www.netbeans.org/dtds/tc-ref2_0.dtd">
+<tc-ref version="2.0">
+  <tc-id id="SourceBrowserTopComponent"/>
   <state opened="true"/>
 </tc-ref>
 ]]></file>
@@ -81,6 +118,15 @@
                 <attr name="preferredID" stringvalue="BrowserTopComponent"/>
                 <attr
                     bundlevalue="us.physionconsulting.ovation.browser.Bundle#CTL_BrowserAction" name="displayName"/>
+            </file>
+            <file name="us-physionconsulting-ovation-browser-SourceBrowserTopComponent.instance">
+                <!--us.physionconsulting.ovation.browser.SourceBrowserTopComponent-->
+                <attr
+                    methodvalue="org.openide.windows.TopComponent.openAction" name="instanceCreate"/>
+                <attr name="component" newvalue="us.physionconsulting.ovation.browser.SourceBrowserTopComponent"/>
+                <attr name="preferredID" stringvalue="SourceBrowserTopComponent"/>
+                <attr
+                    bundlevalue="us.physionconsulting.ovation.browser.Bundle#CTL_SourceBrowserAction" name="displayName"/>
             </file>
         </folder>
     </folder>

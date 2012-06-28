@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module codename="us.physion.ovation.dbconnection">
-    <module_version install_time="1339179197787" last="true" origin="installer" specification_version="1.0">
-        <file crc="3772060204" name="config/Modules/us-physion-ovation-dbconnection.xml"/>
-        <file crc="3920383626" name="modules/ext/ovation.jar"/>
-        <file crc="2620838126" name="modules/us-physion-ovation-dbconnection.jar"/>
-    </module_version>
-</module>

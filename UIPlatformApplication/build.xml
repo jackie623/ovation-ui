@@ -6,10 +6,10 @@
     <description>Builds the module suite UIPlatformApplication.</description>
     <import file="nbproject/build-impl.xml"/>
     
-    <property name="interfaces.jar.dir" value="interfacejar"/>
+    <property name="interfaces.jar.dir" value="lib"/>
     <property name="interfaces.src.dir" value="GlobalInterfaces/src/"/>
     <property name="interfaces.class.dir" value="GlobalInterfaces/build/classes/"/>
-    <property name="ovation.jar.path" value="ovation.jar"/>
+    <property name="ovation.jar.path" value="lib/ovation.jar"/>
     
     <target name="recreate-interfaces-jar">
         <mkdir dir="${interfaces.class.dir}"/>

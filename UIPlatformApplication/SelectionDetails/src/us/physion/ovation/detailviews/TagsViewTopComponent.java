@@ -65,7 +65,6 @@ public final class TagsViewTopComponent extends TopComponent {
         initComponents();
         setName(Bundle.CTL_TagsViewTopComponent());
         setToolTipText(Bundle.HINT_TagsViewTopComponent());
-
     }
 
     /**

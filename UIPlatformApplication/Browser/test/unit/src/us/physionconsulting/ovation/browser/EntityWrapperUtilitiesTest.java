@@ -21,6 +21,10 @@ import ovation.*;
 public class EntityWrapperUtilitiesTest {
     
     public EntityWrapperUtilitiesTest() {
+        String s = System.getProperty("OVATION_TEST");
+        System.setProperty("OVATION_TEST", "true");
+        s = System.getProperty("OVATION_TEST");
+        String s2 = s.toString();
     }
     
     ExplorerManager em;
@@ -37,7 +41,8 @@ public class EntityWrapperUtilitiesTest {
     }
     
     @Before
-    public void setUp() throws UserAuthenticationException {
+    public void setUp() throws UserAuthenticationException 
+    {
         ctx = Ovation.connect("/Users/huecotanks/test-ui/test-ui.connection", "TestUser", "password");
         treeMap = new HashMap<String, Node>();
         em = new ExplorerManager();

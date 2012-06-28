@@ -22,14 +22,14 @@ import ovation.database.DatabaseManager;
  * @author jackie
  */
 public class EntityWrapperUtilitiesTest {
-    
+
     public EntityWrapperUtilitiesTest() {
-        /*String s = System.getProperty("OVATION_TEST");
-        System.setProperty("OVATION_TEST", "true");
-        s = System.getProperty("OVATION_TEST");
-        String s2 = s.toString();*/
+        /*
+         * String s = System.getProperty("OVATION_TEST");
+         * System.setProperty("OVATION_TEST", "true"); s =
+         * System.getProperty("OVATION_TEST"); String s2 = s.toString();
+         */
     }
-    
     ExplorerManager em;
     Map<String, Node> treeMap;
     IAuthenticatedDataStoreCoordinator dsc;
@@ -37,37 +37,30 @@ public class EntityWrapperUtilitiesTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-       
-       File f = new File(tm.getConnectionFile());
-       if (!f.exists())
-       {
-           DatabaseManager db = new DatabaseManager();
-           db.createDB(tm.getConnectionFile(), "127.0.0.1");
-       }
-       
+
+        File f = new File(tm.getConnectionFile());
+        if (!f.exists()) {
+            DatabaseManager db = new DatabaseManager();
+            db.createLocalDatabase(tm.getConnectionFile(), "127.0.0.1");
+        }
+
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
-    @Before
-    public void setUp()
-    {
-        //try {
-            try {
-                dsc = tm.setupDatabase();
-            } catch (Exception e) {
-                tearDown();
-                fail(e.getMessage());
-            }
 
-       
-            treeMap = new HashMap<String, Node>();
-            em = new ExplorerManager();
-        /*} catch (Exception ue) {
-            ue.printStackTrace();
-        }*/
+    @Before
+    public void setUp() {
+        try {
+            dsc = tm.setupDatabase();
+        } catch (Exception e) {
+            tearDown();
+            fail(e.getMessage());
+        }
+
+        treeMap = new HashMap<String, Node>();
+        em = new ExplorerManager();
     }
 
     @After
@@ -76,80 +69,69 @@ public class EntityWrapperUtilitiesTest {
     }
 
     @Test
-    public void testCreateNodeForNodeThatAlreadyExists()
-    {
-        
+    public void testCreateNodeForNodeThatAlreadyExists() {
     }
-    
+
     @Test
-    public void testQuerySetsProjectViewRootNodeAppropriately()
-    {
+    public void testQuerySetsProjectViewRootNodeAppropriately() {
         em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
         Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
-        
+
         Set s = new HashSet<ExplorerManager>();
         s.add(em);
         EntityWrapperUtilities.createNodesFromQuery(s, itr);
-        
+
         Node[] projects = em.getRootContext().getChildren().getNodes(true);
         Set<String> projectSet = new HashSet<String>();
-        for (Project p : dsc.getContext().getProjects())
-        {
+        for (Project p : dsc.getContext().getProjects()) {
             projectSet.add(p.getURIString());
         }
-        
-        for (Node n : projects)
-        {
+
+        for (Node n : projects) {
             EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
             assertTrue(projectSet.contains(ew.getURI()));
             projectSet.remove(ew.getURI());
         }
         assertTrue(projectSet.isEmpty());
     }
-    
+
     @Test
-    public void testQuerySetsSourceViewRootNodeAppropriately()
-    {
+    public void testQuerySetsSourceViewRootNodeAppropriately() {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(false)));
         Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
-        
+
         Set mgrSet = new HashSet<ExplorerManager>();
         mgrSet.add(em);
         EntityWrapperUtilities.createNodesFromQuery(mgrSet, itr);
-        
+
         Node[] sources = em.getRootContext().getChildren().getNodes(true);
         Set<String> sourcesSet = new HashSet<String>();
-        
-        for (Source s : dsc.getContext().getSources())
-        {
-            if (s.getParent() == null)
-            {
+
+        for (Source s : dsc.getContext().getSources()) {
+            if (s.getParent() == null) {
                 sourcesSet.add(s.getURIString());
             }
         }
-        for (Node n : sources)
-        {
+        for (Node n : sources) {
             EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
             assertTrue(sourcesSet.contains(ew.getURI()));
             sourcesSet.remove(ew.getURI());
         }
         assertTrue(sourcesSet.isEmpty());
     }
-    
+
     @Test
-    public void testQuerySetsExperimentNodesAppropriatelyInSourceView()
-    {
+    public void testQuerySetsExperimentNodesAppropriatelyInSourceView() {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(false)));
         Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
-        
+
         Set mgrSet = new HashSet<ExplorerManager>();
         mgrSet.add(em);
         EntityWrapperUtilities.createNodesFromQuery(mgrSet, itr);
-        while(itr.hasNext())
-        {
+        while (itr.hasNext()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
@@ -157,83 +139,67 @@ public class EntityWrapperUtilitiesTest {
             }
         }
         ArrayList<Node> sourceChildren = new ArrayList();
-        for (Node n : em.getRootContext().getChildren().getNodes(true))
-        {
+        for (Node n : em.getRootContext().getChildren().getNodes(true)) {
             Node[] nodes = n.getChildren().getNodes(true);
-            for (Node child : nodes)
-            {
+            for (Node child : nodes) {
                 sourceChildren.add(child);
             }
         }
         Set<String> entitySet = new HashSet<String>();
-        
-        for (Source s : dsc.getContext().getSources())
-        {
-            if (s.getParent() == null)
-            {
+
+        for (Source s : dsc.getContext().getSources()) {
+            if (s.getParent() == null) {
                 for (Experiment e : s.getExperiments()) {
                     entitySet.add(e.getURIString());
                 }
             }
         }
-        for (Node n : sourceChildren)
-        {
+        for (Node n : sourceChildren) {
             EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
-            if (ew.getType().isAssignableFrom(Experiment.class))
-            {
+            if (ew.getType().isAssignableFrom(Experiment.class)) {
                 assertTrue(entitySet.contains(ew.getURI()));
                 entitySet.remove(ew.getURI());
             }
         }
         assertTrue(entitySet.isEmpty());
     }
-    
+
     @Test
-    public void testQuerySetsExperimentNodesAppropriatelyInProjectView()
-    {
+    public void testQuerySetsExperimentNodesAppropriatelyInProjectView() {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
         Iterator<IEntityBase> itr = dsc.getContext().query(Experiment.class, "true");
-        
+
         Set mgrSet = new HashSet<ExplorerManager>();
         mgrSet.add(em);
         EntityWrapperUtilities.createNodesFromQuery(mgrSet, itr);
-        
+
         ArrayList<Node> projectChildren = new ArrayList();
-        for (Node n : em.getRootContext().getChildren().getNodes(true))
-        {
-            for (Node child : n.getChildren().getNodes(true))
-            {
+        for (Node n : em.getRootContext().getChildren().getNodes(true)) {
+            for (Node child : n.getChildren().getNodes(true)) {
                 projectChildren.add(child);
             }
         }
         Set<String> entitySet = new HashSet<String>();
-        for (Project p : dsc.getContext().getProjects())
-        {
-            for (Experiment e : p.getExperiments())
-            {
+        for (Project p : dsc.getContext().getProjects()) {
+            for (Experiment e : p.getExperiments()) {
                 entitySet.add(e.getURIString());
             }
         }
-        for (Node n : projectChildren)
-        {
+        for (Node n : projectChildren) {
             EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
-            if (ew.getType().isAssignableFrom(Experiment.class))
-            {
+            if (ew.getType().isAssignableFrom(Experiment.class)) {
                 assertTrue(entitySet.contains(ew.getURI()));
                 entitySet.remove(ew.getURI());
-            }
-            else
-            {
+            } else {
                 fail("Project node's child was something other than an Experment");
             }
         }
         assertTrue(entitySet.isEmpty());
     }
-    
+
     @Test
-    public void testQuerySetsAnalysisRecordNodesAppropriatelyInProjectView()
-    {
+    public void testQuerySetsAnalysisRecordNodesAppropriatelyInProjectView() {
         ExplorerManager em = new ExplorerManager();
         em.setRootContext(new AbstractNode(new QueryChildren(true)));
         Iterator<IEntityBase> itr = dsc.getContext().query(AnalysisRecord.class, "true");
@@ -252,8 +218,7 @@ public class EntityWrapperUtilitiesTest {
         }
         Set<String> entitySet = new HashSet<String>();
         Iterator<User> userItr = dsc.getContext().getUsersIterator();
-        while (userItr.hasNext())
-        {
+        while (userItr.hasNext()) {
             User user = userItr.next();
             for (Project p : dsc.getContext().getProjects()) {
                 for (AnalysisRecord e : p.getAnalysisRecords(user.getUsername())) {
@@ -261,32 +226,25 @@ public class EntityWrapperUtilitiesTest {
                 }
             }
         }
-        
+
         for (Node n : analysisRecordNodes) {
             EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
             if (ew.getType().isAssignableFrom(Experiment.class)) {
                 assertTrue(entitySet.contains(ew.getURI()));
                 entitySet.remove(ew.getURI());
-            }
-            else
-            {
+            } else {
                 fail("Project node's child was something other than an Experment");
             }
         }
         assertTrue(entitySet.isEmpty());
     }
-   
+
     //Manual test
     @Test
-    public void testPerformanceOnManyChildrenNodes()
-    {
-        
+    public void testPerformanceOnManyChildrenNodes() {
     }
-    
+
     @Test
-    public void testQueryListenerCancelsIteration()
-    {
-        
+    public void testQueryListenerCancelsIteration() {
     }
-    
 }

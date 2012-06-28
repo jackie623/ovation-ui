@@ -12,28 +12,25 @@ import ovation.User;
  *
  * @author huecotanks
  */
-public class PerUserEntityWrapper extends EntityWrapper{
-    
+public class PerUserEntityWrapper extends EntityWrapper {
+
     List<EntityWrapper> children;
-    public PerUserEntityWrapper(String username, String uri, List<EntityWrapper> children)
-    {
+
+    public PerUserEntityWrapper(String username, String uri, List<EntityWrapper> children) {
         super(username, User.class, uri);
         this.children = children;
     }
-    protected PerUserEntityWrapper(String username, String uri)
-    {
+
+    protected PerUserEntityWrapper(String username, String uri) {
         super(username, User.class, uri);
     }
-    
+
     @Override
-    public Boolean isUnique()
-    {
+    public Boolean isUnique() {
         return true;
     }
 
-   
-    public List<EntityWrapper> getChildren()
-    {
+    public List<EntityWrapper> getChildren() {
         return children;
     }
 }

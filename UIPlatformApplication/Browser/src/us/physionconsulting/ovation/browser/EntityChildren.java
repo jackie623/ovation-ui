@@ -99,7 +99,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper>{
                 {
                     User user = userItr.next();
                     String username = user.getUsername();
-                    Iterator<AnalysisRecord> itr = entity.getAnalysisRecordsIterable(username).iterator();
+                    Iterator<AnalysisRecord> itr = entity.getAnalysisRecordIterable(user).iterator();
                     if (itr.hasNext())
                     {
                         List<EntityWrapper> l = new LinkedList();

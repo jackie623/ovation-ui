@@ -10,12 +10,13 @@ import java.util.concurrent.Callable;
 import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *
  * @author huecotanks
  */
-public class EntityWrapper {
+public class EntityWrapper implements IEntityWrapper {
     
     private String uri;
     private Class type;
@@ -62,6 +63,7 @@ public class EntityWrapper {
         retrieveEntity = toCall;
     }*/
     
+    @Override
     public IEntityBase getEntity(){
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         DataContext c = dsc.getContext();
@@ -75,11 +77,14 @@ public class EntityWrapper {
         }
         return c.objectWithURI(uri);
     }
+    @Override
     public String getURI()
     {
         return uri;
     }
+    @Override
     public String getDisplayName() {return displayName;}
+    @Override
     public Class getType() { return type;}
 
    

@@ -14,18 +14,17 @@ import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.Node;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import us.physion.ovation.browser.Bundle;
 
 /**
  * Top component which displays something.
  */
-@ConvertAsProperties(dtd = "-//us.physionconsulting.ovation.browser//SourceBrowser//EN",
+@ConvertAsProperties(dtd = "-//us.physion.ovation.browser//SourceBrowser//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "SourceBrowserTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
-@ActionID(category = "Window", id = "us.physionconsulting.ovation.browser.SourceBrowserTopComponent")
+@ActionID(category = "Window", id = "us.physion.ovation.browser.SourceBrowserTopComponent")
 @ActionReference(path = "Menu/Window" /*
  * , position = 333
  */)

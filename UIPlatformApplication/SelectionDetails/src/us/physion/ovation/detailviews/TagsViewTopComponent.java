@@ -5,6 +5,9 @@
 package us.physion.ovation.detailviews;
 
 import java.awt.event.ActionEvent;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.AbstractListModel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -13,6 +16,10 @@ import org.openide.util.Lookup;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import ovation.IEntityBase;
+import ovation.ITaggableEntityBase;
+import ovation.KeywordTag;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  * Top component which displays something.
@@ -35,9 +42,9 @@ preferredID = "TagsViewTopComponent")
     "HINT_TagsViewTopComponent=This is a TagsView window"
 })
 public final class TagsViewTopComponent extends TopComponent {
-
-    private AbstractListModel listModel = new AbstractListModel() {
-
+    
+    private class StringListModel extends AbstractListModel
+    {
         String[] tags = {"<nothing selected>"};
 
         @Override
@@ -55,11 +62,27 @@ public final class TagsViewTopComponent extends TopComponent {
             tags = newTags;
         }
     };
+
+    private StringListModel listModel = new StringListModel();
     
     protected void updateListModel()
     {
         Lookup global = Utilities.actionsGlobalContext();
-        //EntityWrapper[] rs = global.lookupAll(EntityWrapper.class);
+        Collection<? extends IEntityWrapper> rs = global.lookupAll(IEntityWrapper.class);
+        Set<String> tags = new HashSet<String>();
+        for (IEntityWrapper e: rs)
+        {
+            IEntityBase entity = e.getEntity();
+            if (entity != null && entity instanceof ITaggableEntityBase)
+            {
+                for (KeywordTag t : ((ITaggableEntityBase)entity).getTagSet())
+                {
+                    tags.add(t.getTag());
+                }
+            }
+        }
+        listModel.setTags(tags.toArray(new String[0]));
+        
     }
     public TagsViewTopComponent() {
         initComponents();

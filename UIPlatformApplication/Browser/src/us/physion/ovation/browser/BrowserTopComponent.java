@@ -30,18 +30,17 @@ import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.ConnectionListener;
-import us.physion.ovation.browser.Bundle;
 
 /**
  * Top component which displays something.
  */
-@ConvertAsProperties(dtd = "-//us.physionconsulting.ovation.browser//Browser//EN",
+@ConvertAsProperties(dtd = "-//us.physion.ovation.browser//Browser//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "BrowserTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
-@ActionID(category = "Window", id = "us.physionconsulting.ovation.browser.BrowserTopComponent")
+@ActionID(category = "Window", id = "us.physion.ovation.browser.BrowserTopComponent")
 @ActionReference(path = "Menu/Window" /*
  * , position = 333
  */)

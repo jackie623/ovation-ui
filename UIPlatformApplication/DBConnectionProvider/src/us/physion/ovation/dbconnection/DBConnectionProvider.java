@@ -86,6 +86,7 @@ public class DBConnectionProvider implements ConnectionProvider{
                     }
                     dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
                 }
+                
             }
         };
         r.run(); //TODO: Clean up. Looks like we don't need to create a runnable

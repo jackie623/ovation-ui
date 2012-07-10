@@ -4,8 +4,8 @@
  */
 package us.physion.ovation.browser;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.openide.util.Lookup;
 import ovation.*;
@@ -23,21 +23,14 @@ public class EntityWrapper implements IEntityWrapper {
     private String displayName;
     private Callable<IEntityBase> retrieveEntity;
     
-    public EntityWrapper(String objectURI)
-    {
-        uri = objectURI;
-        IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
-        DataContext c = dsc.getContext();
-        IEntityBase e = (IEntityBase)c.objectWithURI(objectURI);
-        type = e.getClass();
-        displayName = inferDisplayName(e);
-    }
-    
     public EntityWrapper(IEntityBase e)
     {
+        System.out.println("Constructing an entity wrapper...");
         uri = e.getURIString();
         type = e.getClass();
         displayName = inferDisplayName(e);
+        
+        System.out.println("Done constructing entity wrapper.");
     }
     
     //used by the PerUserEntityWrapper object
@@ -54,6 +47,10 @@ public class EntityWrapper implements IEntityWrapper {
         return false;
     }
     
+    public List<String> getTags()
+    {
+        return null;
+    }
     //we have to look up the entitybase on creation, because I index on the object's URI. 
     //If this changes, we should use this constructor for large objects
     /*public EntityWrapper(String name, Class clazz, Callable<IEntityBase> toCall)

@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
@@ -19,40 +20,41 @@ import us.physion.ovation.interfaces.ConnectionProvider;
  *
  * @author huecotanks
  */
-public class EntityChildren extends Children.Keys<EntityWrapper>{
+public class EntityChildren extends Children.Keys<EntityWrapper> {
 
     EntityWrapper parent;
     boolean projectView;
-    
-    EntityChildren(EntityWrapper e, boolean pView)
-    {
+    IAuthenticatedDataStoreCoordinator dsc;
+
+    EntityChildren(EntityWrapper e, boolean pView, IAuthenticatedDataStoreCoordinator theDSC) {
         parent = e;
         projectView = pView;
+        dsc = theDSC;
         setKeys(createKeys());
     }
-    
-    private EntityChildren(List<EntityWrapper> children, boolean pView)
-    {
-        projectView = pView;
+
+    private EntityChildren(List<EntityWrapper> children, boolean pView, IAuthenticatedDataStoreCoordinator theDSC) {
+        projectView = pView;        
+        dsc = theDSC;
         setKeys(children);
     }
-    
+
     @Override
     protected Node[] createNodes(EntityWrapper key) {
-        
+
         EntityChildren children;
         //right now, all PerUserEntityWrappers' children are childless. If this changes, the logic here should change
-        if (key instanceof PerUserEntityWrapper)
-        {
-            children = new EntityChildren(((PerUserEntityWrapper)key).getChildren(), projectView);
-        }else{
-            children = new EntityChildren(key, projectView);
+        if (key instanceof PerUserEntityWrapper) {
+            children = new EntityChildren(((PerUserEntityWrapper) key).getChildren(), projectView, dsc);
+        } else {
+            children = new EntityChildren(key, projectView, dsc);
         }
-        return new Node[] {EntityWrapperUtilities.createNode(key, children, key.isUnique())};
+        return new Node[]{EntityWrapperUtilities.createNode(key, children, key.isUnique())};
     }
-    
+
     protected List<EntityWrapper> createKeys() {
-        IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+        if (dsc == null)
+            dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         if (dsc == null) {
             return new LinkedList();
         }
@@ -84,6 +86,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper>{
 
     protected List<EntityWrapper> createKeysForEntity(DataContext c, EntityWrapper ew) {
 
+        dsc.getContext();
         List<EntityWrapper> list = new LinkedList<EntityWrapper>();
         Class entityClass = ew.getType();
         if (projectView) {
@@ -93,26 +96,23 @@ public class EntityChildren extends Children.Keys<EntityWrapper>{
                     list.add(new EntityWrapper(e));
                 }
                 String currentUser = c.currentAuthenticatedUser().getUsername();
-               
+
                 Iterator<User> userItr = c.getUsersIterator();
-                while (userItr.hasNext())
-                {
+                while (userItr.hasNext()) {
                     User user = userItr.next();
                     String username = user.getUsername();
                     Iterator<AnalysisRecord> itr = entity.getAnalysisRecordIterable(user).iterator();
-                    if (itr.hasNext())
-                    {
+                    if (itr.hasNext()) {
                         List<EntityWrapper> l = new LinkedList();
-                        while(itr.hasNext())
-                        {
+                        while (itr.hasNext()) {
                             l.add(new EntityWrapper(itr.next()));
                         }
                         list.add(new PerUserEntityWrapper(username, user.getURIString(), l));
                     }
                 }
-             
+
                 return list;
-            } 
+            }
         } else {
             if (entityClass.isAssignableFrom(Source.class)) {
                 Source entity = (Source) ew.getEntity();
@@ -142,6 +142,44 @@ public class EntityChildren extends Children.Keys<EntityWrapper>{
                 list.add(new EntityWrapper(e));
             }
             return list;
+        } else if (entityClass.isAssignableFrom(Epoch.class)) {
+            Epoch entity = (Epoch) ew.getEntity();
+            /*
+             * final String epochURI = entity.getURIString(); for (final String
+             * name : entity.getStimuliNames()) { Callable<Stimulus> getStim =
+             * new Callable<Stimulus>(){
+             *
+             * @Override public Stimulus call() throws Exception {
+             *
+             *
+             * return entity.getStimulus(name); }
+             *
+             * };
+             *
+             * }
+             */
+            for (Stimulus s : entity.getStimulusIterable()) {
+                list.add(new EntityWrapper(s));
+            }
+            for (Response r : entity.getResponseIterable()) {
+                list.add(new EntityWrapper(r));
+            }
+
+            String currentUser = c.currentAuthenticatedUser().getUsername();
+
+            Iterator<User> userItr = c.getUsersIterator();
+            while (userItr.hasNext()) {
+                User user = userItr.next();
+                String username = user.getUsername();
+                Iterator<DerivedResponse> itr = entity.getDerivedResponseIterable(user).iterator();
+                if (itr.hasNext()) {
+                    List<EntityWrapper> l = new LinkedList();
+                    while (itr.hasNext()) {
+                        l.add(new EntityWrapper(itr.next()));
+                    }
+                    list.add(new PerUserEntityWrapper(username, user.getURIString(), l));
+                }
+            }
         }
         return list;
     }

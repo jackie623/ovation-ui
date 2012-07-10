@@ -53,14 +53,22 @@ preferredID = "BrowserTopComponent")
 })
 public final class BrowserTopComponent extends TopComponent implements ExplorerManager.Provider{
 
+    private Lookup l;
     private ExplorerManager em = new ExplorerManager();
     public BrowserTopComponent() {
         initComponents();
         setName(Bundle.CTL_BrowserTopComponent());
         setToolTipText(Bundle.HINT_BrowserTopComponent());
         
-        associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
+        l = ExplorerUtils.createLookup(em, getActionMap());
+        associateLookup(l);
         BrowserUtilities.initBrowser(em, true);
+    }
+    
+    @Override
+    public Lookup getLookup()
+    {
+        return l;
     }
 
     /**

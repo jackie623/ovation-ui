@@ -7,13 +7,16 @@ package us.physion.ovation.browser;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
+import javax.swing.SwingUtilities;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
@@ -27,18 +30,16 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
     EntityWrapper parent;
     boolean projectView;
     IAuthenticatedDataStoreCoordinator dsc;
-    ExecutorService executor;
 
-    EntityChildren(EntityWrapper e, boolean pView, IAuthenticatedDataStoreCoordinator theDSC, ExecutorService es) {
+    EntityChildren(EntityWrapper e, boolean pView, IAuthenticatedDataStoreCoordinator theDSC) {
         parent = e;
         projectView = pView;
         dsc = theDSC;
-        executor = es;
         if (e instanceof PerUserEntityWrapper)
         {
             setKeys(((PerUserEntityWrapper)e).getChildren());
         }else{
-            setKeys(createKeys());
+            initKeys();
         }
     }
 
@@ -48,34 +49,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
 
             @Override
             public Children call() throws Exception {
-                //return new EntityChildren(key, projectView, dsc, executor);
-                
-                //if in the event queue thread, run in another thread
-                if (EventQueue.isDispatchThread()) {
-                    Callable<Children> toCall = new Callable<Children>() {
-
-                        @Override
-                        public EntityChildren call() {
-                            return new EntityChildren(key, projectView, dsc, executor);
-                        }
-                    };
-                    String type;
-                    if (parent == null)
-                    {
-                        type = "Root";
-                    }
-                    else{
-                        type = parent.getType().getName();
-                    }
-                    System.out.println("Getting children for (" + type + ") in another thread");
-                    Future<Children> t = BrowserUtilities.submit(toCall);
-                    long time = Calendar.getInstance().getTimeInMillis();
-                    Children c = t.get();
-                    System.out.println("Getting children entity took: " + (Calendar.getInstance().getTimeInMillis() - time));    
-                    return c;
-                } else {
-                    return new EntityChildren(key, projectView, dsc, executor);
-                }
+                return new EntityChildren(key, projectView, dsc);
             }
         };
     }
@@ -86,15 +60,70 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
         return new Node[]{EntityWrapperUtilities.createNode(key, Children.createLazy(getChildrenCallable(key)), key.isUnique())};
     }
 
-    protected List<EntityWrapper> createKeys() {
+   
+    protected void updateWithKeys(final List<EntityWrapper> list)
+    {
+        if (EventQueue.isDispatchThread())
+        {
+            setKeys(list);
+            addNotify();
+            refresh();
+        }
+        else{
+           // try {
+                SwingUtilities.invokeLater(new Runnable(){
+
+                    @Override
+                    public void run() {
+                        setKeys(list);
+                        addNotify();
+                        refresh();
+                    }
+                    
+                });
+            /*} catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (InvocationTargetException ex) {
+                Exceptions.printStackTrace(ex);
+            }*/
+        }
+    }
+    
+    protected void initKeys()
+    {
+        if (EventQueue.isDispatchThread())
+        {
+            BrowserUtilities.submit(new Runnable(){
+
+                @Override
+                public void run() {
+                    System.out.println("Is initialized " + isInitialized());
+                    createKeys();
+                                        System.out.println("Is initialized " + isInitialized());
+
+                }
+                
+            });
+        }
+        else{
+                    System.out.println("Is initialized " + isInitialized());
+
+            createKeys();
+                                System.out.println("Is initialized " + isInitialized());
+
+        }
+    }
+    
+    protected void createKeys() {
+        
         if (dsc == null)
             dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         if (dsc == null) {
-            return new LinkedList();
+            return;
         }
         DataContext c = dsc.getContext();
         if (dsc == null) {
-            return new LinkedList();
+            return;
         }
         if (parent == null) {
             List<EntityWrapper> list = new LinkedList<EntityWrapper>();
@@ -111,10 +140,10 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
                 }
             }
 
-            return list;
+            updateWithKeys(list);
 
         } else {
-            return createKeysForEntity(c, parent);
+            updateWithKeys(createKeysForEntity(c, parent));
         }
     }
 
@@ -175,14 +204,22 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             
             context.beginTransaction();
             try {
+                int count = 0;
                 for (Epoch e : entity.getEpochsIterable()) {
+                    
                     list.add(new EntityWrapper(e));
+                    if (count%10 == 0)
+                    {
+                        updateWithKeys(list);
+                    }
+                    count++;
                 }
             } finally{
                 context.commitTransaction();
             }
             return list;
         } else if (entityClass.isAssignableFrom(Epoch.class)) {
+            System.out.println("Calculating Epoch children");
             context.beginTransaction();
             try {
                 Epoch entity = (Epoch) ew.getEntity();

@@ -8,8 +8,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
@@ -45,9 +44,9 @@ public class DBConnectionProvider implements ConnectionProvider{
         }
         final ConnectionListener[] listeners = connectionListeners.toArray(new ConnectionListener[0]);
         
-        Runnable r = new Runnable() {
+        final Callable<IAuthenticatedDataStoreCoordinator> c = new Callable<IAuthenticatedDataStoreCoordinator>() {
 
-            public void run() {
+            public IAuthenticatedDataStoreCoordinator call() {
                 /*if (DBConnectionProvider.this.dsc != null) {
                     return;
                 }*/
@@ -79,30 +78,43 @@ public class DBConnectionProvider implements ConnectionProvider{
                 dialog.setVisible(true);
 
                 if (!dialog.isCancelled()) {
-                    DBConnectionProvider.this.dsc = dialog.getDataStoreCoordinator();
+                    IAuthenticatedDataStoreCoordinator dsc = dialog.getDataStoreCoordinator();
 
                     for (PropertyChangeListener l : listeners) {
                         dialog.addPropertyChangeListener(l);
                     }
                     dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
                 }
-                
+                return null;
             }
         };
-        r.run(); //TODO: Clean up. Looks like we don't need to create a runnable
-        
-        //new Thread (r).start ();
-        /*try {
+        //TODO: fix this
+        try {
             if (SwingUtilities.isEventDispatchThread()) {
-                r.run();
+                try {
+                    dsc = c.call();
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             } else {
-                SwingUtilities.invokeAndWait(r);
+                SwingUtilities.invokeAndWait(new Runnable()
+                {
+                    public void run()
+                    {
+                        try {
+                            dsc = c.call();
+                        } catch (Exception ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+                    }
+                });
             }
         } catch (InterruptedException ex) {
             Exceptions.printStackTrace(ex);
         } catch (InvocationTargetException ex) {
             Exceptions.printStackTrace(ex);
-        }*/
+        }
+        
         return dsc;
     }
 

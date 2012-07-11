@@ -45,9 +45,8 @@ public class BrowserUtilities{
         return browserMap;
     }    
     
-    protected static Future<Children> submit(Callable<Children> c)
-    {
-        return executorService.submit(c);
+    static void submit(Runnable runnable) {
+        executorService.submit(runnable);
     }
     
     protected static void initBrowser(final ExplorerManager em, 
@@ -60,7 +59,7 @@ public class BrowserUtilities{
             @Override
             public void run() {
                 browserMap.clear();
-                em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null, executorService)));
+                em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null)));
             }
             
         });
@@ -84,7 +83,7 @@ public class BrowserUtilities{
             }
         }
 
-        em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null, executorService)));
+        em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null)));
     }
     
     protected static void resetView()
@@ -97,7 +96,7 @@ public class BrowserUtilities{
         }*/
         browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-            mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr), null, executorService)));
+            mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr), null)));
         }
     }
     
@@ -118,5 +117,7 @@ public class BrowserUtilities{
         
         EntityWrapperUtilities.createNodesFromQuery(mgrs, itr);
     }
+
+    
     
 }

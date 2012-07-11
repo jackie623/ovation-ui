@@ -9,7 +9,7 @@ import com.physion.ebuilder.expression.ExpressionTree;
 import java.awt.EventQueue;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import javax.swing.ActionMap;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.progress.ProgressHandle;
@@ -38,11 +38,17 @@ public class BrowserUtilities{
     protected static Map<String, Node> browserMap = new ConcurrentHashMap<String, Node>();
     protected static Map<ExplorerManager, Boolean> registeredViewManagers = new HashMap<ExplorerManager, Boolean>();
     protected static QueryListener ql;
+    protected static ExecutorService executorService = Executors.newFixedThreadPool(2);
     
     public static Map<String, Node> getNodeMap()
     {
         return browserMap;
     }    
+    
+    protected static Future<Children> submit(Callable<Children> c)
+    {
+        return executorService.submit(c);
+    }
     
     protected static void initBrowser(final ExplorerManager em, 
                                    final boolean projectView)
@@ -54,7 +60,7 @@ public class BrowserUtilities{
             @Override
             public void run() {
                 browserMap.clear();
-                em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null)));
+                em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null, executorService)));
             }
             
         });
@@ -78,7 +84,7 @@ public class BrowserUtilities{
             }
         }
 
-        em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null)));
+        em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null, executorService)));
     }
     
     protected static void resetView()
@@ -91,7 +97,7 @@ public class BrowserUtilities{
         }*/
         browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-            mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr), null)));
+            mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr), null, executorService)));
         }
     }
     

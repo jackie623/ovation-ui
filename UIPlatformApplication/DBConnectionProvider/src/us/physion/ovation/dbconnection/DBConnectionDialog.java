@@ -251,7 +251,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         String username = usernameTextField.getText();
         String password = passwordTextField.getText();
         String connectionFile = connectionFileComboBox.getSelectedItem().toString();
-        prefs.addConnectionFile(path);
+        prefs.addConnectionFile(connectionFile);
         DataContext c = null;
         try {
             c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();

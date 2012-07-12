@@ -46,10 +46,6 @@ public class EntityWrapper implements IEntityWrapper {
         return false;
     }
     
-    public List<String> getTags()
-    {
-        return null;
-    }
     //we have to look up the entitybase on creation, because I index on the object's URI. 
     //If this changes, we should use this constructor for large objects
     /*public EntityWrapper(String name, Class clazz, Callable<IEntityBase> toCall)

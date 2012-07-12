@@ -40,6 +40,15 @@ public class BrowserUtilities{
     protected static QueryListener ql;
     protected static ExecutorService executorService = Executors.newFixedThreadPool(2);
     
+    protected static ConnectionListener cn = new ConnectionListener(new Runnable(){
+
+            @Override
+            public void run() {
+                resetView();
+            }
+            
+        });
+    
     public static Map<String, Node> getNodeMap()
     {
         return browserMap;
@@ -54,16 +63,6 @@ public class BrowserUtilities{
     {
         registeredViewManagers.put(em, projectView);//TODO: don't need this. we should be able to look up the explorerManagers from TopComponents
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
-        ConnectionListener cn = new ConnectionListener(new Runnable(){
-
-            @Override
-            public void run() {
-                browserMap.clear();
-                em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null)));
-            }
-            
-        });
-        
         cp.addConnectionListener(cn);
         
         if (ql == null)
@@ -82,18 +81,11 @@ public class BrowserUtilities{
                 etp.addQueryListener(ql);
             }
         }
-
         em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null)));
     }
     
     protected static void resetView()
     {
-        /*for (BrowserTopComponent btc : Lookup.getDefault().lookupAll(BrowserTopComponent.class)){
-            btc.getExplorerManager().setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, true), false)));
-        }
-        for (SourceBrowserTopComponent btc : Lookup.getDefault().lookupAll(SourceBrowserTopComponent.class)){
-            btc.getExplorerManager().setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, f), false)));
-        }*/
         browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
             mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr), null)));
@@ -118,6 +110,15 @@ public class BrowserUtilities{
         EntityWrapperUtilities.createNodesFromQuery(mgrs, itr);
     }
 
-    
+    public static void runOnEDT(Runnable r)
+    {
+        if (EventQueue.isDispatchThread())
+        {
+            r.run();
+        }
+        else{
+            SwingUtilities.invokeLater(r);
+        }
+    }
     
 }

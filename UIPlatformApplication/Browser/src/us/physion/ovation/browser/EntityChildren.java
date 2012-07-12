@@ -97,20 +97,14 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
 
                 @Override
                 public void run() {
-                    System.out.println("Is initialized " + isInitialized());
                     createKeys();
-                    System.out.println("Is initialized " + isInitialized());
 
                 }
                 
             });
         }
         else{
-                    System.out.println("Is initialized " + isInitialized());
-
             createKeys();
-                                System.out.println("Is initialized " + isInitialized());
-
         }
     }
     

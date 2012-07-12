@@ -4,11 +4,14 @@
  */
 package us.physion.ovation.dbconnection;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
@@ -28,8 +31,10 @@ import us.physion.ovation.interfaces.ConnectionProvider;
  */
 public class DBConnectionProvider implements ConnectionProvider{
 
-    private IAuthenticatedDataStoreCoordinator dsc;
+    private IAuthenticatedDataStoreCoordinator dsc = null;
     private ArrayList<ConnectionListener> connectionListeners;
+    
+    private boolean waitingForDSC = false;
     
     public DBConnectionProvider(){
         
@@ -38,18 +43,20 @@ public class DBConnectionProvider implements ConnectionProvider{
 
     @Override
     public synchronized IAuthenticatedDataStoreCoordinator getConnection() {
-        if (dsc != null)
+        
+        synchronized(this)
         {
-            return dsc;
+            if (waitingForDSC || dsc != null) {
+                return dsc;
+            }
+            setWaitingFlag(true);
         }
+        
         final ConnectionListener[] listeners = connectionListeners.toArray(new ConnectionListener[0]);
         
-        final Callable<IAuthenticatedDataStoreCoordinator> c = new Callable<IAuthenticatedDataStoreCoordinator>() {
+        Runnable r = new Runnable() {
 
-            public IAuthenticatedDataStoreCoordinator call() {
-                /*if (DBConnectionProvider.this.dsc != null) {
-                    return;
-                }*/
+            public void run() {
 
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -78,53 +85,52 @@ public class DBConnectionProvider implements ConnectionProvider{
                 dialog.setVisible(true);
 
                 if (!dialog.isCancelled()) {
-                    IAuthenticatedDataStoreCoordinator dsc = dialog.getDataStoreCoordinator();
+                    setDsc(dialog.getDataStoreCoordinator());
+                    setWaitingFlag(false);
 
                     for (PropertyChangeListener l : listeners) {
                         dialog.addPropertyChangeListener(l);
                     }
                     dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
                 }
-                return null;
             }
         };
-        //TODO: fix this
-        try {
-            if (SwingUtilities.isEventDispatchThread()) {
-                try {
-                    dsc = c.call();
-                } catch (Exception ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            } else {
-                SwingUtilities.invokeAndWait(new Runnable()
-                {
-                    public void run()
-                    {
-                        try {
-                            dsc = c.call();
-                        } catch (Exception ex) {
-                            Exceptions.printStackTrace(ex);
-                        }
-                    }
-                });
-            }
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (InvocationTargetException ex) {
-            Exceptions.printStackTrace(ex);
+        
+        if (EventQueue.isDispatchThread())
+        {
+            r.run();
+        }
+        else{
+            //try {
+                EventQueue.invokeLater(r);
+            /*} catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (InvocationTargetException ex) {
+                Exceptions.printStackTrace(ex);
+            }*/
         }
         
         return dsc;
     }
+    
+    private synchronized void setDsc(IAuthenticatedDataStoreCoordinator the_dsc)
+    {
+        dsc = the_dsc;
+    }
+    
+    private synchronized void setWaitingFlag(boolean b)
+    {
+        waitingForDSC = b;
+    }
+            
 
     @Override
-    public synchronized void addConnectionListener(ConnectionListener cl) {
+    public  void addConnectionListener(ConnectionListener cl) {
         connectionListeners.add(cl);
     }
 
     @Override
-    public synchronized void removeConnectionListener(ConnectionListener cl) {
+    public void removeConnectionListener(ConnectionListener cl) {
         connectionListeners.remove(cl);
     }
 

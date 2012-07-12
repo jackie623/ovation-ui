@@ -99,7 +99,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
                 public void run() {
                     System.out.println("Is initialized " + isInitialized());
                     createKeys();
-                                        System.out.println("Is initialized " + isInitialized());
+                    System.out.println("Is initialized " + isInitialized());
 
                 }
                 
@@ -208,11 +208,11 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
                 for (Epoch e : entity.getEpochsIterable()) {
                     
                     list.add(new EntityWrapper(e));
-                    if (count%10 == 0)
+                    /*if (count%10 == 0)
                     {
                         updateWithKeys(list);
                     }
-                    count++;
+                    count++;*/
                 }
             } finally{
                 context.commitTransaction();

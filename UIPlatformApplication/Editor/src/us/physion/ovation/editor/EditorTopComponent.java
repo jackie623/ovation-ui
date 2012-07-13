@@ -6,6 +6,7 @@ package us.physion.ovation.editor;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,7 +67,7 @@ preferredID = "EditorTopComponent")
 public final class EditorTopComponent extends TopComponent {
     
     Lookup.Result global;
-    JFreeChart chart;
+    List<ChartPanel> chartPanels = new ArrayList<ChartPanel>();
 
     private LookupListener listener = new LookupListener() {
 
@@ -80,20 +81,9 @@ public final class EditorTopComponent extends TopComponent {
                 updateEntitySelection();
             }
         }
-
-        
-
     };
     public EditorTopComponent() {
-        chart = ChartFactory.createXYLineChart("Title", "X Label", "Y Label", new DefaultXYDataset(), PlotOrientation.VERTICAL, true, true, true);
-        chart.setPadding(new RectangleInsets(20, 20, 20, 20));
-        chart.setTitle(convertTitle("Title"));
-        XYPlot plot = chart.getXYPlot();
-        plot.getDomainAxis().setLabelFont(new Font("comicsans", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-        plot.getRangeAxis().setLabelFont(new Font("comicsans", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-        plot.getRangeAxis().setLabelAngle(Math.PI/2);
         initComponents();
-        jPanel1.setVisible(false);
         setName(Bundle.CTL_EditorTopComponent());
         setToolTipText(Bundle.HINT_EditorTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
@@ -103,7 +93,7 @@ public final class EditorTopComponent extends TopComponent {
     
     private TextTitle convertTitle(String s)
     {
-        return new TextTitle(s, new Font("comicsans", Font.BOLD, 20));
+        return new TextTitle(s, new Font("timesnewroman", Font.BOLD, 20));
     }
 
     /**
@@ -114,17 +104,22 @@ public final class EditorTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new ChartPanel(chart);
+        jPanel1 = new javax.swing.JPanel();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 388, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 288, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -139,7 +134,7 @@ public final class EditorTopComponent extends TopComponent {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(48, 48, 48)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -147,6 +142,7 @@ public final class EditorTopComponent extends TopComponent {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -237,17 +233,35 @@ public final class EditorTopComponent extends TopComponent {
                     return;
                 }
                 
-                ChartWrapper c = charts.get(0);
-                chart.setTitle(convertTitle(c.getTitle()));
-                XYPlot plot = chart.getXYPlot();
-                plot.setDataset(c.getDataset());
-                plot.setDomainAxis(new NumberAxis(c.getXAxis()));
-                plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-                plot.setRangeAxis(new NumberAxis(c.getYAxis()));
-                plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.CENTER_BASELINE, 15));
-                plot.getRangeAxis().setLabelAngle(Math.PI/2);
-                chart.fireChartChanged();
-                jPanel1.setVisible(true);
+                
+                int count = 0;
+                for (ChartWrapper c : charts)
+                {
+                    JFreeChart chart;
+                    if (count < chartPanels.size())
+                    {
+                        ChartPanel p = chartPanels.get(count);
+                        chart = p.getChart();
+                        XYPlot plot = chart.getXYPlot();
+                        plot.setDataset(c.getDataset());
+                        plot.setDomainAxis(new NumberAxis(c.getXAxis()));
+                        plot.setRangeAxis(new NumberAxis(c.getYAxis()));
+                    }
+                    else{
+                       chart = ChartFactory.createXYLineChart(c.getTitle(), c.getXAxis(), c.getYAxis(), c.getDataset(), PlotOrientation.VERTICAL, true, true, true);
+                       ChartPanel p = new ChartPanel(chart);
+                       chartPanels.add(p);
+                       jTabbedPane1.addTab("tab", p);
+                    }
+                    chart.setTitle(convertTitle(c.getTitle()));
+                    chart.setPadding(new RectangleInsets(20, 20, 20, 20));
+                    XYPlot plot = chart.getXYPlot();
+                    plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
+                    plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
+                    plot.getRangeAxis().setLabelAngle(Math.PI / 2);
+                    jPanel1.setVisible(true);
+                    chart.fireChartChanged();
+                }
             }
         };
     }

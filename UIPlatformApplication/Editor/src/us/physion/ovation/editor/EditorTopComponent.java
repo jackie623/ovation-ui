@@ -5,7 +5,10 @@
 package us.physion.ovation.editor;
 
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -18,6 +21,8 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.title.TextTitle;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -35,6 +40,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
 import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.ui.RectangleInsets;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
@@ -54,14 +60,13 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "EditorTopComponent")
 @Messages({
     "CTL_EditorAction=Editor",
-    "CTL_EditorTopComponent=Editor Window",
-    "HINT_EditorTopComponent=This is a Editor window"
+    "CTL_EditorTopComponent=Response Viewer",
+    "HINT_EditorTopComponent=This plots the currently selected numeric Response data"
 })
 public final class EditorTopComponent extends TopComponent {
     
     Lookup.Result global;
     JFreeChart chart;
-    DefaultXYDataset ds;
 
     private LookupListener listener = new LookupListener() {
 
@@ -80,8 +85,13 @@ public final class EditorTopComponent extends TopComponent {
 
     };
     public EditorTopComponent() {
-        ds = new DefaultXYDataset();
-        chart = ChartFactory.createXYLineChart("Title", "X Label", "Y Label", ds, PlotOrientation.VERTICAL, true, true, true);
+        chart = ChartFactory.createXYLineChart("Title", "X Label", "Y Label", new DefaultXYDataset(), PlotOrientation.VERTICAL, true, true, true);
+        chart.setPadding(new RectangleInsets(20, 20, 20, 20));
+        chart.setTitle(convertTitle("Title"));
+        XYPlot plot = chart.getXYPlot();
+        plot.getDomainAxis().setLabelFont(new Font("comicsans", Font.LAYOUT_LEFT_TO_RIGHT, 15));
+        plot.getRangeAxis().setLabelFont(new Font("comicsans", Font.LAYOUT_LEFT_TO_RIGHT, 15));
+        plot.getRangeAxis().setLabelAngle(Math.PI/2);
         initComponents();
         jPanel1.setVisible(false);
         setName(Bundle.CTL_EditorTopComponent());
@@ -89,6 +99,11 @@ public final class EditorTopComponent extends TopComponent {
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
 
+    }
+    
+    private TextTitle convertTitle(String s)
+    {
+        return new TextTitle(s, new Font("comicsans", Font.BOLD, 20));
     }
 
     /**
@@ -162,10 +177,8 @@ public final class EditorTopComponent extends TopComponent {
             jPanel1.setVisible(false);
             return;
         }
-        DefaultXYDataset ds = new DefaultXYDataset();
-        String title = null;
-        String xAxis = null;
-        String yAxis = null;
+        
+        LinkedList<ChartWrapper> chartList = new LinkedList<ChartWrapper>();
         for (IEntityWrapper ew: entities)
         {
             if (ew.getType().isAssignableFrom(Epoch.class))
@@ -178,41 +191,61 @@ public final class EditorTopComponent extends TopComponent {
                     {
                         continue;
                     }
-                    title ="Responses for " + epoch.getProtocolID(); 
-                    addXYDataset(ds, entity, name);
-                    xAxis = entity.xUnits();
-                    yAxis = entity.yUnits();
+                    ChartWrapper current = null;
+                    for (ChartWrapper chart : chartList)
+                    {
+                        if (entity.xUnits().equals(chart.getXAxis()) && entity.yUnits().equals(chart.getYAxis())) {
+                            current = chart;
+                            current.setTitle("Responses for " + epoch.getProtocolID());
+                            break;
+                        }
+                    }
+                    if (current == null)
+                    {
+                        current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
+                        current.setTitle(ew.getDisplayName());
+                        chartList.add(current);
+                    }
+                    
+                    addXYDataset(current.getDataset(), entity, name);
                 }
                 
             }
             else if (ew.getType().isAssignableFrom(Response.class)) {
-                title = ew.getDisplayName();
                 ResponseWrapper entity = ResponseWrapper.createIfPlottable(ew);
                 if (entity != null) {
-                    addXYDataset(ds, entity, ew.getDisplayName());
-                    xAxis = entity.xUnits();
-                    yAxis = entity.yUnits();
+                    ChartWrapper current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
+                    current.setTitle(ew.getDisplayName());
+                    chartList.add(current);
+                    addXYDataset(current.getDataset(), entity, ew.getDisplayName());
                 }
             }
         }
-        runOnEDT(updateChartRunnable(ds, title, xAxis, yAxis));
+        runOnEDT(updateChartRunnable(chartList));
        
     }
     
-    private Runnable updateChartRunnable(final DefaultXYDataset ds, final String title, final String xAxis, final String yAxis)
+    private Runnable updateChartRunnable(final List<ChartWrapper> charts)
     {
+        
         return new Runnable(){
 
             @Override
             public void run() {
-                if (title == null) {
+                if (charts.size() == 0) {
                     jPanel1.setVisible(false);
                     return;
                 }
-                chart.setTitle(title);
-                chart.getXYPlot().setDataset(ds);
-                chart.getXYPlot().setDomainAxis(new NumberAxis(xAxis));
-                chart.getXYPlot().setRangeAxis(new NumberAxis(yAxis));
+                
+                ChartWrapper c = charts.get(0);
+                chart.setTitle(convertTitle(c.getTitle()));
+                XYPlot plot = chart.getXYPlot();
+                plot.setDataset(c.getDataset());
+                plot.setDomainAxis(new NumberAxis(c.getXAxis()));
+                plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
+                plot.setRangeAxis(new NumberAxis(c.getYAxis()));
+                plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.CENTER_BASELINE, 15));
+                plot.getRangeAxis().setLabelAngle(Math.PI/2);
                 chart.fireChartChanged();
                 jPanel1.setVisible(true);
             }
@@ -249,7 +282,7 @@ public final class EditorTopComponent extends TopComponent {
                 double[][] data = new double[2][(int) size];
                 for (int i = 0; i < (int) size; ++i) {
                     data[1][i] = floatingData[i];
-                    data[0][i] = i*samplingRate;
+                    data[0][i] = i/samplingRate;
                 }
                 ds.addSeries(name, data);
             }
@@ -259,7 +292,7 @@ public final class EditorTopComponent extends TopComponent {
                 double[][] data = new double[(int) size][2];
                 for (int i = 0; i < (int) size; ++i) {
                     data[1][i] = integerData[i];
-                    data[0][i] = i*samplingRate;
+                    data[0][i] = i/samplingRate;
                 }
                 ds.addSeries(name, data);
             }
@@ -269,7 +302,7 @@ public final class EditorTopComponent extends TopComponent {
                 double[][] data = new double[(int) size][2];
                 for (int i = 0; i < (int) size; ++i) {
                     data[1][i] = longData[i];
-                    data[0][i] = i*samplingRate;
+                    data[0][i] = i/samplingRate;
                 }
                 ds.addSeries(name, data);
             }
@@ -302,8 +335,8 @@ class ResponseWrapper
         ResponseWrapper rw = new ResponseWrapper();
         rw.data = r.getData();
         rw.samplingRate = r.getSamplingRates()[0];
-        rw.xunits = r.getUnits();
-        rw.yunits = r.getSamplingUnits()[0];
+        rw.yunits = r.getUnits();
+        rw.xunits = convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]);
         return rw;
     }
     static ResponseWrapper createIfPlottable(IEntityWrapper ew)
@@ -328,4 +361,34 @@ class ResponseWrapper
     {
         return yunits;
     }
+    
+    protected static String convertSamplingRateUnitsToGraphUnits(String samplingRateUnits){
+       if (samplingRateUnits.toLowerCase().contains("hz"))
+       {
+           String prefix = samplingRateUnits.substring(0, samplingRateUnits.toLowerCase().indexOf("hz"));
+           return "Time (in " + prefix + "Seconds)";
+       }
+       else return ("1 / " + samplingRateUnits);
+    }
 }
+
+class ChartWrapper
+{
+    DefaultXYDataset _ds;
+    String _xAxis;
+    String _yAxis;
+    String _title;
+    
+    ChartWrapper(DefaultXYDataset ds, String xAxis, String yAxis)
+    {
+        _ds = ds;
+        _xAxis = xAxis;
+        _yAxis = yAxis;
+    }
+    DefaultXYDataset getDataset(){ return _ds;}
+    String getXAxis() { return _xAxis;}
+    String getYAxis() { return _yAxis;}
+    void setTitle(String s) {_title = s;}
+    String getTitle() {return _title;}
+}
+ 

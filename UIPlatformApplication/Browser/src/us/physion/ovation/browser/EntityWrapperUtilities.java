@@ -169,7 +169,7 @@ public class EntityWrapperUtilities {
         }
 
         //otherwise, create an AbstractNode representing this object
-        AbstractNode n = new AbstractNode(c, Lookups.singleton(key));
+        EntityNode n = new EntityNode(c, Lookups.singleton(key));
         n.setDisplayName(key.getDisplayName());
         setIconForType(n, key.getType());
         if (uri != null) {//TODO: test this for nodes that don't have uris

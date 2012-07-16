@@ -9,7 +9,7 @@ import com.physion.ebuilder.expression.ExpressionTree;
 import java.awt.EventQueue;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import javax.swing.ActionMap;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.progress.ProgressHandle;
@@ -38,27 +38,31 @@ public class BrowserUtilities{
     protected static Map<String, Node> browserMap = new ConcurrentHashMap<String, Node>();
     protected static Map<ExplorerManager, Boolean> registeredViewManagers = new HashMap<ExplorerManager, Boolean>();
     protected static QueryListener ql;
+    protected static ExecutorService executorService = Executors.newFixedThreadPool(2);
+    
+    protected static ConnectionListener cn = new ConnectionListener(new Runnable(){
+
+            @Override
+            public void run() {
+                resetView();
+            }
+            
+        });
     
     public static Map<String, Node> getNodeMap()
     {
         return browserMap;
     }    
     
+    static void submit(Runnable runnable) {
+        executorService.submit(runnable);
+    }
+    
     protected static void initBrowser(final ExplorerManager em, 
                                    final boolean projectView)
     {
         registeredViewManagers.put(em, projectView);//TODO: don't need this. we should be able to look up the explorerManagers from TopComponents
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
-        ConnectionListener cn = new ConnectionListener(new Runnable(){
-
-            @Override
-            public void run() {
-                browserMap.clear();
-                em.setRootContext(new AbstractNode(new EntityChildren(null, projectView)));
-            }
-            
-        });
-        
         cp.addConnectionListener(cn);
         
         if (ql == null)
@@ -77,21 +81,14 @@ public class BrowserUtilities{
                 etp.addQueryListener(ql);
             }
         }
-
-        em.setRootContext(new AbstractNode(new EntityChildren(null, projectView)));
+        em.setRootContext(new AbstractNode(new EntityChildren(null, projectView, null)));
     }
     
     protected static void resetView()
     {
-        /*for (BrowserTopComponent btc : Lookup.getDefault().lookupAll(BrowserTopComponent.class)){
-            btc.getExplorerManager().setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, true), false)));
-        }
-        for (SourceBrowserTopComponent btc : Lookup.getDefault().lookupAll(SourceBrowserTopComponent.class)){
-            btc.getExplorerManager().setRootContext(new AbstractNode(Children.create(new EntityChildFactory(null, f), false)));
-        }*/
         browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-            mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr))));
+            mgr.setRootContext(new AbstractNode(new EntityChildren(null, registeredViewManagers.get(mgr), null)));
         }
     }
     
@@ -111,6 +108,17 @@ public class BrowserUtilities{
         Iterator itr = dsc.getContext().query(result);
         
         EntityWrapperUtilities.createNodesFromQuery(mgrs, itr);
+    }
+
+    public static void runOnEDT(Runnable r)
+    {
+        if (EventQueue.isDispatchThread())
+        {
+            r.run();
+        }
+        else{
+            SwingUtilities.invokeLater(r);
+        }
     }
     
 }

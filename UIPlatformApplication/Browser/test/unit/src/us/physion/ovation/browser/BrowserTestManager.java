@@ -11,7 +11,7 @@ import ovation.test.TestManager;
  *
  * @author huecotanks
  */
-public class BrowserTestManager extends TestManager{
+public class BrowserTestManager extends TestManager {
 
     @Override
     public String getLicenseText() {
@@ -30,11 +30,11 @@ public class BrowserTestManager extends TestManager{
 
     @Override
     public String getConnectionFile() {
-        String path = 
-                System.getProperty("user.home") + File.separator + 
-                "data" + File.separator + 
-                "browser" + File.separator + 
-                "browser-test.connection";
+        String path =
+                System.getProperty("user.home") + File.separator
+                + "data" + File.separator
+                + "browser" + File.separator
+                + "browser-test.connection";
         return path;
     }
 
@@ -47,5 +47,4 @@ public class BrowserTestManager extends TestManager{
     public String getFirstUserPassword() {
         return "password";
     }
-    
 }

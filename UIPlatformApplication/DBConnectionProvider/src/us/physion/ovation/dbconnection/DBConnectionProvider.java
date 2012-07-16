@@ -4,12 +4,17 @@
  */
 package us.physion.ovation.dbconnection;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
@@ -22,97 +27,114 @@ import ovation.IAuthenticatedDataStoreCoordinator;
 import us.physion.ovation.interfaces.ConnectionListener;
 import us.physion.ovation.interfaces.ConnectionProvider;
 
-@ServiceProvider(service=ConnectionProvider.class)
+@ServiceProvider(service = ConnectionProvider.class)
 /**
  *
  * @author huecotanks
  */
-public class DBConnectionProvider implements ConnectionProvider{
+public class DBConnectionProvider implements ConnectionProvider {
 
-    private IAuthenticatedDataStoreCoordinator dsc;
-    private ArrayList<ConnectionListener> connectionListeners;
-    
-    public DBConnectionProvider(){
-        
-        connectionListeners = new ArrayList<ConnectionListener>();
-    };
+    private IAuthenticatedDataStoreCoordinator dsc = null;
+    private Set<ConnectionListener> connectionListeners;
+    private boolean waitingForDSC = false;
+
+    public DBConnectionProvider() {
+
+        connectionListeners = Collections.synchronizedSet(new HashSet());
+    }
+
+    ;
 
     @Override
-    public synchronized IAuthenticatedDataStoreCoordinator getConnection() {
-        if (dsc != null)
-        {
-            return dsc;
+    public IAuthenticatedDataStoreCoordinator getConnection() {
+
+        synchronized (this) {
+            if (waitingForDSC || dsc != null) {
+                return dsc;
+            }
+            setWaitingFlag(true);
         }
+
         final ConnectionListener[] listeners = connectionListeners.toArray(new ConnectionListener[0]);
-        
+
         Runnable r = new Runnable() {
 
             public void run() {
-                /*if (DBConnectionProvider.this.dsc != null) {
-                    return;
-                }*/
+
+                /*
+                 * try {
+                 * UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                 * /* for (javax.swing.UIManager.LookAndFeelInfo info :
+                 * javax.swing.UIManager.getInstalledLookAndFeels()) { if
+                 * ("Nimbus".equals(info.getName())) {
+                 * javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                 * break; } }
+                 */
+
+                /*
+                 * } catch (ClassNotFoundException ex) {
+                 * java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE,
+                 * null, ex); } catch (InstantiationException ex) {
+                 * java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE,
+                 * null, ex); } catch (IllegalAccessException ex) {
+                 * java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE,
+                 * null, ex); } catch
+                 * (javax.swing.UnsupportedLookAndFeelException ex) {
+                 * java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE,
+                 * null, ex);
+                }
+                 */
 
                 try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                    /*
-                     * for (javax.swing.UIManager.LookAndFeelInfo info :
-                     * javax.swing.UIManager.getInstalledLookAndFeels()) { if
-                     * ("Nimbus".equals(info.getName())) {
-                     * javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                     * break; }
-                }
-                     */
+                    DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
 
-                } catch (ClassNotFoundException ex) {
-                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-                } catch (InstantiationException ex) {
-                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-                } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-                    java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-                }
-                DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
-                
-                dialog.setLocationRelativeTo(null);
-                dialog.pack();
-                dialog.setVisible(true);
+                    dialog.setLocationRelativeTo(null);
+                    dialog.pack();
+                    dialog.setVisible(true);
 
-                if (!dialog.isCancelled()) {
-                    DBConnectionProvider.this.dsc = dialog.getDataStoreCoordinator();
+                    if (!dialog.isCancelled()) {
+                        setDsc(dialog.getDataStoreCoordinator());
+                        setWaitingFlag(false);
 
-                    for (PropertyChangeListener l : listeners) {
-                        dialog.addPropertyChangeListener(l);
+                        for (PropertyChangeListener l : listeners) {
+                            dialog.addPropertyChangeListener(l);
+                        }
+                        dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
                     }
-                    dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
+                } finally {
+                    setWaitingFlag(false);
                 }
             }
         };
-        r.run(); //TODO: Clean up. Looks like we don't need to create a runnable
-        
-        //new Thread (r).start ();
-        /*try {
-            if (SwingUtilities.isEventDispatchThread()) {
-                r.run();
-            } else {
-                SwingUtilities.invokeAndWait(r);
-            }
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (InvocationTargetException ex) {
-            Exceptions.printStackTrace(ex);
-        }*/
+
+        runOnEDT(r);
+
         return dsc;
     }
 
+    private synchronized void setDsc(IAuthenticatedDataStoreCoordinator the_dsc) {
+        dsc = the_dsc;
+    }
+
+    private synchronized void setWaitingFlag(boolean b) {
+        waitingForDSC = b;
+    }
+
     @Override
-    public synchronized void addConnectionListener(ConnectionListener cl) {
+    public void addConnectionListener(ConnectionListener cl) {
         connectionListeners.add(cl);
     }
 
     @Override
-    public synchronized void removeConnectionListener(ConnectionListener cl) {
+    public void removeConnectionListener(ConnectionListener cl) {
         connectionListeners.remove(cl);
     }
 
+    public static void runOnEDT(Runnable r) {
+        if (EventQueue.isDispatchThread()) {
+            r.run();
+        } else {
+            SwingUtilities.invokeLater(r);
+        }
+    }
 }

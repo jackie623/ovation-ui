@@ -180,18 +180,18 @@ public class EntityWrapperUtilities {
 
     protected static void setIconForType(AbstractNode n, Class entityClass) {
         if (entityClass.isAssignableFrom(Source.class)) {
-            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/source-icon-2.png");
+            n.setIconBaseWithExtension("us/physion/ovation/browser/source-icon-2.png");
 
         } else if (entityClass.isAssignableFrom(Project.class)) {
-            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/project-icon-2.png");
+            n.setIconBaseWithExtension("us/physion/ovation/browser/project-icon-2.png");
         } else if (entityClass.isAssignableFrom(Experiment.class)) {
-            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/experiments_badge.png");
+            n.setIconBaseWithExtension("us/physion/ovation/browser/experiments_badge.png");
         } else if (entityClass.isAssignableFrom(EpochGroup.class)) {
-            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/experiment-icon-2.png");
+            n.setIconBaseWithExtension("us/physion/ovation/browser/experiment-icon-2.png");
         } else if (entityClass.isAssignableFrom(Epoch.class)) {
-            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/epoch-icon.png");
+            n.setIconBaseWithExtension("us/physion/ovation/browser/epoch-icon.png");
         } else if (entityClass.isAssignableFrom(AnalysisRecord.class)) {
-            n.setIconBaseWithExtension("us/physionconsulting/ovation/browser/analysis-record-icon.png");
+            n.setIconBaseWithExtension("us/physion/ovation/browser/analysis-record-icon.png");
         }
     }
 }

@@ -12,7 +12,9 @@ public class Installer extends ModuleInstall {
 
     private ConnectionProvider dbc;
     @Override
-    public void restored() {
-        dbc = new DBConnectionProvider();
+    public synchronized void restored() {
+        
+        if (dbc == null)
+            dbc = new DBConnectionProvider();
     }
 }

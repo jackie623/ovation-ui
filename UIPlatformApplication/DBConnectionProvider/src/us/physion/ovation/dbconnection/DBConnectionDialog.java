@@ -7,6 +7,7 @@ package us.physion.ovation.dbconnection;
 import java.awt.Color;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import org.openide.util.Exceptions;
 import ovation.*;
 
 /**
@@ -50,7 +51,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         prefs = prefProvider;
         connectionComboBoxModel = new DefaultComboBoxModel(prefs.getConnectionHistory().toArray(new String[0]));
         connectionFileComboBox.setModel(connectionComboBoxModel);
-        errorTextField.setVisible(false);
+        jScrollPane1.setVisible(false);
     }
 
     /**
@@ -61,15 +62,15 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     }
 
     private void showErrors(Exception e) {
-        errorTextField.setVisible(true);
+        jScrollPane1.setVisible(true);
         this.pack();
         if (e instanceof UserAuthenticationException) {
-            errorTextField.setText("**Error: Username and password combination was not found.");
+            errorTextArea.setText("**Error: Username and password combination was not found.");
         }
         else {
-            errorTextField.setText("**Error: " + e.getLocalizedMessage());
+            errorTextArea.setText("**Error: " + e.getLocalizedMessage());
         }
-        errorTextField.setForeground(Color.RED);
+        errorTextArea.setForeground(Color.RED);
     }
 
     /**
@@ -90,8 +91,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         passwordLabel = new javax.swing.JLabel();
         usernameTextField = new javax.swing.JTextField();
         passwordTextField = new javax.swing.JPasswordField();
-        errorTextField = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        errorTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setFocusCycleRoot(false);
@@ -160,15 +162,16 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        errorTextField.setEditable(false);
-        errorTextField.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.errorTextField.text")); // NOI18N
-
         jButton1.setText(org.openide.util.NbBundle.getMessage(DBConnectionDialog.class, "DBConnectionDialog.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
+
+        errorTextArea.setColumns(20);
+        errorTextArea.setRows(5);
+        jScrollPane1.setViewportView(errorTextArea);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -178,42 +181,47 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 .add(43, 43, 43)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
-                        .add(connectionFileLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(connectionFileLabel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 487, Short.MAX_VALUE)
                         .add(75, 75, 75))
                     .add(layout.createSequentialGroup()
-                        .add(connectionFileComboBox, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(chooseButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 34, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(18, 18, 18))))
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(layout.createSequentialGroup()
+                                .add(connectionFileComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 479, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(27, 27, 27)
+                                .add(chooseButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 34, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 470, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap())))
             .add(layout.createSequentialGroup()
                 .add(48, 48, 48)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
+                        .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .add(layout.createSequentialGroup()
+                        .add(0, 0, Short.MAX_VALUE)
                         .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 123, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 129, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(errorTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 457, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 129, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(44, 44, 44))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .add(connectionFileLabel)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(chooseButton)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, connectionFileComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(13, 13, 13)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(connectionFileComboBox, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(chooseButton))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(jPanel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(16, 16, 16)
-                .add(errorTextField)
-                .add(18, 18, 18)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 100, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(27, 27, 27))
+                    .add(connectButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 37, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         pack();
@@ -227,10 +235,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             //add to preferences
             String path = chooser.getSelectedFile().getAbsolutePath();
-            prefs.addConnectionFile(path);
             connectionComboBoxModel.insertElementAt(path, 0);
             //connectionFileComboBox.addItem(path);
-            //connectionFileComboBox.setSelectedItem(path);
+            connectionFileComboBox.setSelectedItem(path);
         }
 
 
@@ -244,12 +251,25 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         String username = usernameTextField.getText();
         String password = passwordTextField.getText();
         String connectionFile = connectionFileComboBox.getSelectedItem().toString();
+        prefs.addConnectionFile(connectionFile);
         DataContext c = null;
         try {
-            c = Ovation.connect(connectionFile, username, password);
+            c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
         } catch (Exception ex) {
             showErrors(ex);
             return;
+        }
+        boolean authenticated = false;
+        try {
+            authenticated = c.authenticateUser(username, password);
+        } catch (Exception ex) {
+            showErrors(ex);
+            return;
+        }
+        if (!authenticated)
+        {
+            showErrors(new UserAuthenticationException());
+            return;        
         }
         dsc = c.getAuthenticatedDataStoreCoordinator();
         cancelled = false;
@@ -309,9 +329,10 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     private javax.swing.JButton connectButton;
     private javax.swing.JComboBox connectionFileComboBox;
     private javax.swing.JLabel connectionFileLabel;
-    private javax.swing.JTextField errorTextField;
+    private javax.swing.JTextArea errorTextArea;
     private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel passwordLabel;
     private javax.swing.JPasswordField passwordTextField;
     private javax.swing.JLabel usernameLabel;

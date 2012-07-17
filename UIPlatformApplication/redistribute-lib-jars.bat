@@ -1,7 +1,8 @@
 set basedir=%~dp0
 
+IF exist %basedir%\build\cluster\modules\ext ( cp %basedir%\lib\ovation.jar %basedir%\build\cluster\modules\ext )
+
 cp %basedir%\lib\ovation.jar %basedir%\Browser\release\modules\ext
-cp %basedir%\lib\ovation.jar %basedir%\build\cluster\modules\ext
 cp %basedir%\lib\ovation.jar %basedir%\DBConnectionProvider\release\modules\ext
 cp %basedir%\lib\ovation.jar %basedir%\OvationAPI\release\modules\ext
 

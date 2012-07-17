@@ -5,7 +5,6 @@
 package us.physion.ovation.interfaces;
 
 import ovation.IEntityBase;
-
 /**
  *
  * @author huecotanks
@@ -19,5 +18,4 @@ public interface IEntityWrapper {
     Class getType();
 
     String getURI();
-    
 }

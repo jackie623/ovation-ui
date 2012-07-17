@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.jdesktop.layout/1">
+    <module_version install_time="1334085465201" last="true" origin="installer" specification_version="1.19.1">
+        <file crc="2204093842" name="config/Modules/org-jdesktop-layout.xml"/>
+        <file crc="3375517798" name="modules/ext/swing-layout-1.0.4.jar"/>
+        <file crc="3920853994" name="modules/locale/org-jdesktop-layout_ja.jar"/>
+        <file crc="87192845" name="modules/locale/org-jdesktop-layout_pt_BR.jar"/>
+        <file crc="3598306692" name="modules/locale/org-jdesktop-layout_ru.jar"/>
+        <file crc="1611946555" name="modules/locale/org-jdesktop-layout_zh_CN.jar"/>
+        <file crc="1061317106" name="modules/org-jdesktop-layout.jar"/>
+    </module_version>
+</module>

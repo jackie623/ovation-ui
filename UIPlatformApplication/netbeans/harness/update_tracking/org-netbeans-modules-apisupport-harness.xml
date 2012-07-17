@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module codename="org.netbeans.modules.apisupport.harness">
+    <module_version install_time="1334084816846" last="true" origin="installer" specification_version="1.28.1">
+        <file crc="2309339016" name="antlib/bindex-2.2.jar"/>
+        <file crc="623532342" name="antlib/jsearch-2.0_05.jar"/>
+        <file crc="2967796174" name="config/Modules/org-netbeans-modules-apisupport-harness.xml"/>
+        <file crc="278778530" name="jnlp/jnlp-launcher.jar"/>
+        <file crc="277119342" name="modules/locale/org-netbeans-modules-apisupport-harness_ja.jar"/>
+        <file crc="3897879684" name="modules/locale/org-netbeans-modules-apisupport-harness_pt_BR.jar"/>
+        <file crc="3509073153" name="modules/locale/org-netbeans-modules-apisupport-harness_ru.jar"/>
+        <file crc="3002965320" name="modules/locale/org-netbeans-modules-apisupport-harness_zh_CN.jar"/>
+        <file crc="1513620153" name="modules/org-netbeans-modules-apisupport-harness.jar"/>
+        <file crc="1637518917" name="tasks.jar"/>
+    </module_version>
+</module>

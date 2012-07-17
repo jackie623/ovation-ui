@@ -1,10 +1,8 @@
 function force_copy {
-    echo "calling force copy"
     if [ -f $2 ] && [ $1 != $2 ]; then
 	echo "Removing file"
 	rm -f $2
     fi
-    cp $1 $2
 }
 
 if [ -d `dirname $0`/build/cluster/modules/ext ]; then

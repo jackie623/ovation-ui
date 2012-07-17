@@ -16,7 +16,8 @@
 
     <property name="netbeans.updatecenter.url"
           value="http://updates.netbeans.org/netbeans/updates/7.0/uc/final/distribution/catalog.xml.gz"/>
-
+    <property name="netbeans" value="netbeans"/>
+    
     <target name="download-netbeans-rcp">
         <mkdir dir="${netbeans}/harness"/>
         <get src="${bootstrap.url}" dest="${netbeans}/harness/tasks.jar" usetimestamp="true" verbose="true"/>

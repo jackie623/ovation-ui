@@ -1,11 +1,21 @@
+function force_copy {
+    echo "calling force copy"
+    if [ -f $2 ] && [ $1 != $2 ]; then
+	echo "Removing file"
+	rm -f $2
+    fi
+    cp $1 $2
+}
+
 if [ -d `dirname $0`/build/cluster/modules/ext ]; then
-    cp `dirname $0`/lib/ovation.jar `dirname $0`/build/cluster/modules/ext
+    force_copy `dirname $0`/lib/ovation.jar `dirname $0`/build/cluster/modules/ext/ovation.jar
 fi
 
-cp `dirname $0`/lib/ovation.jar `dirname $0`/Browser/release/modules/ext
-cp `dirname $0`/lib/ovation.jar `dirname $0`/DBConnectionProvider/release/modules/ext
-cp `dirname $0`/lib/ovation.jar `dirname $0`/OvationAPI/release/modules/ext
+force_copy `dirname $0`/lib/ovation.jar `dirname $0`/Browser/release/modules/ext/ovation.jar
+force_copy `dirname $0`/lib/ovation.jar `dirname $0`/DBConnectionProvider/release/modules/ext/ovation.jar
+force_copy `dirname $0`/lib/ovation.jar `dirname $0`/OvationAPI/release/modules/ext/ovation.jar
 
-cp `dirname $0`/lib/test-manager.jar `dirname $0`/TestManager/release/modules/ext
+force_copy `dirname $0`/lib/test-manager.jar `dirname $0`/TestManager/release/modules/ext/test-manager.jar
 
-cp `dirname $0`/lib/interfaces.jar `dirname $0`/GlobalInterfaceLibrary/release/modules/ext/
+force_copy `dirname $0`/lib/interfaces.jar `dirname $0`/GlobalInterfaceLibrary/release/modules/ext/interfaces.jar
+

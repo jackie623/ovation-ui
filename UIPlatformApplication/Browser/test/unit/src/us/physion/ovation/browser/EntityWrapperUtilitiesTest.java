@@ -44,13 +44,15 @@ public class EntityWrapperUtilitiesTest {
         File f = new File(tm.getConnectionFile());
         if (!f.exists()) {
             DatabaseManager db = new DatabaseManager();
-            db.createLocalDatabase(tm.getConnectionFile(), "127.0.0.1");
+            db.createLocalDatabase(tm.getConnectionFile(), "127.0.0.1", 1602);
         }
 
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+        DatabaseManager db = new DatabaseManager();
+        db.deleteLocalDatabase(tm.getConnectionFile());
     }
 
     @Before

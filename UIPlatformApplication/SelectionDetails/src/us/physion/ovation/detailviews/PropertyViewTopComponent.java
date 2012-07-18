@@ -5,14 +5,21 @@
 package us.physion.ovation.detailviews;
 
 import java.beans.IntrospectionException;
+import java.util.LinkedList;
+import java.util.List;
+import javax.swing.AbstractListModel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.nodes.BeanNode;
 import org.openide.util.Exceptions;
+import org.openide.util.LookupEvent;
+import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import ovation.Resource;
 
 /**
  * Top component which displays something.
@@ -36,6 +43,7 @@ preferredID = "PropertyViewTopComponent")
 })
 public final class PropertyViewTopComponent extends TopComponent {
 
+    
     public PropertyViewTopComponent() {
         initComponents();
         setName(Bundle.CTL_PropertyViewTopComponent());
@@ -114,4 +122,49 @@ public final class PropertyViewTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
+    
+    private class ResourceListModel extends AbstractListModel
+    {
+        List<ResourceWrapper> resources = new LinkedList<ResourceWrapper>();
+
+        @Override
+        public int getSize() {
+            return resources.size();
+        }
+
+        @Override
+        public Object getElementAt(int i) {
+            if (i < resources.size())
+                return resources.get(i);
+            return null;
+        }
+        
+        protected void setTags(List<ResourceWrapper> newTags)
+        {
+            int length = Math.max(resources.size(), newTags.size());
+            resources = newTags;
+            this.fireContentsChanged(this, 0, length);
+        }
+        
+        protected void addTag(ResourceWrapper tag)
+        {
+            resources.add(tag);
+            this.fireContentsChanged(this, resources.size(), resources.size());
+        }
+    };
+    
+    protected class ResourceWrapper
+    {
+        String uri;
+        String name;
+        public ResourceWrapper(Resource r)
+        {
+            uri = r.getURIString();
+            name = r.getName();
+        }
+        public String toString(){
+            return name;
+        }
+        
+    };
 }

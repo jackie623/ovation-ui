@@ -133,23 +133,23 @@ public final class ResourceViewTopComponent extends TopComponent {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1)
                         .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34))))
+                        .addGap(20, 20, 20))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 587, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addGap(22, 22, 22))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -177,23 +177,20 @@ public final class ResourceViewTopComponent extends TopComponent {
         //Delete selected resources
         for (Object o :jList1.getSelectedValues())
         {
-            if (o instanceof ResourceWrapper)
-            {
-                Resource r = ((ResourceWrapper)o).getEntity();
-                if (r.canWrite())
-                {
-                    for (IEntityWrapper e : entities)
-                    {
-                        IEntityBase eb = e.getEntity();
-                        for (String name : eb.getResourceNames()) {
-                            if (name.equals(r.getName())) {
+            if (o instanceof ResourceWrapper) {
+                String rName = ((ResourceWrapper) o).getName();
+                for (IEntityWrapper e : entities) {
+                    IEntityBase eb = e.getEntity();
+                    for (String name : eb.getResourceNames()) {
+                        if (name.equals(rName)) {
+                            Resource r = eb.getResource(name);
+                            if (r.canWrite()) {
                                 eb.removeResource(r);
-                                updateResources();
-                                break;
                             }
                         }
                     }
                 }
+                updateResources();
             }
         }
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -268,6 +265,11 @@ public final class ResourceViewTopComponent extends TopComponent {
         public String toString(){
             return name;
         }
+        public String getName()
+        {
+            return name;
+        }
+        
         
         public Resource getEntity()
         {

@@ -82,6 +82,7 @@ public class BrowserUtilities{
             }
         }
         em.setRootContext(new EntityNode(new EntityChildren(null, projectView, null)));
+        resetView(em, projectView);
     }
     
     protected static void resetView()
@@ -90,6 +91,11 @@ public class BrowserUtilities{
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
             mgr.setRootContext(new EntityNode(new EntityChildren(null, registeredViewManagers.get(mgr), null)));
         }
+    }
+
+    protected static void resetView(ExplorerManager e, boolean projectView)
+    {
+        e.setRootContext(new EntityNode(new EntityChildren(null, projectView, null)));
     }
     
     protected static void setTrees(final ExpressionTree result)

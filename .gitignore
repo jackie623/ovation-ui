@@ -1,4 +1,4 @@
-/UIPlatformApplication/OvationAPI/nbproject/private/
+*/nbproject/private/
 
 *.class
 /UIPlatformApplication/QueryTools/build/*
@@ -12,3 +12,4 @@
 /UIPlatformApplication/SelectionDetails/nbproject/private/
 /UIPlatformApplication/Browser/build/
 /UIPlatformApplication/Editor/build/
+/UIPlatformApplication/TestManager/build/

@@ -13,3 +13,6 @@
 /UIPlatformApplication/Browser/build/
 /UIPlatformApplication/Editor/build/
 /UIPlatformApplication/TestManager/build/
+/UIPlatformApplication/DBConnectionProvider/nbproject/private/
+/UIPlatformApplication/Beans Binding/build/
+UIPlatformApplication/nbproject/private/platform-private.properties

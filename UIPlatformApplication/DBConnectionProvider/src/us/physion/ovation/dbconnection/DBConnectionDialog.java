@@ -38,6 +38,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
 
+        // Set up default and cancel buttons
         this.getRootPane().setDefaultButton(connectButton);
         getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "CANCEL");
         getRootPane().getActionMap().put("CANCEL", new AbstractAction() {

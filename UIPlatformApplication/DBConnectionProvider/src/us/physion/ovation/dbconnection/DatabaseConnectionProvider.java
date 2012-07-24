@@ -32,13 +32,13 @@ import us.physion.ovation.interfaces.ConnectionProvider;
  *
  * @author huecotanks
  */
-public class DBConnectionProvider implements ConnectionProvider {
+public class DatabaseConnectionProvider implements ConnectionProvider {
 
     private IAuthenticatedDataStoreCoordinator dsc = null;
     private Set<ConnectionListener> connectionListeners;
     private boolean waitingForDSC = false;
 
-    public DBConnectionProvider() {
+    public DatabaseConnectionProvider() {
 
         connectionListeners = Collections.synchronizedSet(new HashSet());
     }

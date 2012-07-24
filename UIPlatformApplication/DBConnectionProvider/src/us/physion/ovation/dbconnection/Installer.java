@@ -15,6 +15,6 @@ public class Installer extends ModuleInstall {
     public synchronized void restored() {
         
         if (dbc == null)
-            dbc = new DBConnectionProvider();
+            dbc = new DatabaseConnectionProvider();
     }
 }

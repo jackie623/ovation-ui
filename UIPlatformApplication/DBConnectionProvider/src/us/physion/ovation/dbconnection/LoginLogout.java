@@ -33,13 +33,13 @@ public final class LoginLogout extends AbstractAction implements ActionListener{
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         if (cp == null)
         {
-            cp = new DBConnectionProvider();
+            cp = new DatabaseConnectionProvider();
         }
         cp.getConnection();
     }
 
     /*public Component getToolbarPresenter() {
-        new DBConnectionProvider();
+        new DatabaseConnectionProvider();
         return new JPanel();
     }*/
 }

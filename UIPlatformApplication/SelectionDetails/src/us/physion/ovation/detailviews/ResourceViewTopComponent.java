@@ -42,7 +42,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "ResourceViewTopComponent")
 @Messages({
     "CTL_ResourceViewAction=ResourceView",
-    "CTL_ResourceViewTopComponent=Resource View",
+    "CTL_ResourceViewTopComponent=Resources",
     "HINT_ResourceViewTopComponent=This window displays the Resource objects associated with the selected Ovation entity"
 })
 public final class ResourceViewTopComponent extends TopComponent {

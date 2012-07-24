@@ -43,8 +43,8 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "TagsViewTopComponent")
 @Messages({
     "CTL_TagsViewAction=TagsView",
-    "CTL_TagsViewTopComponent=TagsView Window",
-    "HINT_TagsViewTopComponent=This is a TagsView window"
+    "CTL_TagsViewTopComponent=Keyword Tags",
+    "HINT_TagsViewTopComponent=This is a Keyword Tags window"
 })
 public final class TagsViewTopComponent extends TopComponent {
     

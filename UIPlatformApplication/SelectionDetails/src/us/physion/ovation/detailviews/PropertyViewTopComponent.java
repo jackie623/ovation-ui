@@ -38,7 +38,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "PropertyViewTopComponent")
 @Messages({
     "CTL_PropertyViewAction=PropertyView",
-    "CTL_PropertyViewTopComponent=PropertyView Window",
+    "CTL_PropertyViewTopComponent=Properties",
     "HINT_PropertyViewTopComponent=This is a PropertyView window"
 })
 public final class PropertyViewTopComponent extends TopComponent {

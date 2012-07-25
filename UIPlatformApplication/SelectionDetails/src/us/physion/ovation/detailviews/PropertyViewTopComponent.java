@@ -27,7 +27,7 @@ import ovation.Resource;
 @ConvertAsProperties(dtd = "-//us.physion.ovation.detailviews//PropertyView//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "PropertyViewTopComponent",
-//iconBase="SET/PATH/TO/ICON/HERE", 
+//iconBase="SET/PATH/TO/ICON/HERE",
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "properties", openAtStartup = true)
 @ActionID(category = "Window", id = "us.physion.ovation.detailviews.PropertyViewTopComponent")
@@ -43,7 +43,7 @@ preferredID = "PropertyViewTopComponent")
 })
 public final class PropertyViewTopComponent extends TopComponent {
 
-    
+
     public PropertyViewTopComponent() {
         initComponents();
         setName(Bundle.CTL_PropertyViewTopComponent());
@@ -52,7 +52,7 @@ public final class PropertyViewTopComponent extends TopComponent {
         PropertySheet ps = new PropertySheet();
             ps.putClientProperty("thing", "1");
             ps.putClientProperty("thing", "2");
-        
+
         jPanel1.add(ps);
         ps.show();
         System.out.println("PS is showing " + ps.isShowing());
@@ -73,11 +73,11 @@ public final class PropertyViewTopComponent extends TopComponent {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 323, Short.MAX_VALUE)
+            .addGap(0, 570, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 262, Short.MAX_VALUE)
+            .addGap(0, 472, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -85,16 +85,16 @@ public final class PropertyViewTopComponent extends TopComponent {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(128, 128, 128)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(131, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(104, 104, 104)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(118, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -122,7 +122,7 @@ public final class PropertyViewTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
-    
+
     private class ResourceListModel extends AbstractListModel
     {
         List<ResourceWrapper> resources = new LinkedList<ResourceWrapper>();
@@ -138,21 +138,21 @@ public final class PropertyViewTopComponent extends TopComponent {
                 return resources.get(i);
             return null;
         }
-        
+
         protected void setTags(List<ResourceWrapper> newTags)
         {
             int length = Math.max(resources.size(), newTags.size());
             resources = newTags;
             this.fireContentsChanged(this, 0, length);
         }
-        
+
         protected void addTag(ResourceWrapper tag)
         {
             resources.add(tag);
             this.fireContentsChanged(this, resources.size(), resources.size());
         }
     };
-    
+
     protected class ResourceWrapper
     {
         String uri;
@@ -165,6 +165,6 @@ public final class PropertyViewTopComponent extends TopComponent {
         public String toString(){
             return name;
         }
-        
+
     };
 }

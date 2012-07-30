@@ -8,6 +8,7 @@ import us.physion.ovation.browser.QueryChildren;
 import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.browser.EntityWrapperUtilities;
 import java.io.File;
+import java.net.InetAddress;
 import java.util.*;
 import org.apache.log4j.Level;
 import org.junit.*;
@@ -44,7 +45,22 @@ public class EntityWrapperUtilitiesTest {
         File f = new File(tm.getConnectionFile());
         if (!f.exists()) {
             DatabaseManager db = new DatabaseManager();
-            db.createLocalDatabase(tm.getConnectionFile(), "127.0.0.1", 1602);
+            String lockServer = System.getProperty("OVATION_LOCK_SERVER");
+            if(lockServer == null) {
+                lockServer = InetAddress.getLocalHost().getHostName();
+            }
+            
+            int nodeFdId = 0;
+            if (System.getProperty("NODE_FDID") != null) {
+                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID")) + 100;
+            }
+
+            int jobFdId = 0;
+            if (System.getProperty("JOB_FDID") != null) {
+                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID")) + 100;
+            }
+            
+            db.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
         }
 
     }

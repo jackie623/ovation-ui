@@ -37,7 +37,7 @@ import us.physion.ovation.interfaces.ConnectionListener;
 @ConvertAsProperties(dtd = "-//us.physion.ovation.browser//Browser//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "BrowserTopComponent",
-//iconBase="SET/PATH/TO/ICON/HERE", 
+//iconBase="SET/PATH/TO/ICON/HERE",
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
 @ActionID(category = "Window", id = "us.physion.ovation.browser.BrowserTopComponent")
@@ -59,12 +59,12 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         initComponents();
         setName(Bundle.CTL_BrowserTopComponent());
         setToolTipText(Bundle.HINT_BrowserTopComponent());
-        
+
         l = ExplorerUtils.createLookup(em, getActionMap());
         associateLookup(l);
         BrowserUtilities.initBrowser(em, true);
     }
-    
+
     @Override
     public Lookup getLookup()
     {
@@ -81,30 +81,17 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
 
         jSplitPane1 = new javax.swing.JSplitPane();
         treeViewPane = new BeanTreeView();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        resetQueryButton = new javax.swing.JButton();
+        insertItemButton = new javax.swing.JButton();
+        removeItemButton = new javax.swing.JButton();
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+        org.openide.awt.Mnemonics.setLocalizedText(resetQueryButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.resetQueryButton.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton2, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.jButton2.text")); // NOI18N
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
+        org.openide.awt.Mnemonics.setLocalizedText(insertItemButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.insertItemButton.text")); // NOI18N
+        insertItemButton.setBounds(new java.awt.Rectangle(-32762, -32087, 90, 90));
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton3, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.jButton3.text")); // NOI18N
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
+        org.openide.awt.Mnemonics.setLocalizedText(removeItemButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.removeItemButton.text")); // NOI18N
+        removeItemButton.setBounds(new java.awt.Rectangle(-32697, -32087, 90, 90));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -113,43 +100,31 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
             .addComponent(treeViewPane, javax.swing.GroupLayout.DEFAULT_SIZE, 605, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
+                .addComponent(insertItemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
+                .addComponent(removeItemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton3)
+                .addComponent(resetQueryButton)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(treeViewPane, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(treeViewPane, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
+                    .addComponent(insertItemButton)
+                    .addComponent(removeItemButton)
+                    .addComponent(resetQueryButton))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        ((BeanTreeView)treeViewPane).collapseNode(em.getRootContext());
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        ((BeanTreeView)treeViewPane).expandAll();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        BrowserUtilities.resetView();
-    }//GEN-LAST:event_jButton3ActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton insertItemButton;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JButton removeItemButton;
+    private javax.swing.JButton resetQueryButton;
     private javax.swing.JScrollPane treeViewPane;
     // End of variables declaration//GEN-END:variables
     @Override

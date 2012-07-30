@@ -32,7 +32,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 @ConvertAsProperties(dtd = "-//us.physion.ovation.detailviews//TagsView//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "TagsViewTopComponent",
-//iconBase="SET/PATH/TO/ICON/HERE", 
+//iconBase="SET/PATH/TO/ICON/HERE",
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "properties", openAtStartup = true)
 @ActionID(category = "Window", id = "us.physion.ovation.detailviews.TagsViewTopComponent")
@@ -43,11 +43,11 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "TagsViewTopComponent")
 @Messages({
     "CTL_TagsViewAction=TagsView",
-    "CTL_TagsViewTopComponent=Tags",
-    "HINT_TagsViewTopComponent=This window displays the tags for the selected entities"
+    "CTL_TagsViewTopComponent=Keyword Tags",
+    "HINT_TagsViewTopComponent=This is a Keyword Tags window"
 })
 public final class TagsViewTopComponent extends TopComponent {
-    
+
     private DefaultComboBoxModel tagComboModel = new DefaultComboBoxModel(new String[] {});
     Lookup.Result global;
     private Collection<? extends IEntityWrapper> entities;
@@ -56,7 +56,7 @@ public final class TagsViewTopComponent extends TopComponent {
 
         @Override
         public void resultChanged(LookupEvent le) {
-            
+
             //TODO: we should have some other Interface for things that can update the tags view
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
@@ -66,7 +66,7 @@ public final class TagsViewTopComponent extends TopComponent {
         }
 
     };
-    
+
     private class StringListModel extends AbstractListModel
     {
         List<String> tags = new LinkedList<String>();
@@ -82,14 +82,14 @@ public final class TagsViewTopComponent extends TopComponent {
                 return tags.get(i);
             return null;
         }
-        
+
         protected void setTags(List<String> newTags)
         {
             int length = Math.max(tags.size(), newTags.size());
             tags = newTags;
             this.fireContentsChanged(this, 0, length);
         }
-        
+
         protected void addTag(String tag)
         {
             tags.add(tag);
@@ -97,8 +97,8 @@ public final class TagsViewTopComponent extends TopComponent {
         }
     };
 
-    
-    
+
+
     protected void updateListModel()
     {
         entities = global.allInstances();
@@ -113,7 +113,7 @@ public final class TagsViewTopComponent extends TopComponent {
                 }
             }
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
-        cp.getConnection().getContext(); //getContext 
+        cp.getConnection().getContext(); //getContext
         List<String> tags = new LinkedList<String>();
         for (IEntityWrapper e: entities)
         {
@@ -142,9 +142,9 @@ public final class TagsViewTopComponent extends TopComponent {
                 }
             }
         }
-        
+
         listModel.setTags(tags);
-        
+
     }
     public TagsViewTopComponent() {
         initComponents();
@@ -185,32 +185,30 @@ public final class TagsViewTopComponent extends TopComponent {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 660, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 650, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(21, Short.MAX_VALUE))
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(addTagComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void addTagComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagComboBoxActionPerformed
-       
+
         System.out.println("Combo box action performed");
         if (evt.getActionCommand().equals("comboBoxEdited"))
         {
@@ -221,7 +219,7 @@ public final class TagsViewTopComponent extends TopComponent {
             String tag = addTagComboBox.getSelectedItem().toString();
             for (IEntityWrapper e : entities)
             {
-                
+
                 IEntityBase ie = e.getEntity();
                 if (ie instanceof ITaggableEntityBase)
                 {

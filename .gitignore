@@ -1,4 +1,7 @@
-/UIPlatformApplication/OvationAPI/nbproject/private/
+# OS X
+.DS_Store
+
+*/nbproject/private/
 
 *.class
 /UIPlatformApplication/QueryTools/build/*
@@ -11,3 +14,10 @@
 /UIPlatformApplication/SelectionDetails/build/
 /UIPlatformApplication/SelectionDetails/nbproject/private/
 /UIPlatformApplication/Browser/build/
+/UIPlatformApplication/Editor/build/
+/UIPlatformApplication/TestManager/build/
+/UIPlatformApplication/DBConnectionProvider/nbproject/private/
+/UIPlatformApplication/Beans Binding/build/
+UIPlatformApplication/nbproject/private/platform-private.properties
+/UIPlatformApplication/dist/
+/UIPlatformApplication/JFreeChart/build/

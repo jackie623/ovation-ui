@@ -31,7 +31,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 @ConvertAsProperties(dtd = "-//us.physion.ovation.detailviews//ResourceView//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "ResourceViewTopComponent",
-//iconBase="SET/PATH/TO/ICON/HERE", 
+//iconBase="SET/PATH/TO/ICON/HERE",
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "properties", openAtStartup = true)
 @ActionID(category = "Window", id = "us.physion.ovation.detailviews.ResourceViewTopComponent")
@@ -42,7 +42,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "ResourceViewTopComponent")
 @Messages({
     "CTL_ResourceViewAction=ResourceView",
-    "CTL_ResourceViewTopComponent=Resource View",
+    "CTL_ResourceViewTopComponent=Resources",
     "HINT_ResourceViewTopComponent=This window displays the Resource objects associated with the selected Ovation entity"
 })
 public final class ResourceViewTopComponent extends TopComponent {
@@ -51,7 +51,7 @@ public final class ResourceViewTopComponent extends TopComponent {
 
         @Override
         public void resultChanged(LookupEvent le) {
-            
+
             //TODO: we should have some other Interface for things that can update the tags view
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
@@ -64,7 +64,7 @@ public final class ResourceViewTopComponent extends TopComponent {
     protected Lookup.Result<IEntityWrapper> global;
     protected Collection<? extends IEntityWrapper> entities;
     protected ResourceListModel listModel;
-        
+
     public ResourceViewTopComponent() {
         initComponents();
         setName(Bundle.CTL_ResourceViewTopComponent());
@@ -72,14 +72,14 @@ public final class ResourceViewTopComponent extends TopComponent {
 
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
-        
+
     }
-    
+
     protected void updateResources()
     {
         entities = global.allInstances();
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
-        cp.getConnection().getContext(); //getContext 
+        cp.getConnection().getContext(); //getContext
         List<ResourceWrapper> resources = new LinkedList();
         for (IEntityWrapper e: entities)
         {
@@ -88,7 +88,7 @@ public final class ResourceViewTopComponent extends TopComponent {
                 resources.add(new ResourceWrapper(r));
             }
         }
-         
+
         listModel.setResources(resources);
     }
 
@@ -101,25 +101,25 @@ public final class ResourceViewTopComponent extends TopComponent {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        resourceList = new javax.swing.JList();
+        insertResourceButton = new javax.swing.JButton();
+        removeResourceButton = new javax.swing.JButton();
 
         listModel = new ResourceListModel();
-        jList1.setModel(listModel);
-        jScrollPane1.setViewportView(jList1);
+        resourceList.setModel(listModel);
+        jScrollPane1.setViewportView(resourceList);
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(ResourceViewTopComponent.class, "ResourceViewTopComponent.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(insertResourceButton, org.openide.util.NbBundle.getMessage(ResourceViewTopComponent.class, "ResourceViewTopComponent.insertResourceButton.text")); // NOI18N
+        insertResourceButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                insertResourceButtonActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton2, org.openide.util.NbBundle.getMessage(ResourceViewTopComponent.class, "ResourceViewTopComponent.jButton2.text")); // NOI18N
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(removeResourceButton, org.openide.util.NbBundle.getMessage(ResourceViewTopComponent.class, "ResourceViewTopComponent.removeResourceButton.text")); // NOI18N
+        removeResourceButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                removeResourceButtonActionPerformed(evt);
             }
         });
 
@@ -130,30 +130,28 @@ public final class ResourceViewTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1)
-                        .addContainerGap())
+                    .addComponent(jScrollPane1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(insertResourceButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(20, 20, 20))))
+                        .addComponent(removeResourceButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 587, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
-                .addGap(22, 22, 22))
+                    .addComponent(insertResourceButton)
+                    .addComponent(removeResourceButton))
+                .addGap(28, 28, 28))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void insertResourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_insertResourceButtonActionPerformed
         //addButton
         JFileChooser chooser = new JFileChooser();
         int returnVal = chooser.showOpenDialog(new JPanel());
@@ -171,11 +169,11 @@ public final class ResourceViewTopComponent extends TopComponent {
                 listModel.addResource(new ResourceWrapper(r));
             }
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_insertResourceButtonActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void removeResourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeResourceButtonActionPerformed
         //Delete selected resources
-        for (Object o :jList1.getSelectedValues())
+        for (Object o :resourceList.getSelectedValues())
         {
             if (o instanceof ResourceWrapper) {
                 String rName = ((ResourceWrapper) o).getName();
@@ -193,13 +191,13 @@ public final class ResourceViewTopComponent extends TopComponent {
                 updateResources();
             }
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_removeResourceButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JList jList1;
+    private javax.swing.JButton insertResourceButton;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton removeResourceButton;
+    private javax.swing.JList resourceList;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -238,21 +236,21 @@ public final class ResourceViewTopComponent extends TopComponent {
                 return resources.get(i);
             return null;
         }
-        
+
         protected void setResources(List<ResourceWrapper> newResources)
         {
             int length = Math.max(resources.size(), newResources.size());
             resources = newResources;
             this.fireContentsChanged(this, 0, length);
         }
-        
+
         protected void addResource(ResourceWrapper resource)
         {
             resources.add(resource);
             this.fireContentsChanged(this, resources.size(), resources.size());
         }
     };
-    
+
     protected class ResourceWrapper
     {
         String uri;
@@ -269,13 +267,13 @@ public final class ResourceViewTopComponent extends TopComponent {
         {
             return name;
         }
-        
-        
+
+
         public Resource getEntity()
         {
             IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
             DataContext c = dsc.getContext();
-            
+
             return (Resource)c.objectWithURI(uri);
         }
 

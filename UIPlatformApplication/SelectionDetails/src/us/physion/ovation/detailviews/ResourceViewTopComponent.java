@@ -81,22 +81,19 @@ public final class ResourceViewTopComponent extends TopComponent {
         resourceList.addMouseListener(new MouseAdapter() {
 
             public void mouseClicked(MouseEvent evt) {
-                System.out.println("mouse clicked");
                 JList list = (JList) evt.getSource();
                 int index = -1;
                 if (evt.getClickCount() == 2) {
                     index = list.locationToIndex(evt.getPoint());
-                    System.out.println("mouse double clicked");
                 } else if (evt.getClickCount() == 3) {   // Triple-click
                     index = list.locationToIndex(evt.getPoint());
-                    System.out.println("mouse triple clicked");
                 }
                 if (index >= 0)
                 {
                     ResourceWrapper rw = (ResourceWrapper) listModel.getElementAt(index);
                     Resource r = rw.getEntity();
-                    System.out.println("index >=0");
                     r.edit();
+                    System.out.println("Editing");
                 }
             }
         });
@@ -232,9 +229,15 @@ public final class ResourceViewTopComponent extends TopComponent {
     }//GEN-LAST:event_removeResourceButtonActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        for (Object r : resourceList.getSelectedValues())
+        for (Object rw : resourceList.getSelectedValues())
         {
-            ((ResourceWrapper)r).getEntity().sync();
+            Resource r = ((ResourceWrapper)rw).getEntity();
+            if (r.canWrite())
+            {
+                System.out.println("Syncing");
+                r.sync();
+                r.releaseLocalFile();
+            }
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 

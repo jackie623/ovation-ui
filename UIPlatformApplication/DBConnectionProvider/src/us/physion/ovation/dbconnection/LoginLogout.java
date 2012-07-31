@@ -34,8 +34,10 @@ public final class LoginLogout extends AbstractAction implements ActionListener{
         if (cp == null)
         {
             cp = new DatabaseConnectionProvider();
+            cp.getConnection();
+        }else {
+            cp.resetConnection();
         }
-        cp.getConnection();
     }
 
     /*public Component getToolbarPresenter() {

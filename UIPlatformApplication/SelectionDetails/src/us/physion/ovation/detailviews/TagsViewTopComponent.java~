@@ -1,4 +1,4 @@
-/**
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -43,8 +43,13 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "TagsViewTopComponent")
 @Messages({
     "CTL_TagsViewAction=TagsView",
+<<<<<<< HEAD
+    "CTL_TagsViewTopComponent=Tags",
+    "HINT_TagsViewTopComponent=This window displays the tags for the selected entities"
+=======
     "CTL_TagsViewTopComponent=Keyword Tags",
     "HINT_TagsViewTopComponent=This is a Keyword Tags window"
+>>>>>>> 5622a8acf8130720e139061377fafe5ffd7d5a22
 })
 public final class TagsViewTopComponent extends TopComponent {
 

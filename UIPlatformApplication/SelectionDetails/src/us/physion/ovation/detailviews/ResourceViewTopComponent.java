@@ -4,9 +4,14 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import javax.swing.AbstractListModel;
 import javax.swing.JFileChooser;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -72,7 +77,29 @@ public final class ResourceViewTopComponent extends TopComponent {
 
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
+        
+        resourceList.addMouseListener(new MouseAdapter() {
 
+            public void mouseClicked(MouseEvent evt) {
+                System.out.println("mouse clicked");
+                JList list = (JList) evt.getSource();
+                int index = -1;
+                if (evt.getClickCount() == 2) {
+                    index = list.locationToIndex(evt.getPoint());
+                    System.out.println("mouse double clicked");
+                } else if (evt.getClickCount() == 3) {   // Triple-click
+                    index = list.locationToIndex(evt.getPoint());
+                    System.out.println("mouse triple clicked");
+                }
+                if (index >= 0)
+                {
+                    ResourceWrapper rw = (ResourceWrapper) listModel.getElementAt(index);
+                    Resource r = rw.getEntity();
+                    System.out.println("index >=0");
+                    r.edit();
+                }
+            }
+        });
     }
 
     protected void updateResources()
@@ -104,6 +131,7 @@ public final class ResourceViewTopComponent extends TopComponent {
         resourceList = new javax.swing.JList();
         insertResourceButton = new javax.swing.JButton();
         removeResourceButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         listModel = new ResourceListModel();
         resourceList.setModel(listModel);
@@ -123,16 +151,25 @@ public final class ResourceViewTopComponent extends TopComponent {
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(ResourceViewTopComponent.class, "ResourceViewTopComponent.jButton1.text")); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(insertResourceButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(removeResourceButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -146,7 +183,8 @@ public final class ResourceViewTopComponent extends TopComponent {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(insertResourceButton)
-                    .addComponent(removeResourceButton))
+                    .addComponent(removeResourceButton)
+                    .addComponent(jButton1))
                 .addGap(28, 28, 28))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -193,8 +231,16 @@ public final class ResourceViewTopComponent extends TopComponent {
         }
     }//GEN-LAST:event_removeResourceButtonActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        for (Object r : resourceList.getSelectedValues())
+        {
+            ((ResourceWrapper)r).getEntity().sync();
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton insertResourceButton;
+    private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton removeResourceButton;
     private javax.swing.JList resourceList;

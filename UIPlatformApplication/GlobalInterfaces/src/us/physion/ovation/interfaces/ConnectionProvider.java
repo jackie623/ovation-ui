@@ -15,5 +15,5 @@ public interface ConnectionProvider {
     public IAuthenticatedDataStoreCoordinator getConnection();
     public void addConnectionListener(ConnectionListener cl);
     public void removeConnectionListener(ConnectionListener cl);
-    
+    public void resetConnection();
 }

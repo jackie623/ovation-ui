@@ -43,7 +43,11 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
         connectionListeners = Collections.synchronizedSet(new HashSet());
     }
 
-    ;
+    public synchronized void resetConnection()
+    {
+        dsc = null;
+        getConnection();
+    }
 
     @Override
     public IAuthenticatedDataStoreCoordinator getConnection() {

@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.FutureTask;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.ListSelectionEvent;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -132,6 +133,7 @@ public final class TagsViewTopComponent extends TopComponent {
         setToolTipText(Bundle.HINT_TagsViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
+        
     }
 
     /**

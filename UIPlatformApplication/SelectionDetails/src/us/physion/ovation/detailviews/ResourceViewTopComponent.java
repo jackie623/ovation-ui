@@ -58,6 +58,7 @@ public final class ResourceViewTopComponent extends TopComponent {
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
             {
+                //closeEditedResourceFiles();
                 updateResources();
             }
         }

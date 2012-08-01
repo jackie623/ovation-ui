@@ -91,11 +91,11 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(resetQueryButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(insertItemButton)
-                        .addComponent(removeItemButton)))
+                        .addComponent(removeItemButton))
+                    .addComponent(resetQueryButton))
                 .addGap(12, 12, 12))
         );
     }// </editor-fold>//GEN-END:initComponents

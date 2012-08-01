@@ -28,8 +28,6 @@ public class EntityWrapper implements IEntityWrapper {
         uri = e.getURIString();
         type = e.getClass();
         displayName = inferDisplayName(e);
-        
-        System.out.println("Done constructing entity wrapper (" + type.getName() + ")");
     }
     
     //used by the PerUserEntityWrapper object

@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.FutureTask;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.ListSelectionEvent;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -104,14 +105,10 @@ public final class TagsViewTopComponent extends TopComponent {
         entities = global.allInstances();
         if (entities.isEmpty())
             {
-                System.out.println("Nothing selected");
+                listModel.setTags(new LinkedList<String>());
+                return;
             }
-            else{
-                for (IEntityWrapper e : entities)
-                {
-                    System.out.println(e.getType().toString() + " is selected");
-                }
-            }
+         
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.getConnection().getContext(); //getContext
         List<String> tags = new LinkedList<String>();
@@ -123,22 +120,6 @@ public final class TagsViewTopComponent extends TopComponent {
                 for (KeywordTag t : ((ITaggableEntityBase)entity).getTagSet())
                 {
                     tags.add(t.getTag());
-                }
-                if (entity instanceof ovation.Experiment)
-                {
-                    tags.add("Experiment");
-                }
-                if (entity instanceof ovation.EpochGroup)
-                {
-                    tags.add("EpochGroup");
-                }
-                if (entity instanceof ovation.Project)
-                {
-                    tags.add("Project");
-                }
-                if (entity instanceof ovation.Epoch)
-                {
-                    tags.add("Epoch");
                 }
             }
         }
@@ -152,6 +133,7 @@ public final class TagsViewTopComponent extends TopComponent {
         setToolTipText(Bundle.HINT_TagsViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
+        
     }
 
     /**
@@ -209,10 +191,8 @@ public final class TagsViewTopComponent extends TopComponent {
 
     private void addTagComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagComboBoxActionPerformed
 
-        System.out.println("Combo box action performed");
         if (evt.getActionCommand().equals("comboBoxEdited"))
         {
-            System.out.println("Combo  box edited");
             //add tag
             ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
             cp.getConnection().getContext(); //getContext

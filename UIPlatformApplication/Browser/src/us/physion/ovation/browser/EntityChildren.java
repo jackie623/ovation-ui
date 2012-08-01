@@ -213,7 +213,6 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             }
             return list;
         } else if (entityClass.isAssignableFrom(Epoch.class)) {
-            System.out.println("Calculating Epoch children");
             context.beginTransaction();
             try {
                 Epoch entity = (Epoch) ew.getEntity();

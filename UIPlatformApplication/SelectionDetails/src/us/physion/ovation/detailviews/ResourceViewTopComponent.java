@@ -9,10 +9,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
-import javax.swing.AbstractListModel;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -61,6 +58,7 @@ public final class ResourceViewTopComponent extends TopComponent {
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
             {
+                //closeEditedResourceFiles();
                 updateResources();
             }
         }
@@ -69,9 +67,12 @@ public final class ResourceViewTopComponent extends TopComponent {
     protected Lookup.Result<IEntityWrapper> global;
     protected Collection<? extends IEntityWrapper> entities;
     protected ResourceListModel listModel;
+    protected Set<ResourceWrapper> editedSet = new HashSet();
 
     public ResourceViewTopComponent() {
         initComponents();
+        saveButton.setEnabled(false);
+        resourceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setName(Bundle.CTL_ResourceViewTopComponent());
         setToolTipText(Bundle.HINT_ResourceViewTopComponent());
 
@@ -81,30 +82,57 @@ public final class ResourceViewTopComponent extends TopComponent {
         resourceList.addMouseListener(new MouseAdapter() {
 
             public void mouseClicked(MouseEvent evt) {
-                System.out.println("mouse clicked");
                 JList list = (JList) evt.getSource();
                 int index = -1;
-                if (evt.getClickCount() == 2) {
+                if (evt.getClickCount() == 2 || evt.getClickCount() == 3) {
                     index = list.locationToIndex(evt.getPoint());
-                    System.out.println("mouse double clicked");
-                } else if (evt.getClickCount() == 3) {   // Triple-click
-                    index = list.locationToIndex(evt.getPoint());
-                    System.out.println("mouse triple clicked");
-                }
-                if (index >= 0)
-                {
                     ResourceWrapper rw = (ResourceWrapper) listModel.getElementAt(index);
-                    Resource r = rw.getEntity();
-                    System.out.println("index >=0");
-                    r.edit();
+                    if (!editedSet.contains(rw))
+                    {
+                        Resource r = rw.getEntity();
+                        r.edit();
+                        editedSet.add(rw);
+                        saveButton.setEnabled(true);
+                    }
                 }
             }
         });
+        
+        resourceList.addListSelectionListener(new ListSelectionListener(){
+
+            @Override
+            public void valueChanged(ListSelectionEvent lse) {
+                for (Object value: resourceList.getSelectedValues())
+                {
+                    if (editedSet.contains(value))
+                    {
+                       saveButton.setEnabled(true);
+                       return;
+                    }
+                }
+                saveButton.setEnabled(false);
+            }
+        });
+    }
+    
+    protected void closeEditedResourceFiles()
+    {
+        for (ResourceWrapper rw : editedSet)
+        {
+            rw.getEntity().releaseLocalFile();
+        }
+        editedSet = new HashSet();
+        saveButton.setEnabled(false);
     }
 
     protected void updateResources()
     {
         entities = global.allInstances();
+        updateResources(entities);
+    }
+    
+    protected void updateResources(Collection<? extends IEntityWrapper> entities)
+    {
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.getConnection().getContext(); //getContext
         List<ResourceWrapper> resources = new LinkedList();
@@ -115,9 +143,26 @@ public final class ResourceViewTopComponent extends TopComponent {
                 resources.add(new ResourceWrapper(r));
             }
         }
+        
+        LinkedList<ResourceWrapper> toRemove = new LinkedList();
+        for (ResourceWrapper rw : editedSet)
+        {
+            if (!resources.contains(rw))
+            {
+                toRemove.add(rw);
+            }
+        }
+        
+        //TODO: wrap in a transaction? run on another thread?
+        for (ResourceWrapper rw : toRemove)
+        {
+            editedSet.remove(rw);
+            rw.getEntity().releaseLocalFile();
+        }
 
         listModel.setResources(resources);
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -131,7 +176,7 @@ public final class ResourceViewTopComponent extends TopComponent {
         resourceList = new javax.swing.JList();
         insertResourceButton = new javax.swing.JButton();
         removeResourceButton = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        saveButton = new javax.swing.JButton();
 
         listModel = new ResourceListModel();
         resourceList.setModel(listModel);
@@ -151,10 +196,10 @@ public final class ResourceViewTopComponent extends TopComponent {
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(ResourceViewTopComponent.class, "ResourceViewTopComponent.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        org.openide.awt.Mnemonics.setLocalizedText(saveButton, org.openide.util.NbBundle.getMessage(ResourceViewTopComponent.class, "ResourceViewTopComponent.saveButton.text")); // NOI18N
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                saveButtonActionPerformed(evt);
             }
         });
 
@@ -168,7 +213,7 @@ public final class ResourceViewTopComponent extends TopComponent {
                         .addContainerGap()
                         .addComponent(jScrollPane1))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButton1)
+                        .addComponent(saveButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(insertResourceButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -184,7 +229,7 @@ public final class ResourceViewTopComponent extends TopComponent {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(insertResourceButton)
                     .addComponent(removeResourceButton)
-                    .addComponent(jButton1))
+                    .addComponent(saveButton))
                 .addGap(28, 28, 28))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -226,33 +271,39 @@ public final class ResourceViewTopComponent extends TopComponent {
                         }
                     }
                 }
-                updateResources();
             }
         }
+        updateResources(entities);// don't regrab entities from the current TopComponent
     }//GEN-LAST:event_removeResourceButtonActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        for (Object r : resourceList.getSelectedValues())
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        for (Object rw : resourceList.getSelectedValues())
         {
-            ((ResourceWrapper)r).getEntity().sync();
+            Resource r = ((ResourceWrapper)rw).getEntity();
+            if (r.canWrite())
+            {
+                r.sync();
+            }
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_saveButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton insertResourceButton;
-    private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton removeResourceButton;
     private javax.swing.JList resourceList;
+    private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
+        saveButton.setEnabled(false);
     }
 
     @Override
     public void componentClosed() {
         // TODO add custom code on component closing
+        closeEditedResourceFiles();
     }
 
     void writeProperties(java.util.Properties p) {
@@ -321,6 +372,11 @@ public final class ResourceViewTopComponent extends TopComponent {
             DataContext c = dsc.getContext();
 
             return (Resource)c.objectWithURI(uri);
+        }
+        
+        public String getURI()
+        {
+            return uri;
         }
 
     };

@@ -58,6 +58,7 @@ public final class ResourceViewTopComponent extends TopComponent {
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
             {
+                //closeEditedResourceFiles();
                 updateResources();
             }
         }
@@ -96,15 +97,32 @@ public final class ResourceViewTopComponent extends TopComponent {
                 }
             }
         });
+        
+        resourceList.addListSelectionListener(new ListSelectionListener(){
+
+            @Override
+            public void valueChanged(ListSelectionEvent lse) {
+                for (Object value: resourceList.getSelectedValues())
+                {
+                    if (editedSet.contains(value))
+                    {
+                       saveButton.setEnabled(true);
+                       return;
+                    }
+                }
+                saveButton.setEnabled(false);
+            }
+        });
     }
     
     protected void closeEditedResourceFiles()
     {
         for (ResourceWrapper rw : editedSet)
         {
-            rw.getEntity().releaseLocalFile();// TODO: release local file should close the file, if it can
+            rw.getEntity().releaseLocalFile();
         }
         editedSet = new HashSet();
+        saveButton.setEnabled(false);
     }
 
     protected void updateResources()
@@ -124,6 +142,22 @@ public final class ResourceViewTopComponent extends TopComponent {
             {
                 resources.add(new ResourceWrapper(r));
             }
+        }
+        
+        LinkedList<ResourceWrapper> toRemove = new LinkedList();
+        for (ResourceWrapper rw : editedSet)
+        {
+            if (!resources.contains(rw))
+            {
+                toRemove.add(rw);
+            }
+        }
+        
+        //TODO: wrap in a transaction? run on another thread?
+        for (ResourceWrapper rw : toRemove)
+        {
+            editedSet.remove(rw);
+            rw.getEntity().releaseLocalFile();
         }
 
         listModel.setResources(resources);
@@ -248,7 +282,6 @@ public final class ResourceViewTopComponent extends TopComponent {
             Resource r = ((ResourceWrapper)rw).getEntity();
             if (r.canWrite())
             {
-                System.out.println("Syncing");
                 r.sync();
             }
         }
@@ -339,6 +372,11 @@ public final class ResourceViewTopComponent extends TopComponent {
             DataContext c = dsc.getContext();
 
             return (Resource)c.objectWithURI(uri);
+        }
+        
+        public String getURI()
+        {
+            return uri;
         }
 
     };

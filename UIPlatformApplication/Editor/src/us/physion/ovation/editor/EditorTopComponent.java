@@ -4,15 +4,20 @@
  */
 package us.physion.ovation.editor;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -68,6 +73,7 @@ public final class EditorTopComponent extends TopComponent {
     
     Lookup.Result global;
     List<ChartPanel> chartPanels = new ArrayList<ChartPanel>();
+    ChartTableModel chartModel = new ChartTableModel(chartPanels);
 
     private LookupListener listener = new LookupListener() {
 
@@ -88,6 +94,7 @@ public final class EditorTopComponent extends TopComponent {
         setToolTipText(Bundle.HINT_EditorTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
+        jTable1.setDefaultRenderer(ChartPanel.class, new ChartCellRenderer());
 
     }
     
@@ -105,36 +112,32 @@ public final class EditorTopComponent extends TopComponent {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+
+        jTable1.setModel(chartModel);
+        jScrollPane1.setViewportView(jTable1);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 510, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(48, 48, 48)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -142,11 +145,13 @@ public final class EditorTopComponent extends TopComponent {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
+        jPanel1.setVisible(false);
     }
 
     @Override
@@ -199,7 +204,8 @@ public final class EditorTopComponent extends TopComponent {
                     if (current == null)
                     {
                         current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
-                        current.setTitle(ew.getDisplayName());
+                        System.out.println("Created new ChartWrapper with name " + ew.getDisplayName());
+                       current.setTitle(ew.getDisplayName());
                         chartList.add(current);
                     }
                     
@@ -218,12 +224,11 @@ public final class EditorTopComponent extends TopComponent {
             }
         }
         runOnEDT(updateChartRunnable(chartList));
-       
     }
     
     private Runnable updateChartRunnable(final List<ChartWrapper> charts)
     {
-        
+        final int height = this.getHeight();
         return new Runnable(){
 
             @Override
@@ -233,35 +238,45 @@ public final class EditorTopComponent extends TopComponent {
                     return;
                 }
                 
+                int initialSize = chartPanels.size();
                 
-                int count = 0;
-                for (ChartWrapper c : charts)
-                {
+                System.out.println("Chart panels sizeA: " + chartPanels.size());
+                
+                if (initialSize > 0) {
+//                    chartPanels.removeAll(chartPanels.subList(0, chartPanels.size()));
+                    while (!chartPanels.isEmpty()) {
+                        chartPanels.remove(0);
+                    }
+                    System.out.println("Chart panels sizeB: " + chartPanels.size());
+                    System.out.println("Deleting rows: 0 - " + (initialSize - 1));
+                    chartModel.fireTableRowsDeleted(0, initialSize - 1);
+                }
+                
+                System.out.println("Chart panels sizeC: " + chartPanels.size());
+                
+                for (ChartWrapper c : charts) {
                     JFreeChart chart;
-                    if (count < chartPanels.size())
-                    {
-                        ChartPanel p = chartPanels.get(count);
-                        chart = p.getChart();
-                        XYPlot plot = chart.getXYPlot();
-                        plot.setDataset(c.getDataset());
-                        plot.setDomainAxis(new NumberAxis(c.getXAxis()));
-                        plot.setRangeAxis(new NumberAxis(c.getYAxis()));
+
+                    chart = ChartFactory.createXYLineChart(c.getTitle(), c.getXAxis(), c.getYAxis(), c.getDataset(), PlotOrientation.VERTICAL, true, true, true);
+                    ChartPanel p = new ChartPanel(chart);
+                    chartPanels.add(p);
+                    int rowheight = (int) (height / chartPanels.size());
+                    System.out.println("Setting row height to " + rowheight);
+                    if (rowheight >= 1) {
+                        jTable1.setRowHeight(rowheight);
                     }
-                    else{
-                       chart = ChartFactory.createXYLineChart(c.getTitle(), c.getXAxis(), c.getYAxis(), c.getDataset(), PlotOrientation.VERTICAL, true, true, true);
-                       ChartPanel p = new ChartPanel(chart);
-                       chartPanels.add(p);
-                       jTabbedPane1.addTab("tab", p);
-                    }
+
                     chart.setTitle(convertTitle(c.getTitle()));
                     chart.setPadding(new RectangleInsets(20, 20, 20, 20));
                     XYPlot plot = chart.getXYPlot();
                     plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
                     plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
                     plot.getRangeAxis().setLabelAngle(Math.PI / 2);
-                    jPanel1.setVisible(true);
-                    chart.fireChartChanged();
+ 
                 }
+
+                chartModel.fireTableDataChanged();
+                jPanel1.setVisible(true);
             }
         };
     }
@@ -404,5 +419,37 @@ class ChartWrapper
     String getYAxis() { return _yAxis;}
     void setTitle(String s) {_title = s;}
     String getTitle() {return _title;}
+}
+
+class ChartTableModel extends DefaultTableModel {
+  List<ChartPanel> data;
+
+  public ChartTableModel(List<ChartPanel> data) {
+    this.data = data;
+  }
+  
+  public void setCharts(List<ChartPanel> charts)
+  {
+      data = charts;
+  }
+
+  public Class<?> getColumnClass(int columnIndex) { return ChartPanel.class; }
+  public int getColumnCount() { return 1; }
+  public String getColumnName(int columnIndex) { return ""; }
+  public int getRowCount() { return (data == null) ? 0 : data.size(); }
+  public Object getValueAt(int rowIndex, int columnIndex) { return data.get(rowIndex); }
+  public boolean isCellEditable(int rowIndex, int columnIndex) { return true; }
+}
+
+class ChartCellRenderer implements TableCellRenderer {
+
+  public Component getTableCellRendererComponent(JTable table, Object value,        boolean isSelected, boolean hasFocus, int row, int column) {
+    ChartPanel panel = (ChartPanel)value;
+    if (table.getRowCount() != 0 && table.getColumnCount() != 0);
+    {
+        panel.setSize(new Dimension(table.getWidth()/table.getColumnCount(), table.getHeight()/table.getRowCount()));
+    }
+    return panel;
+  }
 }
  

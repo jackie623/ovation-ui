@@ -47,6 +47,9 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleInsets;
+import org.netbeans.api.autoupdate.UpdateElement;
+import org.netbeans.api.autoupdate.UpdateManager;
+import org.netbeans.api.autoupdate.UpdateUnit;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
@@ -204,7 +207,6 @@ public final class EditorTopComponent extends TopComponent {
                     if (current == null)
                     {
                         current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
-                        System.out.println("Created new ChartWrapper with name " + ew.getDisplayName());
                        current.setTitle(ew.getDisplayName());
                         chartList.add(current);
                     }
@@ -239,20 +241,13 @@ public final class EditorTopComponent extends TopComponent {
                 }
                 
                 int initialSize = chartPanels.size();
-                
-                System.out.println("Chart panels sizeA: " + chartPanels.size());
-                
-                if (initialSize > 0) {
-//                    chartPanels.removeAll(chartPanels.subList(0, chartPanels.size()));
-                    while (!chartPanels.isEmpty()) {
+                while (!chartPanels.isEmpty()) {
                         chartPanels.remove(0);
-                    }
-                    System.out.println("Chart panels sizeB: " + chartPanels.size());
-                    System.out.println("Deleting rows: 0 - " + (initialSize - 1));
-                    chartModel.fireTableRowsDeleted(0, initialSize - 1);
+                }
+                if (charts.size() < initialSize) {
+                    chartModel.fireTableRowsDeleted(charts.size() +1, initialSize - 1);
                 }
                 
-                System.out.println("Chart panels sizeC: " + chartPanels.size());
                 
                 for (ChartWrapper c : charts) {
                     JFreeChart chart;
@@ -261,7 +256,6 @@ public final class EditorTopComponent extends TopComponent {
                     ChartPanel p = new ChartPanel(chart);
                     chartPanels.add(p);
                     int rowheight = (int) (height / chartPanels.size());
-                    System.out.println("Setting row height to " + rowheight);
                     if (rowheight >= 1) {
                         jTable1.setRowHeight(rowheight);
                     }
@@ -271,7 +265,7 @@ public final class EditorTopComponent extends TopComponent {
                     XYPlot plot = chart.getXYPlot();
                     plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
                     plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-                    plot.getRangeAxis().setLabelAngle(Math.PI / 2);
+                    //plot.getRangeAxis().setLabelAngle(Math.PI / 2);//turns the Y axis label, right side up
  
                 }
 
@@ -294,6 +288,18 @@ public final class EditorTopComponent extends TopComponent {
 
     private void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
     {
+        /*String s = "";
+        for (UpdateUnit updateUnit : UpdateManager.getDefault().getUpdateUnits()) {
+            UpdateElement updateElement = updateUnit.getInstalled();
+            if (updateElement != null) {
+                if (updateElement.getCodeName().equals("us.physion.ovation.editor"));
+                    s = updateElement.getCodeName() + ": " + updateElement.getSpecificationVersion() + "\n";
+            }
+        }
+        name = s;
+        */
+        name = "Version 1.0 test";
+        //TODO: remove update services dependency!
         NumericData d = rw.getData();
         double samplingRate = rw.getSamplingRate();
         long[] shape = d.getShape();

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+OpenIDE-Module: us.physion.ovation.updater
+OpenIDE-Module-Install: us/physion/ovation/updater/Installer.class
+OpenIDE-Module-Layer: us/physion/ovation/updater/layer.xml
+OpenIDE-Module-Localizing-Bundle: us/physion/ovation/updater/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

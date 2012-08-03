@@ -47,32 +47,30 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleInsets;
-import org.netbeans.api.autoupdate.UpdateElement;
-import org.netbeans.api.autoupdate.UpdateManager;
-import org.netbeans.api.autoupdate.UpdateUnit;
 import us.physion.ovation.interfaces.IEntityWrapper;
+
 
 /**
  * Top component which displays something.
  */
-@ConvertAsProperties(dtd = "-//us.physion.ovation.editor//Editor//EN",
+@ConvertAsProperties(dtd = "-//us.physion.ovation.editor//ResponseView//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "EditorTopComponent",
+@TopComponent.Description(preferredID = "ResponseViewTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
-@ActionID(category = "Window", id = "us.physion.ovation.editor.EditorTopComponent")
+@ActionID(category = "Window", id = "us.physion.ovation.editor.ResponseViewTopComponent")
 @ActionReference(path = "Menu/Window" /*
  * , position = 333
  */)
-@TopComponent.OpenActionRegistration(displayName = "#CTL_EditorAction",
-preferredID = "EditorTopComponent")
+@TopComponent.OpenActionRegistration(displayName = "#CTL_ResponseViewAction",
+preferredID = "ResponseViewTopComponent")
 @Messages({
-    "CTL_EditorAction=Editor",
-    "CTL_EditorTopComponent=Response Viewer",
-    "HINT_EditorTopComponent=This plots the currently selected numeric Response data"
+    "CTL_ResponseViewAction=Response View",
+    "CTL_ResponseViewTopComponent=Response Viewer",
+    "HINT_ResponseViewTopComponent=This plots the currently selected numeric Response data"
 })
-public final class EditorTopComponent extends TopComponent {
+public final class ResponseViewTopComponent extends TopComponent {
     
     Lookup.Result global;
     List<ChartPanel> chartPanels = new ArrayList<ChartPanel>();
@@ -91,10 +89,10 @@ public final class EditorTopComponent extends TopComponent {
             }
         }
     };
-    public EditorTopComponent() {
+    public ResponseViewTopComponent() {
         initComponents();
-        setName(Bundle.CTL_EditorTopComponent());
-        setToolTipText(Bundle.HINT_EditorTopComponent());
+        setName(Bundle.CTL_ResponseViewTopComponent());
+        setToolTipText(Bundle.HINT_ResponseViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
         jTable1.setDefaultRenderer(ChartPanel.class, new ChartCellRenderer());
@@ -255,7 +253,7 @@ public final class EditorTopComponent extends TopComponent {
                     chart = ChartFactory.createXYLineChart(c.getTitle(), c.getXAxis(), c.getYAxis(), c.getDataset(), PlotOrientation.VERTICAL, true, true, true);
                     ChartPanel p = new ChartPanel(chart);
                     chartPanels.add(p);
-                    int rowheight = (int) (height / chartPanels.size());
+                    int rowheight = (height / chartPanels.size());
                     if (rowheight >= 1) {
                         jTable1.setRowHeight(rowheight);
                     }
@@ -288,18 +286,6 @@ public final class EditorTopComponent extends TopComponent {
 
     private void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
     {
-        /*String s = "";
-        for (UpdateUnit updateUnit : UpdateManager.getDefault().getUpdateUnits()) {
-            UpdateElement updateElement = updateUnit.getInstalled();
-            if (updateElement != null) {
-                if (updateElement.getCodeName().equals("us.physion.ovation.editor"));
-                    s = updateElement.getCodeName() + ": " + updateElement.getSpecificationVersion() + "\n";
-            }
-        }
-        name = s;
-        */
-        name = "Version 1.0 test";
-        //TODO: remove update services dependency!
         NumericData d = rw.getData();
         double samplingRate = rw.getSamplingRate();
         long[] shape = d.getShape();
@@ -349,113 +335,3 @@ public final class EditorTopComponent extends TopComponent {
     }
     
 }
-
-class ResponseWrapper
-{
-    String xunits;
-    String yunits;
-    double samplingRate;
-    NumericData data;
-    
-    protected ResponseWrapper() {}
-    
-    
-    static ResponseWrapper createIfPlottable(Response r)
-    {
-        if (!r.getUTI().equals(Response.NUMERIC_DATA_UTI) || r.getShape().length != 1)
-        {
-            return null;
-        }
-    
-        ResponseWrapper rw = new ResponseWrapper();
-        rw.data = r.getData();
-        rw.samplingRate = r.getSamplingRates()[0];
-        rw.yunits = r.getUnits();
-        rw.xunits = convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]);
-        return rw;
-    }
-    static ResponseWrapper createIfPlottable(IEntityWrapper ew)
-    {
-        return createIfPlottable((Response)ew.getEntity());
-    }
-    
-    protected NumericData getData()
-    {
-        return data;
-    }
-    protected double getSamplingRate()
-    {
-        return samplingRate;
-    }
-    
-    protected String xUnits()
-    {
-        return xunits;
-    }
-    protected String yUnits()
-    {
-        return yunits;
-    }
-    
-    protected static String convertSamplingRateUnitsToGraphUnits(String samplingRateUnits){
-       if (samplingRateUnits.toLowerCase().contains("hz"))
-       {
-           String prefix = samplingRateUnits.substring(0, samplingRateUnits.toLowerCase().indexOf("hz"));
-           return "Time (in " + prefix + "Seconds)";
-       }
-       else return ("1 / " + samplingRateUnits);
-    }
-}
-
-class ChartWrapper
-{
-    DefaultXYDataset _ds;
-    String _xAxis;
-    String _yAxis;
-    String _title;
-    
-    ChartWrapper(DefaultXYDataset ds, String xAxis, String yAxis)
-    {
-        _ds = ds;
-        _xAxis = xAxis;
-        _yAxis = yAxis;
-    }
-    DefaultXYDataset getDataset(){ return _ds;}
-    String getXAxis() { return _xAxis;}
-    String getYAxis() { return _yAxis;}
-    void setTitle(String s) {_title = s;}
-    String getTitle() {return _title;}
-}
-
-class ChartTableModel extends DefaultTableModel {
-  List<ChartPanel> data;
-
-  public ChartTableModel(List<ChartPanel> data) {
-    this.data = data;
-  }
-  
-  public void setCharts(List<ChartPanel> charts)
-  {
-      data = charts;
-  }
-
-  public Class<?> getColumnClass(int columnIndex) { return ChartPanel.class; }
-  public int getColumnCount() { return 1; }
-  public String getColumnName(int columnIndex) { return ""; }
-  public int getRowCount() { return (data == null) ? 0 : data.size(); }
-  public Object getValueAt(int rowIndex, int columnIndex) { return data.get(rowIndex); }
-  public boolean isCellEditable(int rowIndex, int columnIndex) { return true; }
-}
-
-class ChartCellRenderer implements TableCellRenderer {
-
-  public Component getTableCellRendererComponent(JTable table, Object value,        boolean isSelected, boolean hasFocus, int row, int column) {
-    ChartPanel panel = (ChartPanel)value;
-    if (table.getRowCount() != 0 && table.getColumnCount() != 0);
-    {
-        panel.setSize(new Dimension(table.getWidth()/table.getColumnCount(), table.getHeight()/table.getRowCount()));
-    }
-    return panel;
-  }
-}
- 

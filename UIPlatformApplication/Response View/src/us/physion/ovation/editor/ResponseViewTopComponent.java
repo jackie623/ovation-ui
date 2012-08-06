@@ -171,9 +171,11 @@ public final class ResponseViewTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
-    
-    private void updateEntitySelection() {
-        Collection<? extends IEntityWrapper> entities = global.allInstances();
+    protected void updateEntitySelection()
+    {
+        updateEntitySelection(global.allInstances());
+    }
+    protected void updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
         if (entities.size() == 0)
         {
             jPanel1.setVisible(false);
@@ -333,5 +335,12 @@ public final class ResponseViewTopComponent extends TopComponent {
             }
         }
     }
-    
+    //for testing
+    protected Collection<ChartPanel> getChartPanels(){
+        return chartPanels;
+    }
+    protected ChartTableModel getChartTableModel()
+    {
+        return chartModel;
+    }
 }

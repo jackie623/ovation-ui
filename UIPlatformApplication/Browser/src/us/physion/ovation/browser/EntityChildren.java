@@ -20,18 +20,20 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EntityWrapper;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *
  * @author huecotanks
  */
-public class EntityChildren extends Children.Keys<EntityWrapper> {
+public class EntityChildren extends Children.Keys<IEntityWrapper> {
 
-    EntityWrapper parent;
+    IEntityWrapper parent;
     boolean projectView;
     IAuthenticatedDataStoreCoordinator dsc;
 
-    EntityChildren(EntityWrapper e, boolean pView, IAuthenticatedDataStoreCoordinator theDSC) {
+    EntityChildren(IEntityWrapper e, boolean pView, IAuthenticatedDataStoreCoordinator theDSC) {
         parent = e;
         projectView = pView;
         dsc = theDSC;
@@ -43,7 +45,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
         }
     }
 
-    private Callable<Children> getChildrenCallable(final EntityWrapper key)
+    private Callable<Children> getChildrenCallable(final IEntityWrapper key)
     {
         return new Callable<Children>() {
 
@@ -55,13 +57,13 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
     }
 
     @Override
-    protected Node[] createNodes(final EntityWrapper key) {
+    protected Node[] createNodes(final IEntityWrapper key) {
 
-        return new Node[]{EntityWrapperUtilities.createNode(key, Children.createLazy(getChildrenCallable(key)), key.isUnique())};
+        return new Node[]{EntityWrapperUtilities.createNode(key, Children.createLazy(getChildrenCallable(key)))};
     }
 
    
-    protected void updateWithKeys(final List<EntityWrapper> list)
+    protected void updateWithKeys(final List<IEntityWrapper> list)
     {
         if (EventQueue.isDispatchThread())
         {
@@ -98,9 +100,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
                 @Override
                 public void run() {
                     createKeys();
-
                 }
-                
             });
         }
         else{
@@ -120,7 +120,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             return;
         }
         if (parent == null) {
-            List<EntityWrapper> list = new LinkedList<EntityWrapper>();
+            List<IEntityWrapper> list = new LinkedList<IEntityWrapper>();
             //case root node: add entityWrapper for each project
             if (projectView) {
                 for (Project p : c.getProjects()) {
@@ -141,10 +141,10 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
         }
     }
 
-    protected List<EntityWrapper> createKeysForEntity(DataContext c, EntityWrapper ew) {
+    protected List<IEntityWrapper> createKeysForEntity(DataContext c, IEntityWrapper ew) {
 
         DataContext context = dsc.getContext();
-        List<EntityWrapper> list = new LinkedList<EntityWrapper>();
+        List<IEntityWrapper> list = new LinkedList<IEntityWrapper>();
         Class entityClass = ew.getType();
         if (projectView) {
             if (entityClass.isAssignableFrom(Project.class)) {

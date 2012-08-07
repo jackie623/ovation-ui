@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.FutureTask;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -90,20 +91,19 @@ public final class ResponseViewTopComponent extends TopComponent {
         }
     };
     public ResponseViewTopComponent() {
+        initTopComponent();
+    }
+    
+    private void initTopComponent()
+    {
         initComponents();
         setName(Bundle.CTL_ResponseViewTopComponent());
         setToolTipText(Bundle.HINT_ResponseViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
         jTable1.setDefaultRenderer(ChartPanel.class, new ChartCellRenderer());
-
     }
-    
-    private TextTitle convertTitle(String s)
-    {
-        return new TextTitle(s, new Font("timesnewroman", Font.BOLD, 20));
-    }
-
+   
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -175,11 +175,12 @@ public final class ResponseViewTopComponent extends TopComponent {
     {
         updateEntitySelection(global.allInstances());
     }
-    protected void updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
+    
+    protected List<ChartWrapper> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
         if (entities.size() == 0)
         {
             jPanel1.setVisible(false);
-            return;
+            return null;
         }
         
         LinkedList<ChartWrapper> chartList = new LinkedList<ChartWrapper>();
@@ -207,7 +208,7 @@ public final class ResponseViewTopComponent extends TopComponent {
                     if (current == null)
                     {
                         current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
-                       current.setTitle(ew.getDisplayName());
+                        current.setTitle(ew.getDisplayName());
                         chartList.add(current);
                     }
                     
@@ -225,10 +226,19 @@ public final class ResponseViewTopComponent extends TopComponent {
                 }
             }
         }
+        /*if (EventQueue.isDispatchThread())
+        {
+            System.out.println("Already was event dispach queue, try again");
+        }
+        List<ChartPanel> panels = new LinkedList();
+        for (ChartWrapper c : chartList) {
+            panels.add(c.generateChartPanel());
+        }*/
         runOnEDT(updateChartRunnable(chartList));
+        return chartList;
     }
     
-    private Runnable updateChartRunnable(final List<ChartWrapper> charts)
+     private Runnable updateChartRunnable(final List<ChartWrapper> charts)
     {
         final int height = this.getHeight();
         return new Runnable(){
@@ -250,23 +260,49 @@ public final class ResponseViewTopComponent extends TopComponent {
                 
                 
                 for (ChartWrapper c : charts) {
-                    JFreeChart chart;
+                    ChartPanel chart = c.generateChartPanel();
 
-                    chart = ChartFactory.createXYLineChart(c.getTitle(), c.getXAxis(), c.getYAxis(), c.getDataset(), PlotOrientation.VERTICAL, true, true, true);
-                    ChartPanel p = new ChartPanel(chart);
-                    chartPanels.add(p);
+                    chartPanels.add(chart);
                     int rowheight = (height / chartPanels.size());
                     if (rowheight >= 1) {
                         jTable1.setRowHeight(rowheight);
                     }
+                }
 
-                    chart.setTitle(convertTitle(c.getTitle()));
-                    chart.setPadding(new RectangleInsets(20, 20, 20, 20));
-                    XYPlot plot = chart.getXYPlot();
-                    plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-                    plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-                    //plot.getRangeAxis().setLabelAngle(Math.PI / 2);//turns the Y axis label, right side up
- 
+                chartModel.fireTableDataChanged();
+                jPanel1.setVisible(true);
+            }
+        };
+    }
+    
+    private Runnable updateChartRunnable2(final List<ChartPanel> charts)
+    {
+        final int height = this.getHeight();
+        return new Runnable(){
+
+            @Override
+            public void run() {
+                if (charts.size() == 0) {
+                    jPanel1.setVisible(false);
+                    return;
+                }
+                
+                int initialSize = chartPanels.size();
+                while (!chartPanels.isEmpty()) {
+                        chartPanels.remove(0);
+                }
+                if (charts.size() < initialSize) {
+                    chartModel.fireTableRowsDeleted(charts.size() +1, initialSize - 1);
+                }
+                
+                
+                for (ChartPanel chart : charts) {
+
+                    chartPanels.add(chart);
+                    int rowheight = (height / chartPanels.size());
+                    if (rowheight >= 1) {
+                        jTable1.setRowHeight(rowheight);
+                    }
                 }
 
                 chartModel.fireTableDataChanged();
@@ -284,9 +320,10 @@ public final class ResponseViewTopComponent extends TopComponent {
         else{
             SwingUtilities.invokeLater(r);
         }
+        
     }
 
-    private void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
+    protected static void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
     {
         NumericData d = rw.getData();
         double samplingRate = rw.getSamplingRate();
@@ -336,9 +373,6 @@ public final class ResponseViewTopComponent extends TopComponent {
         }
     }
     //for testing
-    protected Collection<ChartPanel> getChartPanels(){
-        return chartPanels;
-    }
     protected ChartTableModel getChartTableModel()
     {
         return chartModel;

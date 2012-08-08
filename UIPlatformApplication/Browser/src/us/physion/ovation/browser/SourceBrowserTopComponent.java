@@ -68,6 +68,11 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         org.openide.awt.Mnemonics.setLocalizedText(resetQueryButton, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.resetQueryButton.text")); // NOI18N
+        resetQueryButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetQueryButtonActionPerformed(evt);
+            }
+        });
 
         org.openide.awt.Mnemonics.setLocalizedText(removeItemButton, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.removeItemButton.text")); // NOI18N
 
@@ -99,6 +104,10 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
                 .addGap(12, 12, 12))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void resetQueryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetQueryButtonActionPerformed
+        BrowserUtilities.resetView();
+    }//GEN-LAST:event_resetQueryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton insertItemButton;

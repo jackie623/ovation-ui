@@ -26,6 +26,7 @@ import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
+import org.openide.windows.WindowManager;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import us.physion.ovation.interfaces.ConnectionProvider;
@@ -86,12 +87,15 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         removeItemButton = new javax.swing.JButton();
 
         org.openide.awt.Mnemonics.setLocalizedText(resetQueryButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.resetQueryButton.text")); // NOI18N
+        resetQueryButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetQueryButtonActionPerformed(evt);
+            }
+        });
 
         org.openide.awt.Mnemonics.setLocalizedText(insertItemButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.insertItemButton.text")); // NOI18N
-        insertItemButton.setBounds(new java.awt.Rectangle(-32762, -32087, 90, 90));
 
         org.openide.awt.Mnemonics.setLocalizedText(removeItemButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.removeItemButton.text")); // NOI18N
-        removeItemButton.setBounds(new java.awt.Rectangle(-32697, -32087, 90, 90));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -119,6 +123,10 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void resetQueryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetQueryButtonActionPerformed
+        BrowserUtilities.resetView();
+    }//GEN-LAST:event_resetQueryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton insertItemButton;

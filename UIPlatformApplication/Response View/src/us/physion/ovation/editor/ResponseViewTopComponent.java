@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.FutureTask;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -49,27 +50,28 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleInsets;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
+
 /**
  * Top component which displays something.
  */
-@ConvertAsProperties(dtd = "-//us.physion.ovation.editor//Editor//EN",
+@ConvertAsProperties(dtd = "-//us.physion.ovation.editor//ResponseView//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "EditorTopComponent",
+@TopComponent.Description(preferredID = "ResponseViewTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
-@ActionID(category = "Window", id = "us.physion.ovation.editor.EditorTopComponent")
+@ActionID(category = "Window", id = "us.physion.ovation.editor.ResponseViewTopComponent")
 @ActionReference(path = "Menu/Window" /*
  * , position = 333
  */)
-@TopComponent.OpenActionRegistration(displayName = "#CTL_EditorAction",
-preferredID = "EditorTopComponent")
+@TopComponent.OpenActionRegistration(displayName = "#CTL_ResponseViewAction",
+preferredID = "ResponseViewTopComponent")
 @Messages({
-    "CTL_EditorAction=Editor",
-    "CTL_EditorTopComponent=Response Viewer",
-    "HINT_EditorTopComponent=This plots the currently selected numeric Response data"
+    "CTL_ResponseViewAction=Response View",
+    "CTL_ResponseViewTopComponent=Response Viewer",
+    "HINT_ResponseViewTopComponent=This plots the currently selected numeric Response data"
 })
-public final class EditorTopComponent extends TopComponent {
+public final class ResponseViewTopComponent extends TopComponent {
     
     Lookup.Result global;
     List<ChartPanel> chartPanels = new ArrayList<ChartPanel>();
@@ -88,21 +90,20 @@ public final class EditorTopComponent extends TopComponent {
             }
         }
     };
-    public EditorTopComponent() {
+    public ResponseViewTopComponent() {
+        initTopComponent();
+    }
+    
+    private void initTopComponent()
+    {
         initComponents();
-        setName(Bundle.CTL_EditorTopComponent());
-        setToolTipText(Bundle.HINT_EditorTopComponent());
+        setName(Bundle.CTL_ResponseViewTopComponent());
+        setToolTipText(Bundle.HINT_ResponseViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
         jTable1.setDefaultRenderer(ChartPanel.class, new ChartCellRenderer());
-
     }
-    
-    private TextTitle convertTitle(String s)
-    {
-        return new TextTitle(s, new Font("timesnewroman", Font.BOLD, 20));
-    }
-
+   
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -170,13 +171,16 @@ public final class EditorTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
+    protected void updateEntitySelection()
+    {
+        updateEntitySelection(global.allInstances());
+    }
     
-    private void updateEntitySelection() {
-        Collection<? extends IEntityWrapper> entities = global.allInstances();
+    protected List<ChartWrapper> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
         if (entities.size() == 0)
         {
             jPanel1.setVisible(false);
-            return;
+            return null;
         }
         
         LinkedList<ChartWrapper> chartList = new LinkedList<ChartWrapper>();
@@ -204,8 +208,7 @@ public final class EditorTopComponent extends TopComponent {
                     if (current == null)
                     {
                         current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
-                        System.out.println("Created new ChartWrapper with name " + ew.getDisplayName());
-                       current.setTitle(ew.getDisplayName());
+                        current.setTitle(ew.getDisplayName());
                         chartList.add(current);
                     }
                     
@@ -223,10 +226,19 @@ public final class EditorTopComponent extends TopComponent {
                 }
             }
         }
+        /*if (EventQueue.isDispatchThread())
+        {
+            System.out.println("Already was event dispach queue, try again");
+        }
+        List<ChartPanel> panels = new LinkedList();
+        for (ChartWrapper c : chartList) {
+            panels.add(c.generateChartPanel());
+        }*/
         runOnEDT(updateChartRunnable(chartList));
+        return chartList;
     }
     
-    private Runnable updateChartRunnable(final List<ChartWrapper> charts)
+     private Runnable updateChartRunnable(final List<ChartWrapper> charts)
     {
         final int height = this.getHeight();
         return new Runnable(){
@@ -239,40 +251,58 @@ public final class EditorTopComponent extends TopComponent {
                 }
                 
                 int initialSize = chartPanels.size();
-                
-                System.out.println("Chart panels sizeA: " + chartPanels.size());
-                
-                if (initialSize > 0) {
-//                    chartPanels.removeAll(chartPanels.subList(0, chartPanels.size()));
-                    while (!chartPanels.isEmpty()) {
+                while (!chartPanels.isEmpty()) {
                         chartPanels.remove(0);
-                    }
-                    System.out.println("Chart panels sizeB: " + chartPanels.size());
-                    System.out.println("Deleting rows: 0 - " + (initialSize - 1));
-                    chartModel.fireTableRowsDeleted(0, initialSize - 1);
+                }
+                if (charts.size() < initialSize) {
+                    chartModel.fireTableRowsDeleted(charts.size() +1, initialSize - 1);
                 }
                 
-                System.out.println("Chart panels sizeC: " + chartPanels.size());
                 
                 for (ChartWrapper c : charts) {
-                    JFreeChart chart;
+                    ChartPanel chart = c.generateChartPanel();
 
-                    chart = ChartFactory.createXYLineChart(c.getTitle(), c.getXAxis(), c.getYAxis(), c.getDataset(), PlotOrientation.VERTICAL, true, true, true);
-                    ChartPanel p = new ChartPanel(chart);
-                    chartPanels.add(p);
-                    int rowheight = (int) (height / chartPanels.size());
-                    System.out.println("Setting row height to " + rowheight);
+                    chartPanels.add(chart);
+                    int rowheight = (height / chartPanels.size());
                     if (rowheight >= 1) {
                         jTable1.setRowHeight(rowheight);
                     }
+                }
 
-                    chart.setTitle(convertTitle(c.getTitle()));
-                    chart.setPadding(new RectangleInsets(20, 20, 20, 20));
-                    XYPlot plot = chart.getXYPlot();
-                    plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-                    plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-                    plot.getRangeAxis().setLabelAngle(Math.PI / 2);
- 
+                chartModel.fireTableDataChanged();
+                jPanel1.setVisible(true);
+            }
+        };
+    }
+    
+    private Runnable updateChartRunnable2(final List<ChartPanel> charts)
+    {
+        final int height = this.getHeight();
+        return new Runnable(){
+
+            @Override
+            public void run() {
+                if (charts.size() == 0) {
+                    jPanel1.setVisible(false);
+                    return;
+                }
+                
+                int initialSize = chartPanels.size();
+                while (!chartPanels.isEmpty()) {
+                        chartPanels.remove(0);
+                }
+                if (charts.size() < initialSize) {
+                    chartModel.fireTableRowsDeleted(charts.size() +1, initialSize - 1);
+                }
+                
+                
+                for (ChartPanel chart : charts) {
+
+                    chartPanels.add(chart);
+                    int rowheight = (height / chartPanels.size());
+                    if (rowheight >= 1) {
+                        jTable1.setRowHeight(rowheight);
+                    }
                 }
 
                 chartModel.fireTableDataChanged();
@@ -290,9 +320,10 @@ public final class EditorTopComponent extends TopComponent {
         else{
             SwingUtilities.invokeLater(r);
         }
+        
     }
 
-    private void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
+    protected static void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
     {
         NumericData d = rw.getData();
         double samplingRate = rw.getSamplingRate();
@@ -341,115 +372,9 @@ public final class EditorTopComponent extends TopComponent {
             }
         }
     }
-    
-}
-
-class ResponseWrapper
-{
-    String xunits;
-    String yunits;
-    double samplingRate;
-    NumericData data;
-    
-    protected ResponseWrapper() {}
-    
-    
-    static ResponseWrapper createIfPlottable(Response r)
+    //for testing
+    protected ChartTableModel getChartTableModel()
     {
-        if (!r.getUTI().equals(Response.NUMERIC_DATA_UTI) || r.getShape().length != 1)
-        {
-            return null;
-        }
-    
-        ResponseWrapper rw = new ResponseWrapper();
-        rw.data = r.getData();
-        rw.samplingRate = r.getSamplingRates()[0];
-        rw.yunits = r.getUnits();
-        rw.xunits = convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]);
-        return rw;
-    }
-    static ResponseWrapper createIfPlottable(IEntityWrapper ew)
-    {
-        return createIfPlottable((Response)ew.getEntity());
-    }
-    
-    protected NumericData getData()
-    {
-        return data;
-    }
-    protected double getSamplingRate()
-    {
-        return samplingRate;
-    }
-    
-    protected String xUnits()
-    {
-        return xunits;
-    }
-    protected String yUnits()
-    {
-        return yunits;
-    }
-    
-    protected static String convertSamplingRateUnitsToGraphUnits(String samplingRateUnits){
-       if (samplingRateUnits.toLowerCase().contains("hz"))
-       {
-           String prefix = samplingRateUnits.substring(0, samplingRateUnits.toLowerCase().indexOf("hz"));
-           return "Time (in " + prefix + "Seconds)";
-       }
-       else return ("1 / " + samplingRateUnits);
+        return chartModel;
     }
 }
-
-class ChartWrapper
-{
-    DefaultXYDataset _ds;
-    String _xAxis;
-    String _yAxis;
-    String _title;
-    
-    ChartWrapper(DefaultXYDataset ds, String xAxis, String yAxis)
-    {
-        _ds = ds;
-        _xAxis = xAxis;
-        _yAxis = yAxis;
-    }
-    DefaultXYDataset getDataset(){ return _ds;}
-    String getXAxis() { return _xAxis;}
-    String getYAxis() { return _yAxis;}
-    void setTitle(String s) {_title = s;}
-    String getTitle() {return _title;}
-}
-
-class ChartTableModel extends DefaultTableModel {
-  List<ChartPanel> data;
-
-  public ChartTableModel(List<ChartPanel> data) {
-    this.data = data;
-  }
-  
-  public void setCharts(List<ChartPanel> charts)
-  {
-      data = charts;
-  }
-
-  public Class<?> getColumnClass(int columnIndex) { return ChartPanel.class; }
-  public int getColumnCount() { return 1; }
-  public String getColumnName(int columnIndex) { return ""; }
-  public int getRowCount() { return (data == null) ? 0 : data.size(); }
-  public Object getValueAt(int rowIndex, int columnIndex) { return data.get(rowIndex); }
-  public boolean isCellEditable(int rowIndex, int columnIndex) { return true; }
-}
-
-class ChartCellRenderer implements TableCellRenderer {
-
-  public Component getTableCellRendererComponent(JTable table, Object value,        boolean isSelected, boolean hasFocus, int row, int column) {
-    ChartPanel panel = (ChartPanel)value;
-    if (table.getRowCount() != 0 && table.getColumnCount() != 0);
-    {
-        panel.setSize(new Dimension(table.getWidth()/table.getColumnCount(), table.getHeight()/table.getRowCount()));
-    }
-    return panel;
-  }
-}
- 

@@ -21,7 +21,6 @@ public class EntityWrapper implements IEntityWrapper {
     private String uri;
     private Class type;
     private String displayName;
-    private Callable<IEntityBase> retrieveEntity;
     
     public EntityWrapper(IEntityBase e)
     {
@@ -38,33 +37,15 @@ public class EntityWrapper implements IEntityWrapper {
         this.uri = uri;
     }
     
-    //If EntityWrapper is unique, it's corresponding Node in a tree view should *not* be a FilterNode
-    public Boolean isUnique()
-    {
-        return false;
-    }
-    
-    //we have to look up the entitybase on creation, because I index on the object's URI. 
-    //If this changes, we should use this constructor for large objects
-    /*public EntityWrapper(String name, Class clazz, Callable<IEntityBase> toCall)
-    {
-        type = clazz;
-        displayName = name;
-        retrieveEntity = toCall;
-    }*/
-    
     @Override
     public IEntityBase getEntity(){
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
-        DataContext c = dsc.getContext();
-        if (uri == null)
+        if (dsc == null)
         {
-            try {
-                return retrieveEntity.call();
-            } catch (Exception ex) {
-                return null;
-            }
+            return null;
         }
+        DataContext c = dsc.getContext();
+      
         return c.objectWithURI(uri);
     }
     @Override
@@ -78,8 +59,8 @@ public class EntityWrapper implements IEntityWrapper {
     public Class getType() { return type;}
 
    
-    private String inferDisplayName(IEntityBase e) {
-        
+    public static String inferDisplayName(IEntityBase e) {
+	Class type = e.getClass();
         if (type.isAssignableFrom(Source.class))
         {
             return ((Source)e).getLabel();

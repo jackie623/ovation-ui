@@ -10,6 +10,7 @@
     <property name="interfaces.src.dir" value="GlobalInterfaces/src/"/>
     <property name="interfaces.class.dir" value="GlobalInterfaces/build/classes/"/>
     <property name="ovation.jar.path" value="lib/ovation.jar"/>
+    <property name="lookup.jar.path" value="${harness.dir}/../platform/lib/org-openide-util-lookup.jar"/>
 
     <property name="bootstrap.url"
               value="http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/lastStableBuild/artifact/nbbuild/netbeans/harness/tasks.jar"/>
@@ -33,7 +34,7 @@
         <javac srcdir="${interfaces.src.dir}"
                includes="**/*"
                destdir="${interfaces.class.dir}"
-               classpath="${ovation.jar.path}"
+               classpath="${ovation.jar.path}:${lookup.jar.path}"
                includeAntRuntime="no"
                 />
 

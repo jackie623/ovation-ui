@@ -5,11 +5,11 @@
 package us.physion.ovation.browser;
 
 import us.physion.ovation.browser.QueryChildren;
-import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.browser.EntityWrapperUtilities;
 import java.io.File;
 import java.net.InetAddress;
 import java.util.*;
+import junit.framework.TestCase;
 import org.apache.log4j.Level;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -20,6 +20,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import ovation.*;
 import ovation.database.DatabaseManager;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *
@@ -52,12 +53,12 @@ public class EntityWrapperUtilitiesTest {
             
             int nodeFdId = 0;
             if (System.getProperty("NODE_FDID") != null) {
-                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID")) + 100;
+                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID"));
             }
 
-            int jobFdId = 0;
+            int jobFdId = 3;
             if (System.getProperty("JOB_FDID") != null) {
-                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID")) + 100;
+                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID"));
             }
             
             db.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
@@ -91,6 +92,7 @@ public class EntityWrapperUtilitiesTest {
 
     @Test
     public void testCreateNodeForNodeThatAlreadyExists() {
+        //TODO
     }
 
     @Test
@@ -110,7 +112,7 @@ public class EntityWrapperUtilitiesTest {
         }
 
         for (Node n : projects) {
-            EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
+            IEntityWrapper ew = n.getLookup().lookup(IEntityWrapper.class);
             assertTrue(projectSet.contains(ew.getURI()));
             projectSet.remove(ew.getURI());
         }
@@ -136,7 +138,7 @@ public class EntityWrapperUtilitiesTest {
             }
         }
         for (Node n : sources) {
-            EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
+            IEntityWrapper ew = n.getLookup().lookup(IEntityWrapper.class);
             assertTrue(sourcesSet.contains(ew.getURI()));
             sourcesSet.remove(ew.getURI());
         }
@@ -176,7 +178,7 @@ public class EntityWrapperUtilitiesTest {
             }
         }
         for (Node n : sourceChildren) {
-            EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
+            IEntityWrapper ew = n.getLookup().lookup(IEntityWrapper.class);
             if (ew.getType().isAssignableFrom(Experiment.class)) {
                 assertTrue(entitySet.contains(ew.getURI()));
                 entitySet.remove(ew.getURI());
@@ -208,7 +210,7 @@ public class EntityWrapperUtilitiesTest {
             }
         }
         for (Node n : projectChildren) {
-            EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
+            IEntityWrapper ew = n.getLookup().lookup(IEntityWrapper.class);
             if (ew.getType().isAssignableFrom(Experiment.class)) {
                 assertTrue(entitySet.contains(ew.getURI()));
                 entitySet.remove(ew.getURI());
@@ -249,7 +251,7 @@ public class EntityWrapperUtilitiesTest {
         }
 
         for (Node n : analysisRecordNodes) {
-            EntityWrapper ew = n.getLookup().lookup(EntityWrapper.class);
+            IEntityWrapper ew = n.getLookup().lookup(IEntityWrapper.class);
             if (ew.getType().isAssignableFrom(Experiment.class)) {
                 assertTrue(entitySet.contains(ew.getURI()));
                 entitySet.remove(ew.getURI());

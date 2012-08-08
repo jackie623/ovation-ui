@@ -10,41 +10,44 @@ import org.openide.nodes.Node;
 import ovation.Project;
 import ovation.Source;
 
+import us.physion.ovation.interfaces.IEntityWrapper;
+
+
 /**
  *
  * @author huecotanks
  */
-public class QueryChildren extends Children.Keys<EntityWrapper> {
+public class QueryChildren extends Children.Keys<IEntityWrapper> {
 
-    Set<EntityWrapper> keys = new HashSet<EntityWrapper>();
+    Set<IEntityWrapper> keys = new HashSet<IEntityWrapper>();
     Set<String> keyURIs = new HashSet<String>();
     private boolean projectView;
     private HashMap<String, QueryChildren> childrenMap = new HashMap<String, QueryChildren>();
-    private HashMap<String, Set<Stack<EntityWrapper>>> pathMap = new HashMap<String, Set<Stack<EntityWrapper>>>();
+    private HashMap<String, Set<Stack<IEntityWrapper>>> pathMap = new HashMap<String, Set<Stack<IEntityWrapper>>>();
 
     protected QueryChildren(boolean pView) {
         projectView = pView;
     }
 
-    protected QueryChildren(Set<Stack<EntityWrapper>> paths, boolean pView) {
+    protected QueryChildren(Set<Stack<IEntityWrapper>> paths, boolean pView) {
         this(pView);
 
         if (paths == null) {
             return;
         }
-        for (Stack<EntityWrapper> path : paths) {
+        for (Stack<IEntityWrapper> path : paths) {
             addPath(path);
         }
     }
   
     @Override
-    protected Node[] createNodes(EntityWrapper key) {
+    protected Node[] createNodes(IEntityWrapper key) {
         QueryChildren children;
         
         children = new QueryChildren(pathMap.get(key.getURI()), projectView);
         childrenMap.put(key.getURI(), children);
 
-        return new Node[]{EntityWrapperUtilities.createNode(key, children, key.isUnique())};
+        return new Node[]{EntityWrapperUtilities.createNode(key, children)};
     }
 
     @Override
@@ -57,7 +60,7 @@ public class QueryChildren extends Children.Keys<EntityWrapper> {
         setKeys(Collections.EMPTY_SET);
     }
 
-    protected boolean shouldAdd(EntityWrapper e) {
+    protected boolean shouldAdd(IEntityWrapper e) {
         if (projectView) {
             if (e.getType().isAssignableFrom(Source.class)) {
                 return false;
@@ -70,21 +73,21 @@ public class QueryChildren extends Children.Keys<EntityWrapper> {
         return true;
     }
 
-    protected void addPath(Stack<EntityWrapper> path) {
+    protected void addPath(Stack<IEntityWrapper> path) {
         if (path == null || path.isEmpty()) {
             return;
         }
-        EntityWrapper e = path.pop();
+        IEntityWrapper e = path.pop();
 
         if (shouldAdd(e)) {
             if (!keyURIs.contains(e.getURI())) {
                 keyURIs.add(e.getURI());
                 keys.add(e);
-                pathMap.put(e.getURI(), new HashSet<Stack<EntityWrapper>>());
+                pathMap.put(e.getURI(), new HashSet<Stack<IEntityWrapper>>());
                 addNotify();
                 refresh();//in case the node is already created
             }
-            Set<Stack<EntityWrapper>> paths = pathMap.get(e.getURI());
+            Set<Stack<IEntityWrapper>> paths = pathMap.get(e.getURI());
             paths.add(path);
             QueryChildren children = childrenMap.get(e.getURI());
             if (children != null) {

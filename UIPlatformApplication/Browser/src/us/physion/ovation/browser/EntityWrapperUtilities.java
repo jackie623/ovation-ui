@@ -19,6 +19,7 @@ import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import ovation.*;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *
@@ -28,23 +29,23 @@ public class EntityWrapperUtilities {
 
     private static String SEPARATOR = ";";
 
-    protected static Set<EntityWrapper> createNodesFromQuery(Set<ExplorerManager> mgrs, Iterator<IEntityBase> itr) {
+    protected static Set<IEntityWrapper> createNodesFromQuery(Set<ExplorerManager> mgrs, Iterator<IEntityBase> itr) {
         Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
-        Set<EntityWrapper> resultSet = new HashSet<EntityWrapper>();
+        Set<IEntityWrapper> resultSet = new HashSet<IEntityWrapper>();
         while (itr.hasNext()) {
             IEntityBase e = itr.next();
-            EntityWrapper ew = new EntityWrapper(e);
+            IEntityWrapper ew = new EntityWrapper(e);
             resultSet.add(ew);
 
-            Stack<EntityWrapper> p = new Stack();
+            Stack<IEntityWrapper> p = new Stack();
             p.push(ew);
-            Set<Stack<EntityWrapper>> paths = getParentsInTree(e, p);
+            Set<Stack<IEntityWrapper>> paths = getParentsInTree(e, p);
 
-            for (Stack<EntityWrapper> path : paths) {
+            for (Stack<IEntityWrapper> path : paths) {
                 Node parentInTree = treeMap.get(path.peek());
                 if (parentInTree == null) {
                     for (ExplorerManager mgr : mgrs) {
-                        Stack<EntityWrapper> copiedPath = new Stack<EntityWrapper>();
+                        Stack<IEntityWrapper> copiedPath = new Stack<IEntityWrapper>();
                         //QueryChildren.addPath() modifies path
                         if (mgrs.size() == 1) {
                             copiedPath = path;
@@ -68,8 +69,8 @@ public class EntityWrapperUtilities {
         return resultSet;
     }
 
-    protected static Set<Stack<EntityWrapper>> getParentsInTree(IEntityBase e, Stack<EntityWrapper> path) {
-        Set<Stack<EntityWrapper>> paths = new HashSet<Stack<EntityWrapper>>();
+    protected static Set<Stack<IEntityWrapper>> getParentsInTree(IEntityBase e, Stack<IEntityWrapper> path) {
+        Set<Stack<IEntityWrapper>> paths = new HashSet<Stack<IEntityWrapper>>();
         String uri = e.getURIString();
 
         if (isPerUser(e)) {
@@ -95,7 +96,7 @@ public class EntityWrapperUtilities {
 
     }
 
-    private static Set<IEntityBase> getParents(IEntityBase entity, Stack<EntityWrapper> path) {
+    private static Set<IEntityBase> getParents(IEntityBase entity, Stack<IEntityWrapper> path) {
         Set<IEntityBase> parents = new HashSet();
         Class type = entity.getClass();
         if (type.isAssignableFrom(Source.class)) {
@@ -109,7 +110,7 @@ public class EntityWrapperUtilities {
             }
 
             boolean epochGroupsInPath = false;
-            for (EntityWrapper ew : path)
+            for (IEntityWrapper ew : path)
             {
                 if (ew.getType().isAssignableFrom(EpochGroup.class))
                 {
@@ -154,16 +155,21 @@ public class EntityWrapperUtilities {
         return false;
     }
 
-    protected static Node createNode(EntityWrapper key, Children c) {
-        return createNode(key, c, false);
-    }
-
-    protected static Node createNode(EntityWrapper key, Children c, boolean forceCreateNode) {
+    protected static Node createNode(IEntityWrapper key, Children c) {
+        
+        boolean forceCreateNode = false;
+        if (key instanceof PerUserEntityWrapper)
+        {
+            //per user entity wrappers are "user" nodes
+            //their uri's correspond to the "User" object they represent, and therefore
+            //are not unique nodes
+            forceCreateNode = true;
+        }
+        
         Map<String, Node> treeMap = BrowserUtilities.getNodeMap();
         String uri = key.getURI();
-        if (!forceCreateNode) {//use a filter node, instead of a duplicate node
+        if (!forceCreateNode) {//If node with uri exists, create a node that just proxies the existing node
             if (uri != null && treeMap.containsKey(uri)) {
-                //create a node that just proxies the existing node
                 return new FilterNode(treeMap.get(uri));
             }
         }

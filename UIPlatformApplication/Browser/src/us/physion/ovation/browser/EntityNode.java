@@ -24,6 +24,7 @@ import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *
@@ -49,7 +50,7 @@ public class EntityNode extends AbstractNode{
    public Sheet createSheet()
    {
        Sheet sheet = Sheet.createDefault();
-       EntityWrapper obj = getLookup().lookup(EntityWrapper.class);
+       IEntityWrapper obj = getLookup().lookup(IEntityWrapper.class);
        IEntityBase e = obj.getEntity();
 
        IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
@@ -85,7 +86,7 @@ public class EntityNode extends AbstractNode{
        return sheet;
    }
    
-   protected Sheet.Set createPropertySetForUser(EntityWrapper obj, IEntityBase e, User u)
+   protected Sheet.Set createPropertySetForUser(IEntityWrapper obj, IEntityBase e, User u)
    {
        Sheet.Set properties = Sheet.createPropertiesSet();
        properties.setName(u.getUsername() + "'s Properties");

@@ -6,6 +6,8 @@ package us.physion.ovation.browser;
 
 import java.lang.reflect.InvocationTargetException;
 import org.openide.nodes.Node.Property;
+import us.physion.ovation.interfaces.IEntityWrapper;
+
 
 /**
  *
@@ -17,9 +19,9 @@ public class EntityProperty extends Property{
     Object value;
     String key;
     
-    EntityWrapper entity;
+    IEntityWrapper entity;
     
-    EntityProperty(EntityWrapper e, String key, Object value, boolean canWrite)
+    EntityProperty(IEntityWrapper e, String key, Object value, boolean canWrite)
     {
         super(value.getClass());
         entity = e;

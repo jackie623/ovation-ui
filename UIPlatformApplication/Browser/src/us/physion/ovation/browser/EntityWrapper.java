@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.physion.ovation.interfaces;
+package us.physion.ovation.browser;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class EntityWrapper implements IEntityWrapper {
     {
         uri = e.getURIString();
         type = e.getClass();
-        displayName = inferDisplayName(e);
+        displayName = EntityWrapper.inferDisplayName(e);
     }
     
     //used by the PerUserEntityWrapper object

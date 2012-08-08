@@ -40,16 +40,13 @@ public class JavaPreferenceProvider implements ConnectionHistoryProvider{
     
     public void addConnectionFile(String element)
     {
-        List history = getConnectionHistory();
-        if (history.contains(element))
-        {
-            return;
-        }
+        List<String> history = getConnectionHistory();
         
         String newPrefEntry = element + SEPARATOR;
-        for (int i =0; i < Math.min(limit -1, history.size()); ++i)
+        for (String item : history)
         {
-            newPrefEntry += history.get(i) + SEPARATOR;
+            if (!item.equals(element))
+                newPrefEntry += item + SEPARATOR;
         }
         prefs.put(connectionHistory, newPrefEntry);
     }

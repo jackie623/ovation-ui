@@ -7,6 +7,7 @@ package us.physion.ovation.editor;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import us.physion.ovation.interfaces.IEntityWrapper;
+import us.physion.ovation.interfaces.EntityWrapper;
 
 /**
  *
@@ -24,7 +25,7 @@ public class TestEntityWrapper implements IEntityWrapper{
         dsc.getContext();
         uri = e.getURIString();
         type = e.getClass();
-        displayName = "display name";//EntityWrapper.inferDisplayName(e);
+        displayName = EntityWrapper.inferDisplayName(e);
     }
     @Override
     public String getDisplayName() {

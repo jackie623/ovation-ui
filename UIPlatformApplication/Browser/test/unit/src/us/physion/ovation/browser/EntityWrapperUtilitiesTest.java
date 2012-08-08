@@ -20,6 +20,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import ovation.*;
 import ovation.database.DatabaseManager;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *

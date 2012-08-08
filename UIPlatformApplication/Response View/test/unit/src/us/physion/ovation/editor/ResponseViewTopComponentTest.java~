@@ -26,6 +26,7 @@ import ovation.*;
 import ovation.database.DatabaseManager;
 import us.physion.ovation.interfaces.ConnectionListener;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EntityWrapper;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**

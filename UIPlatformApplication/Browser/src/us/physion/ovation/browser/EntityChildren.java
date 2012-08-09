@@ -20,19 +20,21 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.interfaces.IEntityWrapper;
+
 
 /**
  *
  * @author huecotanks
  */
-public class EntityChildren extends Children.Keys<IEntityWrapper> {
+public class EntityChildren extends Children.Keys<EntityWrapper> {
 
-    IEntityWrapper parent;
+    EntityWrapper parent;
     boolean projectView;
     IAuthenticatedDataStoreCoordinator dsc;
 
-    EntityChildren(IEntityWrapper e, boolean pView, IAuthenticatedDataStoreCoordinator theDSC) {
+    EntityChildren(EntityWrapper e, boolean pView, IAuthenticatedDataStoreCoordinator theDSC) {
         parent = e;
         projectView = pView;
         dsc = theDSC;
@@ -44,7 +46,7 @@ public class EntityChildren extends Children.Keys<IEntityWrapper> {
         }
     }
 
-    private Callable<Children> getChildrenCallable(final IEntityWrapper key)
+    private Callable<Children> getChildrenCallable(final EntityWrapper key)
     {
         return new Callable<Children>() {
 
@@ -56,13 +58,13 @@ public class EntityChildren extends Children.Keys<IEntityWrapper> {
     }
 
     @Override
-    protected Node[] createNodes(final IEntityWrapper key) {
+    protected Node[] createNodes(final EntityWrapper key) {
 
         return new Node[]{EntityWrapperUtilities.createNode(key, Children.createLazy(getChildrenCallable(key)))};
     }
 
    
-    protected void updateWithKeys(final List<IEntityWrapper> list)
+    protected void updateWithKeys(final List<EntityWrapper> list)
     {
         if (EventQueue.isDispatchThread())
         {
@@ -117,7 +119,7 @@ public class EntityChildren extends Children.Keys<IEntityWrapper> {
         DataContext c = dsc.getContext();
         
         if (parent == null) {
-            List<IEntityWrapper> list = new LinkedList<IEntityWrapper>();
+            List<EntityWrapper> list = new LinkedList<EntityWrapper>();
             //case root node: add entityWrapper for each project
             if (projectView) {
                 for (Project p : c.getProjects()) {
@@ -142,10 +144,10 @@ public class EntityChildren extends Children.Keys<IEntityWrapper> {
         }
     }
 
-    protected List<IEntityWrapper> createKeysForEntity(DataContext c, IEntityWrapper ew) {
+    protected List<EntityWrapper> createKeysForEntity(DataContext c, EntityWrapper ew) {
 
         DataContext context = dsc.getContext();
-        List<IEntityWrapper> list = new LinkedList<IEntityWrapper>();
+        List<EntityWrapper> list = new LinkedList<EntityWrapper>();
         Class entityClass = ew.getType();
         if (projectView) {
             if (entityClass.isAssignableFrom(Project.class)) {

@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.physion.ovation.editor;
+package us.physion.ovation.interfaces;
 
 import ovation.*;
 import us.physion.ovation.interfaces.IEntityWrapper;

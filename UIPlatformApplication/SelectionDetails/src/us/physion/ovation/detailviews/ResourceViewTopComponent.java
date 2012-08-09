@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -67,7 +68,7 @@ public final class ResourceViewTopComponent extends TopComponent {
     protected Lookup.Result<IEntityWrapper> global;
     protected Collection<? extends IEntityWrapper> entities;
     protected ResourceListModel listModel;
-    protected Set<ResourceWrapper> editedSet = new HashSet();
+    protected Set<IResourceWrapper> editedSet = new HashSet();
 
     public ResourceViewTopComponent() {
         initComponents();
@@ -86,14 +87,8 @@ public final class ResourceViewTopComponent extends TopComponent {
                 int index = -1;
                 if (evt.getClickCount() == 2 || evt.getClickCount() == 3) {
                     index = list.locationToIndex(evt.getPoint());
-                    ResourceWrapper rw = (ResourceWrapper) listModel.getElementAt(index);
-                    if (!editedSet.contains(rw))
-                    {
-                        Resource r = rw.getEntity();
-                        r.edit();
-                        editedSet.add(rw);
-                        saveButton.setEnabled(true);
-                    }
+                    IResourceWrapper rw = (IResourceWrapper) listModel.getElementAt(index);
+                    editResource(rw);
                 }
             }
         });
@@ -115,9 +110,24 @@ public final class ResourceViewTopComponent extends TopComponent {
         });
     }
     
+    protected void editResource(IResourceWrapper rw)
+    {
+        if (!editedSet.contains(rw)) {
+            Resource r = rw.getEntity();
+            try{
+                r.edit();
+            } catch(OvationException e)
+            {
+                //pass, for now  - this can be deleted with ovation version 1.4
+            }
+            editedSet.add(rw);
+            saveButton.setEnabled(true);
+        }
+    }
+    
     protected void closeEditedResourceFiles()
     {
-        for (ResourceWrapper rw : editedSet)
+        for (IResourceWrapper rw : editedSet)
         {
             rw.getEntity().releaseLocalFile();
         }
@@ -128,14 +138,14 @@ public final class ResourceViewTopComponent extends TopComponent {
     protected void updateResources()
     {
         entities = global.allInstances();
+        ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
+        cp.getConnection().getContext(); //getContext
         updateResources(entities);
     }
     
     protected void updateResources(Collection<? extends IEntityWrapper> entities)
     {
-        ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
-        cp.getConnection().getContext(); //getContext
-        List<ResourceWrapper> resources = new LinkedList();
+        List<IResourceWrapper> resources = new LinkedList();
         for (IEntityWrapper e: entities)
         {
             for (Resource r : e.getEntity().getResourcesIterable())
@@ -144,8 +154,8 @@ public final class ResourceViewTopComponent extends TopComponent {
             }
         }
         
-        LinkedList<ResourceWrapper> toRemove = new LinkedList();
-        for (ResourceWrapper rw : editedSet)
+        LinkedList<IResourceWrapper> toRemove = new LinkedList();
+        for (IResourceWrapper rw : editedSet)
         {
             if (!resources.contains(rw))
             {
@@ -154,12 +164,17 @@ public final class ResourceViewTopComponent extends TopComponent {
         }
         
         //TODO: wrap in a transaction? run on another thread?
-        for (ResourceWrapper rw : toRemove)
+        for (IResourceWrapper rw : toRemove)
         {
             editedSet.remove(rw);
             rw.getEntity().releaseLocalFile();
         }
-
+        
+        if (editedSet.isEmpty())
+        {
+            saveButton.setEnabled(false);
+        }
+            
         listModel.setResources(resources);
     }
     
@@ -242,44 +257,19 @@ public final class ResourceViewTopComponent extends TopComponent {
             //add to preferences
             //TODO add a dialog that asks for uti type
             String path = chooser.getSelectedFile().getAbsolutePath();
-            Resource r = null;
-            for (IEntityWrapper e : entities)
-            {
-                r = e.getEntity().addResource(Response.NUMERIC_DATA_UTI, path);
-            }
-            if (r != null)
-            {
-                listModel.addResource(new ResourceWrapper(r));
-            }
+            addResource(entities, path);
         }
     }//GEN-LAST:event_insertResourceButtonActionPerformed
 
     private void removeResourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeResourceButtonActionPerformed
         //Delete selected resources
-        for (Object o :resourceList.getSelectedValues())
-        {
-            if (o instanceof ResourceWrapper) {
-                String rName = ((ResourceWrapper) o).getName();
-                for (IEntityWrapper e : entities) {
-                    IEntityBase eb = e.getEntity();
-                    for (String name : eb.getResourceNames()) {
-                        if (name.equals(rName)) {
-                            Resource r = eb.getResource(name);
-                            if (r.canWrite()) {
-                                eb.removeResource(r);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        updateResources(entities);// don't regrab entities from the current TopComponent
+        removeResources(resourceList.getSelectedValues(), entities);
     }//GEN-LAST:event_removeResourceButtonActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         for (Object rw : resourceList.getSelectedValues())
         {
-            Resource r = ((ResourceWrapper)rw).getEntity();
+            Resource r = ((IResourceWrapper)rw).getEntity();
             if (r.canWrite())
             {
                 r.sync();
@@ -318,10 +308,57 @@ public final class ResourceViewTopComponent extends TopComponent {
         // TODO read your settings according to their version
     }
 
-   private class ResourceListModel extends AbstractListModel
+    protected void removeResources(Object[] selectedValues, Collection<? extends IEntityWrapper> entities) {
+        for (Object o :selectedValues)
+        {
+            if (o instanceof IResourceWrapper) {
+                String rName = ((IResourceWrapper) o).getName();
+                for (IEntityWrapper e : entities) {
+                    IEntityBase eb = e.getEntity();
+                    for (String name : eb.getResourceNames()) {
+                        if (name.equals(rName)) {
+                            Resource r = eb.getResource(name);
+                            if (r.canWrite()) {
+                                eb.removeResource(r);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        updateResources(entities);// don't regrab entities from the current TopComponent
+    }
+    
+    protected boolean saveButtonIsEnabled()
     {
-        List<ResourceWrapper> resources = new LinkedList<ResourceWrapper>();
+        return saveButton.isEnabled();
+    }
+    
+    protected List<IResourceWrapper> getResources()
+    {
+        return listModel.getResources();
+    }
+    
+    protected void addResource(Collection<? extends IEntityWrapper> entities, String path)
+    {
+        Resource r = null;
 
+        for (IEntityWrapper e : entities) {
+            r = e.getEntity().addResource(Response.NUMERIC_DATA_UTI, path);
+        }
+        if (r != null) {
+            listModel.addResource(new ResourceWrapper(r));
+        }
+    }
+
+    private class ResourceListModel extends AbstractListModel
+    {
+        List<IResourceWrapper> resources = new LinkedList<IResourceWrapper>();
+        public List<IResourceWrapper> getResources()
+        {
+            return resources;
+        }
+        
         @Override
         public int getSize() {
             return resources.size();
@@ -334,50 +371,18 @@ public final class ResourceViewTopComponent extends TopComponent {
             return null;
         }
 
-        protected void setResources(List<ResourceWrapper> newResources)
+        protected void setResources(List<IResourceWrapper> newResources)
         {
             int length = Math.max(resources.size(), newResources.size());
             resources = newResources;
             this.fireContentsChanged(this, 0, length);
         }
 
-        protected void addResource(ResourceWrapper resource)
+        protected void addResource(IResourceWrapper resource)
         {
             resources.add(resource);
             this.fireContentsChanged(this, resources.size(), resources.size());
         }
     };
 
-    protected class ResourceWrapper
-    {
-        String uri;
-        String name;
-        public ResourceWrapper(Resource r)
-        {
-            uri = r.getURIString();
-            name = r.getName();
-        }
-        public String toString(){
-            return name;
-        }
-        public String getName()
-        {
-            return name;
-        }
-
-
-        public Resource getEntity()
-        {
-            IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
-            DataContext c = dsc.getContext();
-
-            return (Resource)c.objectWithURI(uri);
-        }
-        
-        public String getURI()
-        {
-            return uri;
-        }
-
-    };
 }

@@ -27,6 +27,7 @@ import ovation.database.DatabaseManager;
 import us.physion.ovation.interfaces.ConnectionListener;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
+import us.physion.ovation.interfaces.TestEntityWrapper;
 
 /**
  *
@@ -185,5 +186,17 @@ public class ResponseViewTopComponentTest{
 
         assertEquals(plot.getDomainAxis().getLabel(), ResponseWrapper.convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]));
         assertEquals(plot.getRangeAxis().getLabel(), r.getUnits());
+    }
+    
+    @Test
+    public void testGraphsMultipleSelectedEntitiesWithSharedUnits()
+    {
+    
+    }
+    
+    @Test
+    public void testGraphsMultipleSelectedEntitiesWithoutSharedUnits()
+    {
+    
     }
 }

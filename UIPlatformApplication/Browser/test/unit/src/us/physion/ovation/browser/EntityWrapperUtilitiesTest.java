@@ -20,12 +20,13 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import ovation.*;
 import ovation.database.DatabaseManager;
+import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *
  * @author jackie
  */
-public class EntityWrapperUtilitiesTest extends TestCase{
+public class EntityWrapperUtilitiesTest {
 
     public EntityWrapperUtilitiesTest() {
         /*
@@ -55,7 +56,7 @@ public class EntityWrapperUtilitiesTest extends TestCase{
                 nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID"));
             }
 
-            int jobFdId = 1;
+            int jobFdId = 3;
             if (System.getProperty("JOB_FDID") != null) {
                 jobFdId = Integer.parseInt(System.getProperty("JOB_FDID"));
             }
@@ -91,6 +92,7 @@ public class EntityWrapperUtilitiesTest extends TestCase{
 
     @Test
     public void testCreateNodeForNodeThatAlreadyExists() {
+        //TODO
     }
 
     @Test

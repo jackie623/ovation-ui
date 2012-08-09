@@ -20,7 +20,11 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+<<<<<<< HEAD
 import us.physion.ovation.browser.EntityWrapper;
+=======
+import us.physion.ovation.interfaces.IEntityWrapper;
+>>>>>>> bc6fa5a1273c1e1b63f134e370d4b802d810933b
 
 /**
  *
@@ -115,20 +119,22 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             return;
         }
         DataContext c = dsc.getContext();
-        if (dsc == null) {
-            return;
-        }
+        
         if (parent == null) {
             List<EntityWrapper> list = new LinkedList<EntityWrapper>();
             //case root node: add entityWrapper for each project
             if (projectView) {
                 for (Project p : c.getProjects()) {
+                    p.getURIString();
+                    EntityWrapper x = new EntityWrapper(p);
                     list.add(new EntityWrapper(p));
                 }
             } else {
                 Iterator<Source> itr = c.query(Source.class, "isNull(parent)");
                 while (itr.hasNext()) {
                     Source s = itr.next();
+                    s.getURIString();
+                    EntityWrapper x = new EntityWrapper(s);
                     list.add(new EntityWrapper(s));
                 }
             }

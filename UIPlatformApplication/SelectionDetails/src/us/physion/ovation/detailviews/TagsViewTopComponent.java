@@ -68,6 +68,20 @@ public final class TagsViewTopComponent extends TopComponent {
 
     };
 
+    protected void addTag(Collection<? extends IEntityWrapper> entities, String tag) {
+        for (IEntityWrapper e : entities) {
+
+            IEntityBase ie = e.getEntity();
+            if (ie instanceof ITaggableEntityBase) {
+                ((ITaggableEntityBase) ie).addTag(tag);
+            }
+        }
+        listModel.addTag(tag);
+        tagComboModel.removeAllElements();
+        addTagComboBox.setSelectedItem("");
+        addTagComboBox.setSelectedItem(null);
+    }
+
     private class StringListModel extends AbstractListModel
     {
         List<String> tags = new LinkedList<String>();
@@ -93,24 +107,29 @@ public final class TagsViewTopComponent extends TopComponent {
 
         protected void addTag(String tag)
         {
-            tags.add(tag);
-            this.fireContentsChanged(this, tags.size(), tags.size());
+            if (!tags.contains(tag))
+            {
+                tags.add(tag);
+                this.fireContentsChanged(this, tags.size(), tags.size());
+            }
         }
     };
-
-
 
     protected void updateListModel()
     {
         entities = global.allInstances();
-        if (entities.isEmpty())
-            {
-                listModel.setTags(new LinkedList<String>());
-                return;
-            }
-         
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.getConnection().getContext(); //getContext
+        updateListModel(entities);
+    }
+
+    protected void updateListModel(Collection<? extends IEntityWrapper> entities)
+    {
+        if (entities.isEmpty()) {
+            listModel.setTags(new LinkedList<String>());
+            return;
+        }
+
         List<String> tags = new LinkedList<String>();
         for (IEntityWrapper e: entities)
         {
@@ -197,19 +216,8 @@ public final class TagsViewTopComponent extends TopComponent {
             ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
             cp.getConnection().getContext(); //getContext
             String tag = addTagComboBox.getSelectedItem().toString();
-            for (IEntityWrapper e : entities)
-            {
-
-                IEntityBase ie = e.getEntity();
-                if (ie instanceof ITaggableEntityBase)
-                {
-                    ((ITaggableEntityBase)ie).addTag(tag);
-                }
-            }
-            listModel.addTag(tag);
-            tagComboModel.removeAllElements();
-            addTagComboBox.setSelectedItem("");
-            addTagComboBox.setSelectedItem(null);
+            
+            addTag(entities, tag);
         }
     }//GEN-LAST:event_addTagComboBoxActionPerformed
 
@@ -239,5 +247,10 @@ public final class TagsViewTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
+    }
+    
+    protected List<String> getTagList()
+    {
+        return listModel.tags;
     }
 }

@@ -19,7 +19,6 @@ import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import ovation.*;
-import us.physion.ovation.interfaces.EntityWrapper;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**

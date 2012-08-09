@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -113,7 +114,12 @@ public final class ResourceViewTopComponent extends TopComponent {
     {
         if (!editedSet.contains(rw)) {
             Resource r = rw.getEntity();
-            r.edit();
+            try{
+                r.edit();
+            } catch(OvationException e)
+            {
+                //pass, for now  - this can be deleted with ovation version 1.4
+            }
             editedSet.add(rw);
             saveButton.setEnabled(true);
         }
@@ -163,7 +169,12 @@ public final class ResourceViewTopComponent extends TopComponent {
             editedSet.remove(rw);
             rw.getEntity().releaseLocalFile();
         }
-
+        
+        if (editedSet.isEmpty())
+        {
+            saveButton.setEnabled(false);
+        }
+            
         listModel.setResources(resources);
     }
     
@@ -252,7 +263,7 @@ public final class ResourceViewTopComponent extends TopComponent {
 
     private void removeResourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeResourceButtonActionPerformed
         //Delete selected resources
-        removeResources(resourceList.getSelectedValues());
+        removeResources(resourceList.getSelectedValues(), entities);
     }//GEN-LAST:event_removeResourceButtonActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
@@ -297,10 +308,9 @@ public final class ResourceViewTopComponent extends TopComponent {
         // TODO read your settings according to their version
     }
 
-    protected void removeResources(Object[] selectedValues) {
-        for (Object o :resourceList.getSelectedValues())
+    protected void removeResources(Object[] selectedValues, Collection<? extends IEntityWrapper> entities) {
+        for (Object o :selectedValues)
         {
-            
             if (o instanceof IResourceWrapper) {
                 String rName = ((IResourceWrapper) o).getName();
                 for (IEntityWrapper e : entities) {

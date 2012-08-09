@@ -191,8 +191,9 @@ public class ResourceViewTopComponentTest {
         t.editResource(rw1);
         assertTrue(t.saveButtonIsEnabled());
         
-        t.removeResources(new IResourceWrapper[]{rw1});
-        assertFalse(t.saveButtonIsEnabled());        
+        t.removeResources(new IResourceWrapper[]{rw1}, entitySet);
+        assertFalse(t.saveButtonIsEnabled());    
+        assertEquals(t.getResources().size(), 1);
     } 
     
     

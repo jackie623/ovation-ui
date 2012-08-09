@@ -20,11 +20,9 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
-<<<<<<< HEAD
 import us.physion.ovation.browser.EntityWrapper;
-=======
 import us.physion.ovation.interfaces.IEntityWrapper;
->>>>>>> bc6fa5a1273c1e1b63f134e370d4b802d810933b
+
 
 /**
  *

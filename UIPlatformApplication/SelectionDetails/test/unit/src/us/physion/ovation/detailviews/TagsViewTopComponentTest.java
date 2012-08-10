@@ -13,9 +13,7 @@ import org.junit.*;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.database.DatabaseManager;
 import static org.junit.Assert.*;
-import ovation.DataContext;
-import ovation.ITaggableEntityBase;
-import ovation.Project;
+import ovation.*;
 import us.physion.ovation.interfaces.TestEntityWrapper;
 
 /**
@@ -86,6 +84,8 @@ public class TagsViewTopComponentTest {
         project2 = project = new TestEntityWrapper(dsc, p);
         p2.addTag("tag1");
         p2.addTag("another tag");
+        
+        Ovation.enableLogging(LogLevel.DEBUG);
     }
 
     @After

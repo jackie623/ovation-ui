@@ -63,6 +63,8 @@ public class EntityWrapperUtilitiesTest {
             
             db.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
         }
+        
+        Ovation.enableLogging(LogLevel.DEBUG);
 
     }
 

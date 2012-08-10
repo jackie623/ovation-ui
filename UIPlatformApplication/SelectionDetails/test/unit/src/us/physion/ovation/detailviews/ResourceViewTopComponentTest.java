@@ -96,6 +96,7 @@ public class ResourceViewTopComponentTest {
         Resource r2 = source.getEntity().addResource(uti, "resource 2", data);
         rw2 = new TestResourceWrapper(dsc, r2);
 
+        Ovation.enableLogging(LogLevel.DEBUG);
     }
 
     @After

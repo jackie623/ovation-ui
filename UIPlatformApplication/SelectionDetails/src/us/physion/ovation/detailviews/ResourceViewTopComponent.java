@@ -118,7 +118,10 @@ public final class ResourceViewTopComponent extends TopComponent {
                 r.edit();
             } catch(OvationException e)
             {
-                //pass, for now  - this can be deleted with ovation version 1.4
+                //pass, for now - this can be deleted with ovation version 1.4
+            } catch(UnsupportedOperationException e)
+            {
+                //pass, for now - this can be deleted with ovation version 1.4
             }
             editedSet.add(rw);
             saveButton.setEnabled(true);

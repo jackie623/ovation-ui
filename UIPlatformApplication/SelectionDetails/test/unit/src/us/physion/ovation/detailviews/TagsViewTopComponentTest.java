@@ -36,7 +36,7 @@ public class TagsViewTopComponentTest {
         if (!f.exists()) {
             DatabaseManager db = new DatabaseManager();
             String lockServer = System.getProperty("OVATION_LOCK_SERVER");
-            System.out.prinln("Lockserver: " + lockServer);
+            System.out.println("Lockserver: " + lockServer);
             if(lockServer == null) {
                 lockServer = InetAddress.getLocalHost().getHostName();
             }

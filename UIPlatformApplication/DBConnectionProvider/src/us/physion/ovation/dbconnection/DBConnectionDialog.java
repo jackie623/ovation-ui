@@ -4,6 +4,8 @@
  */
 package us.physion.ovation.dbconnection;
 
+import com.objy.db.DatabaseNotFoundException;
+import com.objy.db.DatabaseOpenException;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -69,8 +71,8 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     /**
      * Creates new form DBConnectionDialog
      */
-    public DBConnectionDialog(java.awt.Frame parent) {
-        this(parent, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
+    public DBConnectionDialog() {
+        this(new JFrame(), true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
     }
 
     private void showErrors(Exception e) {
@@ -267,32 +269,86 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         DataContext c = null;
         try {
             c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
-        } catch (Exception ex) {
+        } catch (SchemaVersionException ex2)
+        {
+            boolean success = runUpdater(ex2.getDatabaseSchemaNumber(), ex2.getAPISchemaNumber());
+            if (success)
+            {
+                try {
+                    c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
+                } catch (DatabaseOpenException ex) {
+                    showErrors(ex);
+                    return;
+                } catch (DatabaseNotFoundException ex) {
+                    showErrors(ex);
+                    return;
+                }
+            }
+            else{
+                cancelled = true;
+                return;
+            }
+        }
+        catch (Exception ex) {
             showErrors(ex);
             return;
         }
         boolean authenticated = false;
         try {
             authenticated = c.authenticateUser(username, password);
-        } catch (Exception ex) {
+        } 
+        catch (Exception ex) {
             showErrors(ex);
             return;
         }
-        if (!authenticated)
-        {
+        if (!authenticated){
             showErrors(new UserAuthenticationException());
             return;
         }
         dsc = c.getAuthenticatedDataStoreCoordinator();
-        cancelled = false;
-        dispose();        // TODO add your handling code here:
+        dispose();    
     }//GEN-LAST:event_connectAction
 
     private void cancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelAction
         cancelled = true;
-        dispose();        // TODO add your handling code here:
+        dispose();      
     }//GEN-LAST:event_cancelAction
 
+    protected boolean runUpdater(int databaseVersion, int apiVersion)
+    {
+        if (databaseVersion <0 || apiVersion <0 )
+        {
+            showErrors(new RuntimeException("Invalid database schema version (" + databaseVersion + ") or api schema version (" + apiVersion + ")"));
+            return false;
+        }
+        RunUpdaterDialog d = new RunUpdaterDialog();
+        d.showDialog();
+        
+        return runUpdater(d, new UpdaterInProgressDialog(), true);
+       
+    }
+    
+    protected boolean runUpdater(RunUpdaterDialog shouldRun, UpdaterInProgressDialog inProgress, boolean showDialog)
+    {
+        if (shouldRun.isCancelled())
+        {
+            return false;
+        }
+        
+        //launch the updater in another thread
+        if (showDialog)
+        {
+            inProgress.showDialog();
+        }
+        if (inProgress.isCancelled())
+        {
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -352,4 +408,10 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     private us.physion.ovation.dbconnection.ConnectionDialogModel viewModel;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
+
+    protected void showDialog() {
+        this.setLocationRelativeTo(null);
+        this.pack();
+        this.setVisible(true);
+    }
 }

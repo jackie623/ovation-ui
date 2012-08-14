@@ -90,11 +90,9 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
                  */
 
                 try {
-                    DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
-
-                    dialog.setLocationRelativeTo(null);
-                    dialog.pack();
-                    dialog.setVisible(true);
+                    DBConnectionDialog dialog = new DBConnectionDialog();
+                    dialog.showDialog();
+                  
 
                     if (!dialog.isCancelled()) {
                         setDsc(dialog.getDataStoreCoordinator());

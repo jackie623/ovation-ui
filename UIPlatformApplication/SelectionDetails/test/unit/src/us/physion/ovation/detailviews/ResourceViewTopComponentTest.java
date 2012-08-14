@@ -20,67 +20,36 @@ import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
 import ovation.*;
 import ovation.database.DatabaseManager;
+import ovation.test.TestManager;
 import us.physion.ovation.interfaces.IEntityWrapper;
 import us.physion.ovation.interfaces.TestEntityWrapper;
+import us.physion.ovation.interfaces.OvationTestCase;
 
 /**
  *
  * @author huecotanks
  */
-public class ResourceViewTopComponentTest {
-    
-    public ResourceViewTopComponentTest() {
-        
-    }
-    
+public class ResourceViewTopComponentTest extends OvationTestCase{
     private IResourceWrapper rw1;
     private IResourceWrapper rw2;
     
     private TestEntityWrapper project;
     private TestEntityWrapper source;
     
-    static SelectionViewTestManager tm = new SelectionViewTestManager();
-    IAuthenticatedDataStoreCoordinator dsc;
+    static TestManager mgr = new SelectionViewTestManager();
+    public ResourceViewTopComponentTest() {
+        setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
+    }
+    
     @BeforeClass
-    public static void setUpClass() throws Exception {
-
-        File f = new File(tm.getConnectionFile());
-        if (!f.exists()) {
-            DatabaseManager db = new DatabaseManager();
-            String lockServer = System.getProperty("OVATION_LOCK_SERVER");
-            if(lockServer == null) {
-                lockServer = InetAddress.getLocalHost().getHostName();
-            }
-            
-            int nodeFdId = 0;
-            if (System.getProperty("NODE_FDID") != null) {
-                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID"));
-            }
-
-            int jobFdId = 4;
-            if (System.getProperty("JOB_FDID") != null) {
-                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID"));
-            }
-            
-            db.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
-        }
-
+    public static void setUpClass()
+    {
+        OvationTestCase.setUpClass(mgr, 5);
     }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        DatabaseManager db = new DatabaseManager();
-        db.deleteLocalDatabase(tm.getConnectionFile());
-    }
-
+    
     @Before
     public void setUp() {
-        try {
-            dsc = tm.setupDatabase();
-        } catch (Exception e) {
-            tearDown();
-            fail(e.getMessage());
-        }
+        super.setUp();
 
         String UNUSED_NAME = "name";
         String UNUSED_PURPOSE = "purpose";
@@ -99,10 +68,6 @@ public class ResourceViewTopComponentTest {
         Ovation.enableLogging(LogLevel.DEBUG);
     }
 
-    @After
-    public void tearDown() {
-        tm.tearDownDatabase();
-    }
     
     @Test
     public void testUpdateResourcesUpdatesTheEntitiesList()

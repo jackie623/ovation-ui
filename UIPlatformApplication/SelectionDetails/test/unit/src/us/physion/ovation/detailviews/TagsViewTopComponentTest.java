@@ -13,63 +13,34 @@ import org.junit.*;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.database.DatabaseManager;
 import static org.junit.Assert.*;
+import org.openide.util.Exceptions;
 import ovation.*;
+import ovation.test.TestManager;
 import us.physion.ovation.interfaces.TestEntityWrapper;
+import us.physion.ovation.interfaces.OvationTestCase;
 
 /**
  *
  * @author huecotanks
  */
-public class TagsViewTopComponentTest {
+public class TagsViewTopComponentTest extends OvationTestCase{
     private TestEntityWrapper project;
     private TestEntityWrapper project2;
     
+    static TestManager mgr = new SelectionViewTestManager();
     public TagsViewTopComponentTest() {
+        setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
     }
-
-    static SelectionViewTestManager tm = new SelectionViewTestManager();
-    IAuthenticatedDataStoreCoordinator dsc;
+    
     @BeforeClass
-    public static void setUpClass() throws Exception {
-
-        File f = new File(tm.getConnectionFile());
-        if (!f.exists()) {
-            DatabaseManager db = new DatabaseManager();
-            String lockServer = System.getProperty("OVATION_LOCK_SERVER");
-            System.out.println("Lockserver: " + lockServer);
-            if(lockServer == null) {
-                lockServer = InetAddress.getLocalHost().getHostName();
-            }
-            
-            int nodeFdId = 0;
-            if (System.getProperty("NODE_FDID") != null) {
-                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID"));
-            }
-
-            int jobFdId = 4;
-            if (System.getProperty("JOB_FDID") != null) {
-                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID"));
-            }
-            
-            db.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
-        }
-
+    public static void setUpClass()
+    {
+        OvationTestCase.setUpClass(mgr, 6);
     }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        DatabaseManager db = new DatabaseManager();
-        db.deleteLocalDatabase(tm.getConnectionFile());
-    }
-
+    
     @Before
     public void setUp() {
-        try {
-            dsc = tm.setupDatabase();
-        } catch (Exception e) {
-            tearDown();
-            fail(e.getMessage());
-        }
+        super.setUp();
 
         String UNUSED_NAME = "name";
         String UNUSED_PURPOSE = "purpose";
@@ -86,14 +57,9 @@ public class TagsViewTopComponentTest {
         p2.addTag("tag1");
         p2.addTag("another tag");
         
-        Ovation.enableLogging(LogLevel.DEBUG);
     }
 
-    @After
-    public void tearDown() {
-        tm.tearDownDatabase();
-    }
-    
+   
     @Test
     public void testUpdateListModelSetsSelectedTagsProperly()
     {

@@ -24,55 +24,32 @@ import org.openide.util.lookup.ServiceProvider;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.*;
 import ovation.database.DatabaseManager;
-import us.physion.ovation.interfaces.ConnectionListener;
-import us.physion.ovation.interfaces.ConnectionProvider;
-import us.physion.ovation.interfaces.IEntityWrapper;
-import us.physion.ovation.interfaces.TestEntityWrapper;
+import ovation.test.TestManager;
+import us.physion.ovation.interfaces.*;
 
 /**
  *
  * @author huecotanks
  */
-public class ResponseViewTopComponentTest{
+public class ResponseViewTopComponentTest extends OvationTestCase{
     
    IAuthenticatedDataStoreCoordinator dsc;
    Experiment experiment = null;
    Epoch epoch = null;
-    static ResponseViewTestManager tm = new ResponseViewTestManager();
-
+    static TestManager mgr = new ResponseViewTestManager();
+    public ResponseViewTopComponentTest() {
+        setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
+    }
+    
     @BeforeClass
-    public static void setUpClass() throws Exception {
-
-        File f = new File(tm.getConnectionFile());
-        if (!f.exists()) {
-            DatabaseManager db = new DatabaseManager();
-            String lockServer = System.getProperty("OVATION_LOCK_SERVER");
-            if(lockServer == null) {
-                lockServer = InetAddress.getLocalHost().getHostName();
-            }
-            
-            int nodeFdId = 0;
-            if (System.getProperty("NODE_FDID") != null) {
-                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID"));
-            }
-
-            int jobFdId = 2;
-            if (System.getProperty("JOB_FDID") != null) {
-                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID"));
-            }
-            
-            db.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
-        }
+    public static void setUpClass()
+    {
+        OvationTestCase.setUpClass(mgr, 4);
     }
     
     @Before
     public void setUp() {
-        try {
-            dsc = tm.setupDatabase();
-        } catch (Exception e) {
-            tearDown();
-            fail(e.getMessage());
-        }
+        super.setUp();
         
         String UNUSED_NAME = "name";
         String UNUSED_PURPOSE = "purpose";
@@ -93,21 +70,6 @@ public class ResponseViewTopComponentTest{
 
     }
 
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        DatabaseManager db = new DatabaseManager();
-        db.deleteLocalDatabase(tm.getConnectionFile());
-    }
-    
-  
-    @After
-    public void tearDown() {
-        tm.tearDownDatabase();
-    }
-
-    public ResponseViewTopComponentTest() {
-    }
 
     @Test
     public void testGraphsSelectedEntity() {

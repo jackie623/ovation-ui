@@ -20,76 +20,35 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import ovation.*;
 import ovation.database.DatabaseManager;
+import ovation.test.TestManager;
+import us.physion.ovation.interfaces.OvationTestCase;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
  *
  * @author jackie
  */
-public class EntityWrapperUtilitiesTest {
+public class EntityWrapperUtilitiesTest extends OvationTestCase{
 
-    public EntityWrapperUtilitiesTest() {
-        /*
-         * String s = System.getProperty("OVATION_TEST");
-         * System.setProperty("OVATION_TEST", "true"); s =
-         * System.getProperty("OVATION_TEST"); String s2 = s.toString();
-         */
-    }
     ExplorerManager em;
     Map<String, Node> treeMap;
-    IAuthenticatedDataStoreCoordinator dsc;
-    static BrowserTestManager tm = new BrowserTestManager();
-
+    static TestManager mgr = new BrowserTestManager();
+    public EntityWrapperUtilitiesTest() {
+        setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
+    }
+    
     @BeforeClass
-    public static void setUpClass() throws Exception {
-
-        File f = new File(tm.getConnectionFile());
-        if (!f.exists()) {
-            DatabaseManager db = new DatabaseManager();
-            String lockServer = System.getProperty("OVATION_LOCK_SERVER");
-            if(lockServer == null) {
-                lockServer = InetAddress.getLocalHost().getHostName();
-            }
-            
-            int nodeFdId = 0;
-            if (System.getProperty("NODE_FDID") != null) {
-                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID"));
-            }
-
-            int jobFdId = 3;
-            if (System.getProperty("JOB_FDID") != null) {
-                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID"));
-            }
-            
-            db.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
-        }
-        
-        Ovation.enableLogging(LogLevel.DEBUG);
-
+    public static void setUpClass()
+    {
+        OvationTestCase.setUpClass(mgr, 2);
     }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        DatabaseManager db = new DatabaseManager();
-        db.deleteLocalDatabase(tm.getConnectionFile());
-    }
-
+    
     @Before
     public void setUp() {
-        try {
-            dsc = tm.setupDatabase();
-        } catch (Exception e) {
-            tearDown();
-            fail(e.getMessage());
-        }
+        super.setUp();
 
         treeMap = new HashMap<String, Node>();
         em = new ExplorerManager();
-    }
-
-    @After
-    public void tearDown() {
-        tm.tearDownDatabase();
     }
 
     @Test

@@ -92,7 +92,6 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
                 try {
                     DBConnectionDialog dialog = new DBConnectionDialog();
                     dialog.showDialog();
-                  
 
                     if (!dialog.isCancelled()) {
                         setDsc(dialog.getDataStoreCoordinator());

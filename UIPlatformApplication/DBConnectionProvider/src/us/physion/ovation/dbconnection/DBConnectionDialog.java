@@ -321,6 +321,14 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             showErrors(new RuntimeException("Invalid database schema version (" + databaseVersion + ") or api schema version (" + apiVersion + ")"));
             return false;
         }
+        
+        if (databaseVersion > apiVersion)
+        {
+            InstallLatestVersionDialog installVersionDialog d = new InstallLatestVersionDialog();
+            d.showDialog();
+            return false;
+        }
+        
         RunUpdaterDialog d = new RunUpdaterDialog();
         d.showDialog();
         

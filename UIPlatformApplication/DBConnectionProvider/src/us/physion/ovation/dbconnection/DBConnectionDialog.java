@@ -257,8 +257,6 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             //connectionFileComboBox.addItem(path);
             connectionFileComboBox.setSelectedItem(path);
         }
-
-
     }//GEN-LAST:event_chooseButtonActionPerformed
 
     private void connectAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectAction
@@ -266,33 +264,12 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         String password = viewModel.getPassword();
         String connectionFile = connectionFileComboBox.getSelectedItem().toString();
         prefs.addConnectionFile(connectionFile);
-        DataContext c = null;
-        try {
-            c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
-        } catch (SchemaVersionException ex2)
-        {
-            boolean success = runUpdater(ex2.getDatabaseSchemaNumber(), ex2.getAPISchemaNumber());
-            if (success)
-            {
-                try {
-                    c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
-                } catch (DatabaseOpenException ex) {
-                    showErrors(ex);
-                    return;
-                } catch (DatabaseNotFoundException ex) {
-                    showErrors(ex);
-                    return;
-                }
-            }
-            else{
-                cancelled = true;
-                return;
-            }
-        }
-        catch (Exception ex) {
-            showErrors(ex);
+        
+        DataContext c = getContextFromConnectionFile(connectionFile);
+        if (c == null){
             return;
         }
+        
         boolean authenticated = false;
         try {
             authenticated = c.authenticateUser(username, password);
@@ -306,6 +283,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             return;
         }
         dsc = c.getAuthenticatedDataStoreCoordinator();
+        cancelled = false;
         dispose();    
     }//GEN-LAST:event_connectAction
 
@@ -314,7 +292,48 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         dispose();      
     }//GEN-LAST:event_cancelAction
 
-    protected boolean runUpdater(int databaseVersion, int apiVersion)
+    protected DataContext getContextFromConnectionFile(String connectionFile)
+    {
+        DataContext c = null;
+        try {
+            c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
+        } catch (SchemaVersionException ex2)
+        {
+            boolean success = shouldRunUpdater(ex2.getDatabaseSchemaNumber(), ex2.getAPISchemaNumber()); //ask the user if they want to run the upgrader
+            if (success)
+            {
+                success = runUpdater(new UpdaterInProgressDialog(), true);
+            }
+            if (success)
+            {
+                try {
+                    c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
+                } catch (DatabaseOpenException ex) {
+                    showErrors(ex);
+                    return c;
+                } catch (DatabaseNotFoundException ex) {
+                    showErrors(ex);
+                    return c;
+                }
+            }
+            else{
+                cancelled = true;
+                return c;
+            }
+        }
+        catch (Exception ex) {
+            showErrors(ex);
+            return c;
+        }
+        return c;
+    }
+    
+    protected boolean shouldRunUpdater(int databaseVersion, int apiVersion)
+    {
+        return shouldRunUpdater(databaseVersion, apiVersion, true, null);
+    }
+    //dependency injection, for testing
+    protected boolean shouldRunUpdater(int databaseVersion, int apiVersion, boolean showDialogs, ShouldRunUpdaterDialog shouldRun)
     {
         if (databaseVersion <0 || apiVersion <0 )
         {
@@ -324,27 +343,32 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         
         if (databaseVersion > apiVersion)
         {
-            InstallLatestVersionDialog installVersionDialog d = new InstallLatestVersionDialog();
-            d.showDialog();
+            if (showDialogs)
+            {
+                InstallLatestVersionDialog installVersionDialog = new InstallLatestVersionDialog();
+                installVersionDialog.showDialog();
+            }
             return false;
         }
-        
-        RunUpdaterDialog d = new RunUpdaterDialog();
-        d.showDialog();
-        
-        return runUpdater(d, new UpdaterInProgressDialog(), true);
-       
+        else if (databaseVersion < apiVersion)
+        {
+            if (shouldRun == null)
+            {
+                shouldRun = new ShouldRunUpdaterDialog();
+            }
+            if (showDialogs)
+            {
+                shouldRun.showDialog();
+            }
+            return !shouldRun.isCancelled();
+        }
+        return false;
     }
     
-    protected boolean runUpdater(RunUpdaterDialog shouldRun, UpdaterInProgressDialog inProgress, boolean showDialog)
+    protected boolean runUpdater(UpdaterInProgressDialog inProgress, boolean showDialogs)
     {
-        if (shouldRun.isCancelled())
-        {
-            return false;
-        }
-        
         //launch the updater in another thread
-        if (showDialog)
+        if (showDialogs)
         {
             inProgress.showDialog();
         }
@@ -394,7 +418,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
-                DBConnectionDialog dialog = new DBConnectionDialog(new javax.swing.JFrame());
+                DBConnectionDialog dialog = new DBConnectionDialog();
 
                 dialog.setVisible(true);
             }

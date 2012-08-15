@@ -4,6 +4,14 @@
  */
 package us.physion.ovation.dbconnection;
 
+import java.awt.Color;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import javax.swing.JFrame;
+import org.openide.util.Exceptions;
+
 /**
  *
  * @author huecotanks
@@ -13,8 +21,8 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
     /**
      * Creates new form InstallLatestVersionDialog
      */
-    public InstallLatestVersionDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public InstallLatestVersionDialog() {
+        super(new JFrame(), true);
         initComponents();
     }
 
@@ -29,19 +37,25 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
 
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        downloadLink = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jButton1.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.jButton1.text")); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.jLabel1.text")); // NOI18N
 
-        jButton2.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.jButton2.text")); // NOI18N
-        jButton2.setBorderPainted(false);
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        downloadLink.setForeground(new java.awt.Color(11, 0, 128));
+        downloadLink.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.downloadLink.text")); // NOI18N
+        downloadLink.setBorderPainted(false);
+        downloadLink.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                downloadLinkActionPerformed(evt);
             }
         });
 
@@ -57,9 +71,9 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
                             .add(24, 24, 24)
                             .add(jLabel1)))
                     .add(layout.createSequentialGroup()
-                        .add(64, 64, 64)
-                        .add(jButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(32, Short.MAX_VALUE))
+                        .add(77, 77, 77)
+                        .add(downloadLink, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -67,19 +81,44 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
                 .add(42, 42, 42)
                 .add(jLabel1)
                 .add(18, 18, 18)
-                .add(jButton2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 19, Short.MAX_VALUE)
+                .add(downloadLink, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jButton1)
-                .add(75, 75, 75))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-       
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void downloadLinkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadLinkActionPerformed
+        if (Desktop.isDesktopSupported())
+        {
+            try {
+                URI uri = new URI("mailto", "support@physionconsulting.com", "subject=Ovation UI Issue Reporting");
+                //URI uri = new URI("mailto:support@physionconsulting.com?subject=Ovation UI Issue Reporting");
+                Desktop.getDesktop().mail(uri);
+                downloadLink.setForeground(new Color(102,51,102));
 
+            } catch (URISyntaxException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+
+        }
+    }//GEN-LAST:event_downloadLinkActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    
+    public void showDialog()
+    {
+        this.setLocationRelativeTo(null);
+        this.pack();
+        this.setVisible(true);
+    }
     /**
      * @param args the command line arguments
      */
@@ -117,12 +156,12 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                InstallLatestVersionDialog dialog = new InstallLatestVersionDialog(new javax.swing.JFrame(), true);
+                InstallLatestVersionDialog dialog = new InstallLatestVersionDialog();
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
 
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
+                        e.getWindow().dispose();
                     }
                 });
                 dialog.setVisible(true);
@@ -130,8 +169,8 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton downloadLink;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 }

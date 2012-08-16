@@ -9,10 +9,19 @@ import com.objy.db.DatabaseOpenException;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import org.netbeans.api.autoupdate.*;
+import org.netbeans.api.autoupdate.OperationContainer.OperationInfo;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import ovation.*;
+import us.physion.ovation.interfaces.Updater;
 
 /**
  *
@@ -260,6 +269,71 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_chooseButtonActionPerformed
 
     private void connectAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectAction
+        
+        //check the database schema version --scheam version logic could be simplified if we could add arbitrary metadata to UpgradeElements
+        //if an update is required, search for all UpdateElements with the same specification number
+        //run them in order -- determined either by spec number or some file
+        //
+        
+        List<UpdateElement> toEnable = new LinkedList<UpdateElement>();
+        List<UpdateElement> toDisable = new LinkedList<UpdateElement>();
+        List<UpdateUnit> units = UpdateManager.getDefault().getUpdateUnits();
+        for (UpdateUnit unit : units)
+        {
+            UpdateElement u = unit.getInstalled();
+            System.out.println(u.getCodeName());
+            if (u.getCodeName().equals("us.physion.ovation.update"))
+            {
+                if (u.isEnabled())
+                {
+                    Double.parseDouble(u.getSpecificationVersion());
+                    System.out.println("Found update module");
+                    //toDisable.add(u);
+                }else{
+                    Double.parseDouble(u.getSpecificationVersion());
+                    System.out.println("Found update module");
+                    toEnable.add(u);
+                }
+                
+            }
+        }
+      
+        for (UpdateElement enable : toEnable) {
+            OperationContainer enabler = OperationContainer.createForEnable();
+
+            enabler.add(enable);
+            ProgressHandle ph = ProgressHandleFactory.createHandle("Enabling Updater");
+            try {
+                ((OperationSupport) enabler.getSupport()).doOperation(ph);
+            } catch (OperationException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        
+        for (UpdateElement disable : toDisable)
+        {
+            OperationContainer disabler = OperationContainer.createForDisable();
+
+            disabler.add(disable);
+            ProgressHandle ph = ProgressHandleFactory.createHandle("Disabling Old Updaters");
+            try {
+                ((OperationSupport) disabler.getSupport()).doOperation(ph);
+            } catch (OperationException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        System.out.println(Ovation.getBuildNumber());
+        System.out.println("Enabled module...");
+        Collection<? extends Updater> updaters = Lookup.getDefault().lookupAll(Updater.class);
+        for (Updater up : updaters)
+        {
+            System.out.println("Found updater");
+            up.runUpdate();
+        }
+        
+        System.out.println(Ovation.getBuildNumber());
+        
+        
         String username = viewModel.getUsername();
         String password = viewModel.getPassword();
         String connectionFile = connectionFileComboBox.getSelectedItem().toString();

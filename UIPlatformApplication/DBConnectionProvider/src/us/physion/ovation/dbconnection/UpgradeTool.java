@@ -4,25 +4,16 @@
  */
 package us.physion.ovation.dbconnection;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Scanner;
+import java.util.*;
 
-import us.physion.ovation.interfaces.IUpgradeDB;
-import us.physion.ovation.interfaces.IUpdateProgress;
-import us.physion.ovation.interfaces.IUpdateUI;
-import us.physion.ovation.interfaces.ProgressUpdater;
+import us.physion.ovation.interfaces.*;
 
 /**
  *
@@ -31,16 +22,12 @@ import us.physion.ovation.interfaces.ProgressUpdater;
 public class UpgradeTool implements IUpgradeDB, IUpdateUI{
 
     private IUpdateProgress pu;
-    private static boolean production;
 
     public static void runUpgrade (String[] args) throws Exception {
         UpgradeTool ut = new UpgradeTool();
 
         Properties p = new Properties(System.getProperties());
-        production = !p.contains("EXECUTION_STEPS_DIR");
-
-        System.setProperty("java.security.policy", getExecDir() + "/security.txt");
-        System.out.println(System.getProperty("java.security.policy"));
+        System.setProperty("java.security.policy", "security.txt");
 
         if (args.length == 3)
         {
@@ -72,10 +59,11 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
 
     }
 
-    public void start(String connectionFile, String username, String password) {
+    public void start(String connectionFile, String username, String password, List<UpdateStep> steps) {
+        //TODO: security manager
         if (System.getSecurityManager() == null) {
-		    System.setSecurityManager(new RMISecurityManager());
-		}
+            System.setSecurityManager(new RMISecurityManager());
+        }
 
         try{
             pu = new ProgressUpdater(connectionFile, username, password, this);
@@ -104,66 +92,15 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
         }
 
         System.out.println("Running on platform " + platform);
-        ArrayList<File> filesToExecute = getFilesToExecute();
 
-        boolean requiresPlugins = false;
-        File execDir = getExecDir();
-        File pluginDir = new File(execDir, platform);
-        if(pluginDir.exists() && !pluginDir.getAbsolutePath().equals(execDir.getAbsolutePath()))
+        for (UpdateStep step : steps)
         {
-            requiresPlugins = true;
-        }
-
-        String objyLib = objyBin + "/../lib";
-        for (File file : filesToExecute)
-        {
-            if (file.getName().contains(".schema")){
-                try{
-                    ProcessBuilder pb = new ProcessBuilder(new File(objyBin, "ooschemaupgrade").getPath(),
-                            "-infile",
-                            file.getAbsolutePath(),
-                            connectionFile);
-                    if (requiresPlugins)
-                    {
-                        updateEnvironment(pluginDir, objyLib, pb);
-
-                    }
-
-                    Process p = pb.start();
-
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(p.getInputStream()));
-                    BufferedReader err = new BufferedReader(
-                            new InputStreamReader(p.getErrorStream()));
-                    p.waitFor();
-
-                    String line;
-
-                    while ((line = in.readLine()) != null) {
-                        System.out.println(line);
-                    }
-
-                    String errorMessage = "";
-                    while ((line = err.readLine()) != null) {
-                        errorMessage += line;
-                    }
-
-                    if (!errorMessage.equals(""))
-                    {
-                        throw new RuntimeException(errorMessage);
-                    }
-
-                } catch(Exception e)
-                {
-                    throw new RuntimeException("Could not upgrade schema using file '" + file + "'. " + e.getMessage());
-                }
-
-            }
-            if (file.getName().endsWith(".jar")){
-
+            if (step instanceof UpdateJarStep)
+            {
+                File file = new File(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
                 try{
                     ProcessBuilder pb = new ProcessBuilder("java",
-                            "-Djava.security.policy=" + getExecDir() + "/security.txt",
+                            "-Djava.security.policy=security.txt",
                             "-cp",
                             System.getProperty("java.class.path") + ":" + file.getAbsolutePath(),
                             "-jar",
@@ -172,118 +109,54 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
                             username,
                             password);
 
-                    if (requiresPlugins)
-                    {
-                        updateEnvironment(pluginDir, objyLib, pb);
-                    }
-                    Process p = pb.start();
-                    System.out.println("Started");
-                    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                    BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
-                    String line;
-
-                    while (true) {
-                        try {
-                            int exitCode = p.exitValue();
-                            break;
-                        } catch (IllegalThreadStateException e) {
-                            while ((line = in.readLine()) != null) {
-                                System.out.println(line);
-                            }
-                        }
-                    }
-
-
-                    while ((line = in.readLine()) != null) {
-                        System.out.println(line);
-                    }
-
-                    String errorMessage = "";
-                    while ((line = err.readLine()) != null) {
-                        errorMessage += line;
-                    }
-
-                    if (!errorMessage.equals(""))
-                    {
-                        throw new RuntimeException(errorMessage);
-                    }
-                    System.out.println("Done");
+                    startProcess(pb);
 
                 } catch(Exception e)
                 {
                     throw new RuntimeException("Could not run jar '" + file + "'. " + e.getMessage());
                 }
-            }
-        }
-    }
-
-    public static File getExecDir() {
-        if ( production )//in production
-        {
-            //OMG super lame
-            return new File(new File(UpgradeTool.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent());
-        }
-
-        return new File(System.getProperty("EXECUTION_STEPS_DIR"));
-
-    }
-
-    public ArrayList<File> getFilesToExecute() {
-        Scanner s = null;
-        File execDir = getExecDir();
-        File executionSteps = null;
-        File jar_dir = null;
-        File schema_dir = null;
-
-        if ( production )
-        {
-            jar_dir = execDir;
-            schema_dir = execDir;
-        }else{// for testing in intellij
-
-            jar_dir = new File(execDir, "../artifacts");
-            schema_dir = new File(execDir, "../../../schemas/current");
-        }
-
-        executionSteps = new File(execDir, "execution_steps.txt");
-
-        try{
-            s = new Scanner(executionSteps);
-        }
-        catch(NullPointerException e)
-        {
-            throw new RuntimeException("File not found: execution_steps.txt");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-
-        ArrayList<File> filesToExecute = new ArrayList<File>();
-
-        while (s.hasNext())
-        {
-            String filename = s.next().replaceAll("\\s+$", "").replaceAll(",", "");
-            File f = null;
-            if (filename.endsWith(".jar"))
-                f = new File(jar_dir, filename);
-            else if(filename.contains(".schema"))
-                f = new File(schema_dir, filename);
-            else
-                continue;
-
-            if (! f.exists())
+            }else if (step instanceof UpdateSchemaStep)
             {
-                throw new RuntimeException("File not found: " + f.getAbsolutePath());
+                File file = new File(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
+                try{
+                    ProcessBuilder pb = new ProcessBuilder(new File(objyBin, "ooschemaupgrade").getPath(),
+                            "-infile",
+                            file.getAbsolutePath(),
+                            connectionFile);
+
+                    startProcess(pb);
+
+                } catch(Exception e)
+                {
+                    throw new RuntimeException("Could not upgrade schema using file '" + file + "'. " + e.getMessage());
+                }
             }
-
-            filesToExecute.add(f);
-
         }
-        if (filesToExecute.isEmpty())
-        {
-            throw new RuntimeException("Nothing to execute");
+    }
+    
+    private void startProcess(ProcessBuilder pb) throws IOException, InterruptedException {
+        Process p = pb.start();
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(p.getInputStream()));
+        BufferedReader err = new BufferedReader(
+                new InputStreamReader(p.getErrorStream()));
+        p.waitFor();
+
+        String line;
+
+        while ((line = in.readLine()) != null) {
+            System.out.println(line);
         }
-        return filesToExecute;
+
+        String errorMessage = "";
+        while ((line = err.readLine()) != null) {
+            errorMessage += line;
+        }
+
+        if (!errorMessage.equals("")) {
+            throw new RuntimeException(errorMessage);
+        }
+
     }
 
     private void updateEnvironment(File pluginDir, String objyLib, ProcessBuilder pb) {

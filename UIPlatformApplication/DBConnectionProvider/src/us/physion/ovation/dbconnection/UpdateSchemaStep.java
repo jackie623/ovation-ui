@@ -4,10 +4,23 @@
  */
 package us.physion.ovation.dbconnection;
 
+import us.physion.ovation.interfaces.UpdateStep;
+
 /**
  *
  * @author huecotanks
  */
-public class UpdateSchemaStep {
+public class UpdateSchemaStep implements UpdateStep{
+
+    String schemafile;
+    
+    UpdateSchemaStep(String schema)
+    {
+        schemafile = schema;
+    }
+    @Override
+    public String getStepDescriptor() {
+        return schemafile;
+    }
     
 }

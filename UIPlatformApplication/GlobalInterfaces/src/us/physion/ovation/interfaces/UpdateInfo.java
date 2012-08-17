@@ -3,7 +3,7 @@ import java.util.List;
 
 public interface UpdateInfo
 {
-    public int getStartingSpecificationNumber();
-
+    public int getSchemaVersion();
+    public String getSpecificationVersion();
     public List<UpdateStep> getUpdateSteps(); 
 }

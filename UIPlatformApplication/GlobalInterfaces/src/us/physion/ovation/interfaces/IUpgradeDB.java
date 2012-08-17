@@ -13,5 +13,5 @@ package us.physion.ovation.interfaces;
  * To change this template use File | Settings | File Templates.
  */
 public interface IUpgradeDB {
-    public void start(String connectionfile, String username, String password);
+    public void start();
 }

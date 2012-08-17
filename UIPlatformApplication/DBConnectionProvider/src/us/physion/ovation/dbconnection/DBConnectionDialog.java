@@ -9,9 +9,7 @@ import com.objy.db.DatabaseOpenException;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import org.netbeans.api.autoupdate.*;
@@ -21,6 +19,9 @@ import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
+import us.physion.ovation.interfaces.IUpgradeDB;
+import us.physion.ovation.interfaces.UpdateInfo;
+import us.physion.ovation.interfaces.UpdateStep;
 import us.physion.ovation.interfaces.Updater;
 
 /**
@@ -275,7 +276,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         //run them in order -- determined either by spec number or some file
         //
         
-        List<UpdateElement> toEnable = new LinkedList<UpdateElement>();
+        /*List<UpdateElement> toEnable = new LinkedList<UpdateElement>();
         List<UpdateElement> toDisable = new LinkedList<UpdateElement>();
         List<UpdateUnit> units = UpdateManager.getDefault().getUpdateUnits();
         for (UpdateUnit unit : units)
@@ -332,14 +333,15 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         }
         
         System.out.println(Ovation.getBuildNumber());
+        */
         
-        
+       
         String username = viewModel.getUsername();
         String password = viewModel.getPassword();
         String connectionFile = connectionFileComboBox.getSelectedItem().toString();
         prefs.addConnectionFile(connectionFile);
         
-        DataContext c = getContextFromConnectionFile(connectionFile);
+        DataContext c = getContextFromConnectionFile(connectionFile, username, password);
         if (c == null){
             return;
         }
@@ -366,17 +368,36 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         dispose();      
     }//GEN-LAST:event_cancelAction
 
-    protected DataContext getContextFromConnectionFile(String connectionFile)
+    protected DataContext getContextFromConnectionFile(String connectionFile, String username, String password)
     {
         DataContext c = null;
         try {
             c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
         } catch (SchemaVersionException ex2)
         {
-            boolean success = shouldRunUpdater(ex2.getDatabaseSchemaNumber(), ex2.getAPISchemaNumber()); //ask the user if they want to run the upgrader
+            int databaseVersion = ex2.getDatabaseSchemaNumber();
+            int apiVersion = ex2.getAPISchemaNumber();
+            boolean success = shouldRunUpdater(databaseVersion, apiVersion); //ask the user if they want to run the upgrader
             if (success)
             {
-                success = runUpdater(new UpdaterInProgressDialog(), true);
+                Collection<? extends UpdateInfo> updates = Lookup.getDefault().lookupAll(UpdateInfo.class);
+                List<UpdateInfo> versions = new LinkedList<UpdateInfo>();
+                for (UpdateInfo u : updates)
+                {
+                    int updateVersion = u.getSchemaVersion();
+                    if (updateVersion > databaseVersion && updateVersion <= apiVersion)
+                    {
+                        versions.add(u);
+                    }
+                }
+                Collections.sort(versions, new UpdateComparator());
+                List<UpdateStep> steps = new LinkedList<UpdateStep>();
+                for (UpdateInfo ui : versions)
+                {
+                    steps.addAll(ui.getUpdateSteps());
+                }
+                UpgradeTool tool = new UpgradeTool(steps, connectionFile, username, password);
+                success = runUpdater(tool, new UpdaterInProgressDialog(), true);
             }
             if (success)
             {
@@ -439,9 +460,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         return false;
     }
     
-    protected boolean runUpdater(UpdaterInProgressDialog inProgress, boolean showDialogs)
+    protected boolean runUpdater(IUpgradeDB tool, UpdaterInProgressDialog inProgress, boolean showDialogs)
     {
-        //launch the updater in another thread
+        tool.start();
         if (showDialogs)
         {
             inProgress.showDialog();
@@ -519,5 +540,13 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
+    }
+    
+    class UpdateComparator implements Comparator<UpdateInfo>
+    {
+        @Override
+        public int compare(UpdateInfo t, UpdateInfo t1) {
+            return t.getSchemaVersion() - t1.getSchemaVersion();
+        }
     }
 }

@@ -12,6 +12,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import ovation.Ovation;
+import ovation.OvationException;
 
 import us.physion.ovation.interfaces.*;
 
@@ -23,16 +25,16 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
 
     private IUpdateProgress pu;
 
-    public static void runUpgrade (String[] args) throws Exception {
-        UpgradeTool ut = new UpgradeTool();
-
-        Properties p = new Properties(System.getProperties());
-        System.setProperty("java.security.policy", "security.txt");
-
-        if (args.length == 3)
-        {
-            ut.start(args[0], args[1], args[2]);
-        }
+    List<UpdateStep> steps;
+    String connectionFile;
+    String username;
+    String password;
+    public UpgradeTool(List<UpdateStep> updateSteps, String connectionFile, String username, String password)
+    {
+        steps = updateSteps;
+        this.connectionFile = connectionFile;
+        this.username = username;
+        this.password = password;
     }
 
     public static boolean isWindows() {
@@ -59,7 +61,11 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
 
     }
 
-    public void start(String connectionFile, String username, String password, List<UpdateStep> steps) {
+    public void start()
+    {
+        start(connectionFile, username, password);
+    }
+    public void start(String connectionFile, String username, String password) {
         //TODO: security manager
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new RMISecurityManager());
@@ -132,29 +138,26 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
                 }
             }
         }
+        System.out.println("Done");
     }
     
     private void startProcess(ProcessBuilder pb) throws IOException, InterruptedException {
         Process p = pb.start();
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(p.getInputStream()));
-        BufferedReader err = new BufferedReader(
-                new InputStreamReader(p.getErrorStream()));
-        p.waitFor();
+        
+        InputStreamHandler inputHandler = new InputStreamHandler(new InputStreamReader(p.getInputStream()));
+        InputStreamHandler errHandler = new InputStreamHandler(new InputStreamReader(p.getErrorStream()));
 
-        String line;
+        inputHandler.start();
+        errHandler.start();
 
-        while ((line = in.readLine()) != null) {
-            System.out.println(line);
-        }
 
-        String errorMessage = "";
-        while ((line = err.readLine()) != null) {
-            errorMessage += line;
-        }
-
-        if (!errorMessage.equals("")) {
-            throw new RuntimeException(errorMessage);
+        try {
+            int err = p.waitFor();
+            if (err != 0) {
+                Ovation.getLogger().error("Unable to complete command: " + errHandler.getCaptureBuffer());
+            }
+        } catch (InterruptedException e) {
+            throw new OvationException("Unable to complete command: " + e.getLocalizedMessage());
         }
 
     }
@@ -173,5 +176,38 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
     @Override
     public void update(int i, String string) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    static class InputStreamHandler extends Thread
+    {
+
+        private StringBuffer captureBuffer;
+        private InputStreamReader stream;
+
+        public InputStreamReader getStream() {
+            return stream;
+        }
+
+        public StringBuffer getCaptureBuffer() {
+            return captureBuffer;
+        }
+
+
+        InputStreamHandler(InputStreamReader inputStream) {
+            stream = inputStream;
+            captureBuffer = new StringBuffer();
+        }
+
+        public void run() {
+            try {
+                int nextChar;
+                while((nextChar = getStream().read()) >= 0) {
+                    getCaptureBuffer().append((char)nextChar);
+                }
+            }
+            catch(IOException e) {
+                Ovation.getLogger().error(e.getLocalizedMessage());
+            }
+        }
     }
 }

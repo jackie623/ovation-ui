@@ -15,6 +15,7 @@ import ovation.LogLevel;
 import ovation.Ovation;
 import ovation.database.DatabaseManager;
 import ovation.test.TestManager;
+import us.physion.ovation.interfaces.IUpgradeDB;
 import us.physion.ovation.interfaces.OvationTestCase;
 
 /**
@@ -82,7 +83,7 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
         DBConnectionDialog d = new DBConnectionDialog();
         UpdaterInProgressDialog running = new UpdaterInProgressDialog();
         running.cancelled = true;
-        assertFalse(d.runUpdater(running, false));
+        assertFalse(d.runUpdater(new TestUpgradeTool(), running, false));
     }
     
     @Test 
@@ -90,12 +91,20 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     {
         DBConnectionDialog d = new DBConnectionDialog();
         UpdaterInProgressDialog running = new UpdaterInProgressDialog();
-        assertTrue(d.runUpdater(running, false));
+        assertTrue(d.runUpdater(new TestUpgradeTool(), running, false));
     }
     
     @Test
     public void testPluginDependanciesAreHandledCorrectly()
     {
         
+    }
+    
+    class TestUpgradeTool implements IUpgradeDB{
+
+        @Override
+        public void start() {
+            //pass
+        }
     }
 }

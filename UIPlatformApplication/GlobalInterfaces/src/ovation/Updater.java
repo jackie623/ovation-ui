@@ -1,4 +1,4 @@
-package us.physion.ovation.interfaces;
+package ovation;
 
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.DataStoreCoordinator;
@@ -9,14 +9,16 @@ import com.objy.db.DatabaseOpenException;
 import com.objy.db.DatabaseNotFoundException;
 import ovation.Ovation;
 import java.rmi.Naming;
+import us.physion.ovation.interfaces.*;
+
 
 public class Updater {
-    public static boolean runUpdate(IAuthenticatedDataStoreCoordinator dsc, IUpdateProgress pu)
+    public boolean runUpdate(DataContext context, IUpdateProgress pu)
     {
 	throw new UnsupportedOperationException("Subclasses of the Updater should override the runUpdate method");
     }
     
-    public static void main(String[] args)
+    public void runMain(String[] args)
     {
 	if (args.length !=3) 
 	{
@@ -25,9 +27,11 @@ public class Updater {
 	}
 
 	DataStoreCoordinator c = null;
-        try {
+        DataContext context = null;
+	try {
             c = DataStoreCoordinator.coordinatorWithConnectionFile(args[0]);
-	    c.getContext().authenticateUser(args[1], args[2]);
+	    context = c.getContextForLicensedDB(false);
+	    context.authenticateUser(args[1], args[2]);
         }catch (DatabaseOpenException e){
 	    Ovation.getLogger().debug(e.getMessage());
 	    throw new OvationException(e.getMessage(), e);
@@ -42,12 +46,12 @@ public class Updater {
 
         IUpdateProgress pu = null;
 	try {                                                                                                                                                                                                                                                                                  
-	     pu = (IUpdateProgress) Naming.lookup("rmi://localhost:10001/ProgressUpdater");                                                                                                                                                                                                     
+	     pu = (IUpdateProgress) Naming.lookup("rmi://localhost:10002/ProgressUpdater");                                                                                                                                                                                                     
 	} catch (Exception e) {                                                                                                                                                                                                                                                                
 	     pu = null;                                                                                                                                                                                                                                                                         
 	}
 
-	runUpdate(c.getContext().getAuthenticatedDataStoreCoordinator(), pu);
+	runUpdate(context, pu);
     }
-    
+
 }

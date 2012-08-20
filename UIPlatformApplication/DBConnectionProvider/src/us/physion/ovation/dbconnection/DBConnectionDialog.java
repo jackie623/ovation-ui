@@ -85,16 +85,33 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         this(new JFrame(), true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
     }
 
-    private void showErrors(Exception e) {
-        errorScrollPane.setVisible(true);
-        this.pack();
-        if (e instanceof UserAuthenticationException) {
-            errorTextArea.setText("**Error: Username and password combination was not found.");
-        }
-        else {
-            errorTextArea.setText("**Error: " + e.getLocalizedMessage());
-        }
-        errorTextArea.setForeground(Color.RED);
+    private void showErrors(final Exception e) {
+             
+        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                errorScrollPane.setVisible(true);
+                DBConnectionDialog.this.pack();
+                if (e instanceof UserAuthenticationException) {
+                    errorTextArea.setText("**Error: Username and password combination was not found.");
+                } else {
+                    errorTextArea.setText("**Error: " + e.getLocalizedMessage());
+                }
+                errorTextArea.setForeground(Color.RED);
+            }
+        });
+        
+    }
+    
+    private void disposeOnEDT() {
+        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                DBConnectionDialog.this.dispose();
+            }
+        });
     }
 
     /**
@@ -336,31 +353,42 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         */
         
        
-        String username = viewModel.getUsername();
-        String password = viewModel.getPassword();
-        String connectionFile = connectionFileComboBox.getSelectedItem().toString();
+        final String username = viewModel.getUsername();
+        final String password = viewModel.getPassword();
+        final String connectionFile = connectionFileComboBox.getSelectedItem().toString();
         prefs.addConnectionFile(connectionFile);
         
-        DataContext c = getContextFromConnectionFile(connectionFile, username, password);
-        if (c == null){
-            return;
-        }
+        //run this on a thread that's not the event queue thread
+        Runnable r = new Runnable(){
+
+            @Override
+            public void run() {
+                DataContext c = getContextFromConnectionFile(connectionFile, username, password);
+                if (c == null) {
+                    return;
+                }
+
+                boolean authenticated = false;
+                try {
+                    authenticated = c.authenticateUser(username, password);
+                } catch (Exception ex) {
+                    showErrors(ex);
+                    return;
+                }
+                if (!authenticated) {
+                    showErrors(new UserAuthenticationException());
+                    return;
+                }
+                dsc = c.getAuthenticatedDataStoreCoordinator();
+                cancelled = false;
+                
+                disposeOnEDT();
+            }
+            
+        };
         
-        boolean authenticated = false;
-        try {
-            authenticated = c.authenticateUser(username, password);
-        } 
-        catch (Exception ex) {
-            showErrors(ex);
-            return;
-        }
-        if (!authenticated){
-            showErrors(new UserAuthenticationException());
-            return;
-        }
-        dsc = c.getAuthenticatedDataStoreCoordinator();
-        cancelled = false;
-        dispose();    
+        DatabaseConnectionProvider.runOffEDT(r);
+       
     }//GEN-LAST:event_connectAction
 
     private void cancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelAction
@@ -396,8 +424,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 {
                     steps.addAll(ui.getUpdateSteps());
                 }
-                UpgradeTool tool = new UpgradeTool(steps, connectionFile, username, password);
-                success = runUpdater(tool, new UpdaterInProgressDialog(), true);
+                UpdaterInProgressDialog uiUpdater = new UpdaterInProgressDialog();
+                UpgradeTool tool = new UpgradeTool(steps, connectionFile, username, password, uiUpdater);
+                success = runUpdater(tool, uiUpdater, true);
             }
             if (success)
             {
@@ -460,13 +489,15 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         return false;
     }
     
-    protected boolean runUpdater(IUpgradeDB tool, UpdaterInProgressDialog inProgress, boolean showDialogs)
+    protected boolean runUpdater(final IUpgradeDB tool, UpdaterInProgressDialog inProgress, boolean showDialogs)
     {
-        tool.start();
         if (showDialogs)
         {
             inProgress.showDialog();
         }
+        
+        tool.start();
+
         if (inProgress.isCancelled())
         {
             return false;

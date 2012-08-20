@@ -5,12 +5,14 @@
 package us.physion.ovation.dbconnection;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import us.physion.ovation.interfaces.IUpdateUI;
 
 /**
  *
  * @author huecotanks
  */
-public class UpdaterInProgressDialog extends javax.swing.JDialog {
+public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpdateUI{
 
     /**
      * Creates new form UpdaterInProgressDialog
@@ -30,7 +32,7 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jProgressBar1 = new javax.swing.JProgressBar();
+        progressBar = new javax.swing.JProgressBar();
         cancelButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -53,7 +55,7 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog {
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                     .add(jLabel1)
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .add(jProgressBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(progressBar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(18, 18, 18)
                         .add(cancelButton)))
                 .addContainerGap(24, Short.MAX_VALUE))
@@ -65,7 +67,7 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog {
                 .add(jLabel1)
                 .add(32, 32, 32)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jProgressBar1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(cancelButton))
                 .addContainerGap(14, Short.MAX_VALUE))
         );
@@ -78,11 +80,27 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog {
     {
         return cancelled;
     }
+    
+    private void disposeOnEDT() {
+        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                UpdaterInProgressDialog.this.dispose();
+            }
+        });
+    }
     protected void showDialog()
     {
-        this.setLocationRelativeTo(null);
-        this.pack();
-        this.setVisible(true);
+        DatabaseConnectionProvider.runOnEDT(new Runnable(){
+
+            @Override
+            public void run() {
+                UpdaterInProgressDialog.this.setLocationRelativeTo(null);
+                UpdaterInProgressDialog.this.pack();
+                UpdaterInProgressDialog.this.setVisible(true);
+            }
+        });
     }
     
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
@@ -143,6 +161,35 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JProgressBar progressBar;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void update(final int i, final String string) {
+        Runnable r = new Runnable(){
+
+            @Override
+            public void run() {
+                if (i < 0) {
+                    progressBar.setIndeterminate(true);
+                } else {
+                    progressBar.setIndeterminate(false);
+                    if (string != null) {
+                        progressBar.setStringPainted(true);
+                        progressBar.setString(string);
+                    }
+                    progressBar.setValue(i);
+                }
+            }
+        };
+
+        DatabaseConnectionProvider.runOnEDT(r);
+        
+        if (i >= 100)
+        {
+            //we're done
+            cancelled = false;
+            disposeOnEDT();
+        }
+    }
 }

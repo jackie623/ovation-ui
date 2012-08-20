@@ -5,6 +5,7 @@
 package us.physion.ovation.dbconnection;
 
 import javax.swing.JFrame;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -26,11 +27,32 @@ public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
         return cancelled;
     }
     
+    private void disposeOnEDT() {
+        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                ShouldRunUpdaterDialog.this.dispose();
+            }
+        });
+    }
     public void showDialog()
     {
-        this.setLocationRelativeTo(null);
-        this.pack();
-        this.setVisible(true);
+        try {
+            DatabaseConnectionProvider.runAndWaitOnEDT(new Runnable(){
+
+                @Override
+                public void run() {
+                    ShouldRunUpdaterDialog.this.setLocationRelativeTo(null);
+                    ShouldRunUpdaterDialog.this.pack();
+                    ShouldRunUpdaterDialog.this.setVisible(true);
+                }
+            });
+        } catch (InterruptedException ex) {
+            cancelled = true;
+            this.disposeOnEDT();
+            Exceptions.printStackTrace(ex);
+        }
     }
     
     /**

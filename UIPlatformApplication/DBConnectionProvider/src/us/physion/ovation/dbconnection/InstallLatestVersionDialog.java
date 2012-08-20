@@ -91,13 +91,12 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void downloadLinkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadLinkActionPerformed
-        if (Desktop.isDesktopSupported())
-        {
+        if (Desktop.isDesktopSupported()) {
             try {
                 URI uri = new URI("mailto", "support@physionconsulting.com", "subject=Ovation UI Issue Reporting");
                 //URI uri = new URI("mailto:support@physionconsulting.com?subject=Ovation UI Issue Reporting");
                 Desktop.getDesktop().mail(uri);
-                downloadLink.setForeground(new Color(102,51,102));
+                downloadLink.setForeground(new Color(102, 51, 102));
 
             } catch (URISyntaxException ex) {
                 Exceptions.printStackTrace(ex);
@@ -112,13 +111,35 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
         dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    
-    public void showDialog()
-    {
-        this.setLocationRelativeTo(null);
-        this.pack();
-        this.setVisible(true);
+    protected void disposeOnEDT() {
+        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                InstallLatestVersionDialog.this.dispose();
+            }
+        });
     }
+
+    public void showDialog() {
+        try {
+            DatabaseConnectionProvider.runAndWaitOnEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                    InstallLatestVersionDialog.this.setLocationRelativeTo(null);
+                    InstallLatestVersionDialog.this.pack();
+                    InstallLatestVersionDialog.this.setVisible(true);
+                }
+            });
+        } catch (InterruptedException ex) {
+            this.disposeOnEDT();
+            Exceptions.printStackTrace(ex);
+        }
+
+
+    }
+
     /**
      * @param args the command line arguments
      */

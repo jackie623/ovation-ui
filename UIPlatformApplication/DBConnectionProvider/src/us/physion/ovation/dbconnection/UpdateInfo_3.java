@@ -6,9 +6,12 @@ package us.physion.ovation.dbconnection;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.openide.util.lookup.ServiceProvider;
+import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.UpdateInfo;
 import us.physion.ovation.interfaces.UpdateStep;
 
+@ServiceProvider(service = UpdateInfo.class)
 /**
  *
  * @author huecotanks
@@ -31,13 +34,13 @@ public class UpdateInfo_3 implements UpdateInfo{
     @Override
     public int getSchemaVersion()
     {
-        return 3;
+        return 2;
     }
     
     @Override
     public List<UpdateStep> getUpdateSteps() {
         List<UpdateStep> steps = new LinkedList<UpdateStep>();
-        steps.add(new UpdateJarStep("~/Ovation/ovation-ui/UIPlatformApplication/Update_3.jar"));//for development, this is a hardcoded path, in production and tests, this should be on s3
+        steps.add(new UpdateJarStep("/Users/huecotanks/Ovation/ovation-ui/UIPlatformApplication/Update_3.jar"));//for development, this is a hardcoded path, in production and tests, this should be on s3
         //steps.add(new UpdateSchemaStep("schema step"));
         //write the proper database schema number, too
         return steps;

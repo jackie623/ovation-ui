@@ -21,7 +21,7 @@ import us.physion.ovation.interfaces.*;
  *
  * @author huecotanks
  */
-public class UpgradeTool implements IUpgradeDB, IUpdateUI{
+public class UpgradeTool implements IUpgradeDB{
 
     private IUpdateProgress pu;
 
@@ -29,12 +29,20 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
     String connectionFile;
     String username;
     String password;
+    IUpdateUI uiUpdater = null;
+    
     public UpgradeTool(List<UpdateStep> updateSteps, String connectionFile, String username, String password)
     {
         steps = updateSteps;
         this.connectionFile = connectionFile;
         this.username = username;
         this.password = password;
+    }
+    
+    public UpgradeTool(List<UpdateStep> updateSteps, String connectionFile, String username, String password, IUpdateUI ui)
+    {
+        this(updateSteps, connectionFile, username, password);
+        uiUpdater = ui;
     }
 
     public static boolean isWindows() {
@@ -72,9 +80,9 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
         }
 
         try{
-            pu = new ProgressUpdater(connectionFile, username, password, this);
-            UnicastRemoteObject.exportObject(pu, 10001);
-            Registry r = LocateRegistry.createRegistry(10001);
+            pu = new ProgressUpdater(connectionFile, username, password, uiUpdater);
+            UnicastRemoteObject.exportObject(pu, 10002);
+            Registry r = LocateRegistry.createRegistry(10002);
             r.bind("ProgressUpdater", pu);
 
         }catch (RemoteException e)
@@ -98,7 +106,9 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
         }
 
         System.out.println("Running on platform " + platform);
-
+        update(-1, "Initializing");
+        int totalSteps = steps.size();
+        int stepNumber = 1;
         for (UpdateStep step : steps)
         {
             if (step instanceof UpdateJarStep)
@@ -137,11 +147,13 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
                     throw new RuntimeException("Could not upgrade schema using file '" + file + "'. " + e.getMessage());
                 }
             }
+            update(-1, "Completed upgrade step " + stepNumber++ + " of " + totalSteps);
         }
         System.out.println("Done");
+        update(100, "Done");
     }
     
-    private void startProcess(ProcessBuilder pb) throws IOException, InterruptedException {
+    private boolean startProcess(ProcessBuilder pb) throws IOException, InterruptedException {
         Process p = pb.start();
         
         InputStreamHandler inputHandler = new InputStreamHandler(new InputStreamReader(p.getInputStream()));
@@ -150,16 +162,17 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
         inputHandler.start();
         errHandler.start();
 
-
         try {
             int err = p.waitFor();
             if (err != 0) {
+                System.out.println("Error: " + errHandler.getCaptureBuffer());
                 Ovation.getLogger().error("Unable to complete command: " + errHandler.getCaptureBuffer());
+                return false;
             }
         } catch (InterruptedException e) {
             throw new OvationException("Unable to complete command: " + e.getLocalizedMessage());
         }
-
+        return true;
     }
 
     private void updateEnvironment(File pluginDir, String objyLib, ProcessBuilder pb) {
@@ -173,11 +186,13 @@ public class UpgradeTool implements IUpgradeDB, IUpdateUI{
         }
     }
 
-    @Override
-    public void update(int i, String string) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    private void update(int percent, String text)
+    {
+        if (uiUpdater == null)
+            return;
+        
+        uiUpdater.update(percent, text);
     }
-    
     static class InputStreamHandler extends Thread
     {
 

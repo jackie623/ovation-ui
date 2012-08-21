@@ -34,12 +34,13 @@ public class UpdateInfo_3 implements UpdateInfo{
     @Override
     public int getSchemaVersion()
     {
-        return 2;
+        return 3;
     }
     
     @Override
     public List<UpdateStep> getUpdateSteps() {
         List<UpdateStep> steps = new LinkedList<UpdateStep>();
+        steps.add(new UpdateSchemaStep("/Users/huecotanks/Ovation/production/schemas/r16/ovation.schema", "3"));
         steps.add(new UpdateJarStep("/Users/huecotanks/Ovation/ovation-ui/UIPlatformApplication/Update_3.jar"));//for development, this is a hardcoded path, in production and tests, this should be on s3
         //steps.add(new UpdateSchemaStep("schema step"));
         //write the proper database schema number, too

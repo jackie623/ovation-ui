@@ -104,9 +104,7 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
     }
     
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        cancelled = true;
-        //TODO: should we be able to force quit the java process that is running the update?
-        dispose();
+        cancel();
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     /**
@@ -187,9 +185,20 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
         
         if (i >= 100)
         {
+            UpdateSucceeded d = new UpdateSucceeded();
+            d.showDialog();
+            
             //we're done
             cancelled = false;
             disposeOnEDT();
         }
+    }
+    
+    @Override
+    public void cancel()
+    {
+        cancelled = true;
+        //TODO: should we be able to force quit the java process that is running the update?
+        disposeOnEDT();
     }
 }

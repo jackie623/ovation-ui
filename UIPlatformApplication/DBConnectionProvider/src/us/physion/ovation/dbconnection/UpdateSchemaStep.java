@@ -13,14 +13,21 @@ import us.physion.ovation.interfaces.UpdateStep;
 public class UpdateSchemaStep implements UpdateStep{
 
     String schemafile;
+    String version;
     
-    UpdateSchemaStep(String schema)
+    UpdateSchemaStep(String schema, String version)
     {
         schemafile = schema;
+        this.version = version;
     }
     @Override
     public String getStepDescriptor() {
         return schemafile;
+    }
+    
+    public String getSchemaVersion()
+    {
+        return version;
     }
     
 }

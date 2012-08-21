@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.dbconnection;
 
+import ovation.UpgradeTool;
 import com.objy.db.DatabaseNotFoundException;
 import com.objy.db.DatabaseOpenException;
 import java.awt.Color;
@@ -419,13 +420,8 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                     }
                 }
                 Collections.sort(versions, new UpdateComparator());
-                List<UpdateStep> steps = new LinkedList<UpdateStep>();
-                for (UpdateInfo ui : versions)
-                {
-                    steps.addAll(ui.getUpdateSteps());
-                }
                 UpdaterInProgressDialog uiUpdater = new UpdaterInProgressDialog();
-                UpgradeTool tool = new UpgradeTool(steps, connectionFile, username, password, uiUpdater);
+                UpgradeTool tool = new UpgradeTool(versions, connectionFile, username, password, uiUpdater);
                 success = runUpdater(tool, uiUpdater, true);
             }
             if (success)

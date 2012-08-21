@@ -95,9 +95,16 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     }
     
     @Test
-    public void testPluginDependanciesAreHandledCorrectly()
+    public void testRunUpdaterWaitsForUsersToQuitBeforeRunning()
     {
         
+        //TODO
+    }
+    
+    @Test
+    public void testPluginDependanciesAreHandledCorrectly()
+    {
+        //TODO
     }
     
     class TestUpgradeTool implements IUpgradeDB{

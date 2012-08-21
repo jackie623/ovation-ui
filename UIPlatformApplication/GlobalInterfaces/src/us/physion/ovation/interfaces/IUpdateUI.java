@@ -14,4 +14,5 @@ package us.physion.ovation.interfaces;
  */
 public interface IUpdateUI{
     public void update(int progress, String text);
+    public void cancel();
 }

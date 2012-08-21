@@ -29,8 +29,8 @@ public class Updater {
 	DataStoreCoordinator c = null;
         DataContext context = null;
 	try {
-            c = DataStoreCoordinator.coordinatorWithConnectionFile(args[0]);
-	    context = c.getContextForLicensedDB(false);
+            c = DataStoreCoordinator.coordinatorWithConnectionFile(args[0], false);
+	    context = c.getContext();
 	    context.authenticateUser(args[1], args[2]);
         }catch (DatabaseOpenException e){
 	    Ovation.getLogger().debug(e.getMessage());

@@ -4,7 +4,6 @@
  */
 package us.physion.ovation.dbconnection;
 
-import ovation.UpgradeTool;
 import com.objy.db.DatabaseNotFoundException;
 import com.objy.db.DatabaseOpenException;
 import java.awt.Color;
@@ -92,6 +91,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
 
             @Override
             public void run() {
+               // DBConnectionDialog.this.setVisible(true);
                 errorScrollPane.setVisible(true);
                 DBConnectionDialog.this.pack();
                 if (e instanceof UserAuthenticationException) {
@@ -358,6 +358,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         final String password = viewModel.getPassword();
         final String connectionFile = connectionFileComboBox.getSelectedItem().toString();
         prefs.addConnectionFile(connectionFile);
+        //this.setVisible(false);
         
         //run this on a thread that's not the event queue thread
         Runnable r = new Runnable(){
@@ -422,6 +423,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 Collections.sort(versions, new UpdateComparator());
                 UpdaterInProgressDialog uiUpdater = new UpdaterInProgressDialog();
                 UpgradeTool tool = new UpgradeTool(versions, connectionFile, username, password, uiUpdater);
+                uiUpdater.setUpgradeTool(tool);
                 success = runUpdater(tool, uiUpdater, true);
             }
             if (success)

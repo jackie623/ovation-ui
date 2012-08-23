@@ -4,8 +4,9 @@
  */
 package us.physion.ovation.dbconnection;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.*;
 import us.physion.ovation.interfaces.IUpdateUI;
 
 /**
@@ -14,12 +15,29 @@ import us.physion.ovation.interfaces.IUpdateUI;
  */
 public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpdateUI{
 
+    
+    private UpgradeTool tool;
     /**
      * Creates new form UpdaterInProgressDialog
      */
     public UpdaterInProgressDialog() {
         super(new JFrame(), true);
         initComponents();
+        
+        this.getRootPane().setDefaultButton(cancelButton);
+        getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "CANCEL");
+        getRootPane().getActionMap().put("CANCEL", new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancel();
+            }
+        });
+    }
+    
+    public void setUpgradeTool(UpgradeTool t)
+    {
+        tool = t;
     }
 
     /**
@@ -34,8 +52,10 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
         jLabel1 = new javax.swing.JLabel();
         progressBar = new javax.swing.JProgressBar();
         cancelButton = new javax.swing.JButton();
+        forceButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(org.openide.util.NbBundle.getMessage(UpdaterInProgressDialog.class, "UpdaterInProgressDialog.title")); // NOI18N
 
         jLabel1.setText(org.openide.util.NbBundle.getMessage(UpdaterInProgressDialog.class, "UpdaterInProgressDialog.jLabel1.text")); // NOI18N
 
@@ -46,30 +66,45 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
             }
         });
 
+        forceButton.setText(org.openide.util.NbBundle.getMessage(UpdaterInProgressDialog.class, "UpdaterInProgressDialog.forceButton.text")); // NOI18N
+        forceButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                forceButtonActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(31, 31, 31)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(jLabel1)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .add(progressBar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(18, 18, 18)
-                        .add(cancelButton)))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(cancelButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 101, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                        .add(layout.createSequentialGroup()
+                            .add(31, 31, 31)
+                            .add(jLabel1)
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(forceButton))
+                        .add(layout.createSequentialGroup()
+                            .add(23, 23, 23)
+                            .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 573, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(27, 27, 27)
-                .add(jLabel1)
-                .add(32, 32, 32)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(cancelButton))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .add(22, 22, 22)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(jLabel1)
+                    .add(forceButton))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(cancelButton)
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         pack();
@@ -104,8 +139,23 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
     }
     
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        cancel();
+        if (cancelButton.getText().toLowerCase().equals("cancel"))
+            cancel();
+        else if (cancelButton.getText().toLowerCase().equals("finished")){
+            cancelled = false;
+            disposeOnEDT();
+        }
     }//GEN-LAST:event_cancelButtonActionPerformed
+
+    private void forceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forceButtonActionPerformed
+        AreYouSureDialog d = new AreYouSureDialog();
+        d.showDialog();
+        if (!d.isCancelled())
+        {
+            if (tool != null)
+                tool.forceUpdate();
+        }
+    }//GEN-LAST:event_forceButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -158,6 +208,7 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
+    private javax.swing.JButton forceButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JProgressBar progressBar;
     // End of variables declaration//GEN-END:variables
@@ -172,11 +223,11 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
                     progressBar.setIndeterminate(true);
                 } else {
                     progressBar.setIndeterminate(false);
-                    if (string != null) {
-                        progressBar.setStringPainted(true);
-                        progressBar.setString(string);
-                    }
                     progressBar.setValue(i);
+                }
+                if (string != null) {
+                    System.out.println("Update jar: " + string);
+                    jLabel1.setText(string);
                 }
             }
         };
@@ -185,12 +236,14 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
         
         if (i >= 100)
         {
-            UpdateSucceeded d = new UpdateSucceeded();
-            d.showDialog();
-            
-            //we're done
-            cancelled = false;
-            disposeOnEDT();
+            DatabaseConnectionProvider.runOnEDT(new Runnable(){
+
+                @Override
+                public void run() {
+                    cancelButton.setText("Finished");
+                    cancelButton.setFocusPainted(true);
+                }
+            });
         }
     }
     

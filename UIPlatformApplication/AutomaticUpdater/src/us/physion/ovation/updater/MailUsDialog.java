@@ -31,6 +31,7 @@ public class MailUsDialog extends javax.swing.JDialog {
         initComponents();
         setLocationRelativeTo(null);
         setTitle("Send Feedback");
+        this.getRootPane().setDefaultButton(okButton);
     }
 
     /**
@@ -44,7 +45,7 @@ public class MailUsDialog extends javax.swing.JDialog {
 
         jScrollPane2 = new javax.swing.JScrollPane();
         jTextArea2 = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
+        okButton = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -55,10 +56,10 @@ public class MailUsDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jButton1.setText(org.openide.util.NbBundle.getMessage(MailUsDialog.class, "MailUsDialog.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        okButton.setText(org.openide.util.NbBundle.getMessage(MailUsDialog.class, "MailUsDialog.okButton.text")); // NOI18N
+        okButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                okButtonActionPerformed(evt);
             }
         });
 
@@ -83,7 +84,7 @@ public class MailUsDialog extends javax.swing.JDialog {
             .add(layout.createSequentialGroup()
                 .add(20, 20, 20)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 108, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 108, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jLabel2))
                 .add(0, 28, Short.MAX_VALUE))
             .add(layout.createSequentialGroup()
@@ -106,16 +107,16 @@ public class MailUsDialog extends javax.swing.JDialog {
                 .add(18, 18, 18)
                 .add(jLabel1)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jButton1)
+                .add(okButton)
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         this.dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_okButtonActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         if (Desktop.isDesktopSupported())
@@ -190,11 +191,11 @@ public class MailUsDialog extends javax.swing.JDialog {
         this.setVisible(true);
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea jTextArea2;
+    private javax.swing.JButton okButton;
     // End of variables declaration//GEN-END:variables
 }

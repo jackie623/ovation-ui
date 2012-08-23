@@ -24,6 +24,8 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
     public InstallLatestVersionDialog() {
         super(new JFrame(), true);
         initComponents();
+        
+        this.getRootPane().setDefaultButton(okButton);
     }
 
     /**
@@ -35,16 +37,16 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
+        okButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         downloadLink = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jButton1.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        okButton.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.okButton.text")); // NOI18N
+        okButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                okButtonActionPerformed(evt);
             }
         });
 
@@ -65,10 +67,10 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                        .add(jButton1)
-                        .add(layout.createSequentialGroup()
-                            .add(24, 24, 24)
+                    .add(layout.createSequentialGroup()
+                        .add(24, 24, 24)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(okButton)
                             .add(jLabel1)))
                     .add(layout.createSequentialGroup()
                         .add(77, 77, 77)
@@ -83,7 +85,7 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
                 .add(18, 18, 18)
                 .add(downloadLink, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jButton1)
+                .add(okButton)
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -107,9 +109,9 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_downloadLinkActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_okButtonActionPerformed
 
     protected void disposeOnEDT() {
         DatabaseConnectionProvider.runOnEDT(new Runnable() {
@@ -191,7 +193,7 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton downloadLink;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton okButton;
     // End of variables declaration//GEN-END:variables
 }

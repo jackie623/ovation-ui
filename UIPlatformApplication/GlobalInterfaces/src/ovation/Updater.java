@@ -29,9 +29,15 @@ public class Updater {
 	DataStoreCoordinator c = null;
         DataContext context = null;
 	try {
-            c = DataStoreCoordinator.coordinatorWithConnectionFile(args[0], false);
+            c = DataStoreCoordinator.coordinatorForDatabaseUpgrade(args[0]);
 	    context = c.getContext();
+	    System.out.println("Getting context");
+	    if (context == null)
+		{
+		    throw new OvationException("Something went wrong - context is null!");
+		}
 	    context.authenticateUser(args[1], args[2]);
+	    System.out.println("Authenticating user");
         }catch (DatabaseOpenException e){
 	    Ovation.getLogger().debug(e.getMessage());
 	    throw new OvationException(e.getMessage(), e);

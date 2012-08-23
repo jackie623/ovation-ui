@@ -17,24 +17,29 @@ import java.util.Iterator;
 
 public class Update_3 extends Updater{
 
+    IUpdateProgress pu;
     @Override
     public boolean runUpdate(DataContext c, IUpdateProgress pu)
     {
+	this.pu = pu;
+	System.setProperty("no.parallel.scan", "true");
 	if (pu != null)
 	{ 
-	    try {
-		pu.update(-1, "Migrating DerivedResponses");
-	    } catch (RemoteException e) {
-		//pass                                                                                                                                                                                                                                                                       
-	    }
+	    update(-1, "Migrating DerivedResponses");
 	}
 
 	Iterator<DerivedResponse> derivedResponses = c.query(DerivedResponse.class, "true");
+	if (!derivedResponses.hasNext())
+	{
+	    update(-1, "Warning: No DerivedResponses in the database");
+	}
+	
+	int count =1;
 	while (derivedResponses.hasNext())
 	    {
-		
-		DerivedResponse a = derivedResponses.next();
+		update ((count++)%99, "Updating derived response " + count);
 
+		DerivedResponse a = derivedResponses.next();
 		c.beginTransaction();
 		try{
 		    a.setUTI(Response.NUMERIC_DATA_UTI);
@@ -49,25 +54,24 @@ public class Update_3 extends Updater{
 		    throw new OvationException("Error while updating: UTI was not set properly");
 	    }
 
-        //moves all the users into one container
+	//moves all the users into one container
         //
-	Iterator<User> users = c.getUsersIterator();
-	int i = 0;
+	c.beginTransaction();
+	try{
+	    Iterator<User> users = c.DBUtilities().getUsersAndGroupsDB().scan("ovation.User", "true");//c.getUsersIterator();
+	    int i = 0;
+	if (!users.hasNext())
+	{
+	    throw new OvationException("No Users in the database!");
+	}
 	
 	while (users.hasNext()){
-
-	    if (pu != null){
-		try{
-		    pu.update(i++, "Moving Users");
-		} catch (RemoteException e)
-		    {
-			//pass
-		    }
-	    }
+	    
+	    update(i++, "Moving Users");
 
 	    c.beginTransaction();
 	    User u = users.next();
-	    
+
 	    String containerID = c.DBUtilities().getUsersAndGroupsContainer().getOid().getString();
 	    try{
 		if (!u.getContainer().getOid().getString().equals(containerID))
@@ -83,24 +87,41 @@ public class Update_3 extends Updater{
 	    }
 	    
 	}
-	
-	if (pu != null)
+	c.commitTransaction();
+	} catch (Exception e)
 	{
-
-	    try{
-		pu.update(-1, "Moving Sources");
-	    } catch (RemoteException e)
-		{
-		    //pass
-		}
+	    c.abortTransaction();
+	    throw new OvationException(e.getMessage(), e);
 	}
 
+	c.beginTransaction();
+	try{
+	    Iterator<User> users = c.DBUtilities().getUsersAndGroupsDB().scan("ovation.User", "true");//c.getUsersIterator();                                                                                                                                                                    
+	    String containerID = c.DBUtilities().getUsersAndGroupsContainer().getOid().getString();
+	    while (users.hasNext()){
+		User u = users.next();
+		if (!u.getContainer().getOid().getString().equals(containerID))
+		{
+		    throw new OvationException("Update failed: Unable to move user to proper container");
+		}
+	    }
+	} finally{
+	    c.commitTransaction();
+	}
+	
+	
+	update(-1, "Moving Sources");
+
 	Iterator<Source> sources = c.query(c.DBUtilities().getSourcesDB(), Source.class, "true");
+	if (!sources.hasNext())
+	    {
+		throw new OvationException("Update failed: No sources in the database!");
+	    }
 	while (sources.hasNext()){
 
 	    c.beginTransaction();
 	    Source u = sources.next();
-
+	
 	    String containerID = c.DBUtilities().getSourcesContainer().getOid().getString();
 	    try{
 		if (!u.getContainer().getOid().getString().equals(containerID))
@@ -115,9 +136,34 @@ public class Update_3 extends Updater{
 		throw new OvationException("Error while updating: "  + e.getMessage());
 	    }
 	    
+	    c.beginTransaction();
+	    try{
+		if (!u.getContainer().getOid().getString().equals(containerID))
+		    {
+			throw new OvationException("Update failed: Unable to move source to proper container");
+		    }
+	    } finally{
+		c.commitTransaction();
+	    }
+
 	}
 	
         return true;
+    }
+
+
+    public void update(int i, String message)
+    {
+        if (pu != null)
+	{
+
+	    try{
+		pu.update(i, message);
+	    } catch (RemoteException e)
+		{
+		    //pass
+		}
+	}
     }
 
     public static void main(String[] args)

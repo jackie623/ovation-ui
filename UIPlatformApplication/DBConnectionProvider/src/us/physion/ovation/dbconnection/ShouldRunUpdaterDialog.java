@@ -6,6 +6,7 @@ package us.physion.ovation.dbconnection;
 
 import javax.swing.JFrame;
 import org.openide.util.Exceptions;
+import ovation.DataStoreCoordinator;
 
 /**
  *
@@ -19,6 +20,7 @@ public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
     public ShouldRunUpdaterDialog() {
         super(new JFrame(), true);
         initComponents();
+        this.getRootPane().setDefaultButton(cancelButton);
     }
     
     private boolean cancelled = false;
@@ -64,16 +66,18 @@ public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        outOfDateLabel = new javax.swing.JLabel();
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
+        shouldUpgradeLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(ShouldRunUpdaterDialog.class, "ShouldRunUpdaterDialog.jLabel1.text")); // NOI18N
+        outOfDateLabel.setFont(new java.awt.Font("Lucida Grande", 1, 14)); // NOI18N
+        outOfDateLabel.setText(org.openide.util.NbBundle.getMessage(ShouldRunUpdaterDialog.class, "ShouldRunUpdaterDialog.outOfDateLabel.text")); // NOI18N
 
         okButton.setText(org.openide.util.NbBundle.getMessage(ShouldRunUpdaterDialog.class, "ShouldRunUpdaterDialog.okButton.text")); // NOI18N
+        okButton.setFocusPainted(false);
         okButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okButtonActionPerformed(evt);
@@ -87,7 +91,7 @@ public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(ShouldRunUpdaterDialog.class, "ShouldRunUpdaterDialog.jLabel2.text")); // NOI18N
+        shouldUpgradeLabel.setText(org.openide.util.NbBundle.getMessage(ShouldRunUpdaterDialog.class, "ShouldRunUpdaterDialog.shouldUpgradeLabel.text")); // NOI18N
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -95,34 +99,30 @@ public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(layout.createSequentialGroup()
+                        .add(162, 162, 162)
                         .add(cancelButton)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(18, 18, 18)
                         .add(okButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 84, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                     .add(layout.createSequentialGroup()
+                        .add(31, 31, 31)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(layout.createSequentialGroup()
-                                .add(79, 79, 79)
-                                .add(jLabel1))
-                            .add(layout.createSequentialGroup()
-                                .add(22, 22, 22)
-                                .add(jLabel2)))
-                        .add(0, 12, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .add(shouldUpgradeLabel)
+                            .add(outOfDateLabel))))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(31, 31, 31)
-                .add(jLabel1)
+                .add(25, 25, 25)
+                .add(outOfDateLabel)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(jLabel2)
+                .add(shouldUpgradeLabel)
                 .add(18, 18, 18)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(okButton)
-                    .add(cancelButton))
-                .addContainerGap(24, Short.MAX_VALUE))
+                    .add(cancelButton)
+                    .add(okButton))
+                .addContainerGap(22, Short.MAX_VALUE))
         );
 
         pack();
@@ -186,8 +186,8 @@ public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JButton okButton;
+    private javax.swing.JLabel outOfDateLabel;
+    private javax.swing.JLabel shouldUpgradeLabel;
     // End of variables declaration//GEN-END:variables
 }

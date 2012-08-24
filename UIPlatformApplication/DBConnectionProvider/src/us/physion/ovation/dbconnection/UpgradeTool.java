@@ -17,6 +17,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import org.openide.util.Exceptions;
 import ovation.DataStoreCoordinator;
+import ovation.DatabaseIsUpgradingException;
 import ovation.Ovation;
 import ovation.OvationException;
 import ovation.util.CommandUtilities;

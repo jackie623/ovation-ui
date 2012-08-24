@@ -29,7 +29,7 @@ public class Updater {
 	DataStoreCoordinator c = null;
         DataContext context = null;
 	try {
-            c = DataStoreCoordinator.coordinatorWithConnectionFile(args[0], "UPGRADE");
+            c = DataStoreCoordinator.coordinatorForDatabaseUpgrade(args[0]);
 	    context = c.getContext();
 	    System.out.println("Getting context");
 	    if (context == null)

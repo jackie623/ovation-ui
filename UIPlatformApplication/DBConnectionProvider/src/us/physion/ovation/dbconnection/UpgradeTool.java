@@ -19,6 +19,7 @@ import org.openide.util.Exceptions;
 import ovation.DataStoreCoordinator;
 import ovation.Ovation;
 import ovation.OvationException;
+import ovation.util.CommandUtilities;
 import us.physion.ovation.dbconnection.UpdateJarStep;
 import us.physion.ovation.dbconnection.UpdateSchemaStep;
 
@@ -77,11 +78,17 @@ public class UpgradeTool implements IUpgradeDB {
     public void start() {
         DataStoreCoordinator dsc = null;
         try {
-            dsc = DataStoreCoordinator.coordinatorForDatabaseUpgrade(connectionFile);
+            dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile, "UPGRADE");
         } catch (DatabaseOpenException ex) {
             throw new OvationException(ex.getMessage(), ex);
         } catch (DatabaseNotFoundException ex) {
             throw new OvationException(ex.getMessage(), ex);
+        }
+        
+        if (dsc.getStringDatabasePreference("OVATION_UPGRADE_CONNECTION_LIST").split(":").length > 1)
+        {
+            dsc.removeFromConnectionList(dsc.getContext(), "OVATION_UPGRADE_CONNECTION_LIST");
+            throw new DatabaseIsUpgradingException();
         }
         while (dsc.getConnectedHosts().size() != 0)
         {
@@ -106,7 +113,6 @@ public class UpgradeTool implements IUpgradeDB {
     }
 
     public void start(String connectionFile, String username, String password) {
-        //TODO: security manager
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new RMISecurityManager());
         }
@@ -158,7 +164,7 @@ public class UpgradeTool implements IUpgradeDB {
                                     username,
                                     password);
 
-                            startProcess(pb);
+                            CommandUtilities.runCommand(pb);
 
                         } catch (Exception e) {
                             throw new RuntimeException("Could not run jar '" + file + "'. " + e.getMessage());
@@ -171,8 +177,7 @@ public class UpgradeTool implements IUpgradeDB {
                                     file.getAbsolutePath(),
                                     connectionFile);
 
-                            startProcess(pb);
-
+                            CommandUtilities.runCommand(pb);
 
                         } catch (Exception e) {
                             throw new RuntimeException("Could not upgrade schema using file '" + file + "'. " + e.getMessage());
@@ -182,7 +187,7 @@ public class UpgradeTool implements IUpgradeDB {
                 System.out.println("Done with update");
 
                 try {
-                    DataStoreCoordinator dsc = DataStoreCoordinator.coordinatorForDatabaseUpgrade(connectionFile);
+                    DataStoreCoordinator dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile, "UPGRADE");
                     dsc.getContext();
                     dsc.setDatabasePreference("OVATION_SCHEMA_VERSION", String.valueOf(update.getSchemaVersion()));
                     dsc.close();
@@ -193,7 +198,7 @@ public class UpgradeTool implements IUpgradeDB {
                 }
             }
             try {
-                DataStoreCoordinator dsc = DataStoreCoordinator.coordinatorForDatabaseUpgrade(connectionFile);
+                DataStoreCoordinator dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile, "UPGRADE");
                 dsc.upgradeFinished();
                 dsc.close();
             } catch (DatabaseOpenException ex) {
@@ -212,28 +217,7 @@ public class UpgradeTool implements IUpgradeDB {
             throw new OvationException(e.getMessage(), e);
         }
     }
-    
-    private void startProcess(ProcessBuilder pb) throws IOException, InterruptedException {
-        Process p = pb.start();
-        
-        InputStreamHandler inputHandler = new InputStreamHandler(new InputStreamReader(p.getInputStream()));
-        InputStreamHandler errHandler = new InputStreamHandler(new InputStreamReader(p.getErrorStream()));
-
-        inputHandler.start();
-        errHandler.start();
-
-        try {
-            int err = p.waitFor();
-            if (err != 0) {
-                System.out.println("Error: " + errHandler.getCaptureBuffer());
-                Ovation.getLogger().error("Unable to complete command: " + errHandler.getCaptureBuffer());
-                throw new OvationException(errHandler.getCaptureBuffer().toString());
-            }
-        } catch (InterruptedException e) {
-            throw new OvationException("Unable to complete command: " + e.getLocalizedMessage());
-        }
-    }
-
+  
     private void updateEnvironment(File pluginDir, String objyLib, ProcessBuilder pb) {
         Map env = pb.environment();
         env.put("OO_PLUGIN_SPEC_DIR", pluginDir.getAbsolutePath());
@@ -251,37 +235,5 @@ public class UpgradeTool implements IUpgradeDB {
             return;
         
         uiUpdater.update(percent, text);
-    }
-    static class InputStreamHandler extends Thread
-    {
-
-        private StringBuffer captureBuffer;
-        private InputStreamReader stream;
-
-        public InputStreamReader getStream() {
-            return stream;
-        }
-
-        public StringBuffer getCaptureBuffer() {
-            return captureBuffer;
-        }
-
-
-        InputStreamHandler(InputStreamReader inputStream) {
-            stream = inputStream;
-            captureBuffer = new StringBuffer();
-        }
-
-        public void run() {
-            try {
-                int nextChar;
-                while((nextChar = getStream().read()) >= 0) {
-                    getCaptureBuffer().append((char)nextChar);
-                }
-            }
-            catch(IOException e) {
-                Ovation.getLogger().error(e.getLocalizedMessage());
-            }
-        }
     }
 }

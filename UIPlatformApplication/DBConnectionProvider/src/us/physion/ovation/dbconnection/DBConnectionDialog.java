@@ -493,9 +493,14 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         {
             inProgress.showDialog();
         }
-        
-        tool.start();
-
+        try{
+            tool.start();
+        } catch (DatabaseIsUpgradingException e)
+        {
+            inProgress.cancel();
+            //TODO: pop p a dialog here
+            
+        }
         if (inProgress.isCancelled())
         {
             return false;

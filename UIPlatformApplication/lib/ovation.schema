@@ -1,0 +1,2557 @@
+version 1 unencrypted
+
+schema *
+0
+1000077 1000036
+{
+  class ooDotNetDateTime
+  non-persistent
+  5035 5035
+  1 0 1 0 1 0 0
+  {
+    Basic
+    protected uint64 ticks_and_kind
+    1 0 0 0
+  }
+
+  class ooDateTime
+  non-persistent
+  5036 5036
+  1 0 1 0 1 0 0
+  {
+    Embedded
+    : public ooDotNetDateTime
+    5035
+    1 0 0 0
+  }
+
+  class ovation:EntityBase
+  basic
+  1000000 1000000
+  1 0 8 0 8 0 0
+  {
+    Embedded
+    : public ooObj
+    1001
+    1 0 0 0
+
+    UniAssoc
+    private ooHandle(User) owner --> 
+    470762048
+    1000000 1000002
+    0 0 3 0 3
+    2 1 0
+
+    UniAssoc
+    private ooHandle(Group) writeGroups[] --> 
+    202326593
+    1000001 1000003
+    0 0 3 0 2
+    3 2 0
+
+    UniAssoc
+    private ooHandle(Resource) resources[] --> 
+    202326594
+    1000002 1000004
+    0 0 3 0 2
+    4 3 0
+
+    UniAssoc
+    private ooHandle(ooMap) properties --> 
+    470762051
+    1000003 4001
+    0 0 3 0 3
+    5 4 0
+
+    Embedded
+    private ooUtf8String uuid
+    5013
+    6 5 0 0
+
+    Basic
+    private ooBoolean incomplete
+    7 6 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) resourcesMap --> 
+    1544503901
+    1000029 4001
+    4 0 3 0 3
+    8 7 0
+  }
+
+  class ovation:TaggableEntityBase
+  basic
+  1000001 1000001
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public EntityBase
+    1000000
+    1 0 0 0
+
+    BiAssoc
+    protected ooHandle(KeywordTag) keywords[] <-> tagged[]
+    68108868
+    1000004 1000005
+    2 0
+    0 0 3 0 2
+    2 1 0
+  }
+
+  class ovation:User
+  basic
+  1000002 1000002
+  1 0 4 1 4 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    BiAssoc
+    protected ooHandle(Group) groups[] <-> users[]
+    68108869
+    1000005 1000003
+    2 0
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String userName
+    5013
+    3 2 0 0
+
+    VArrayBasic
+    private ooVArray(int8) _passwordHash
+    4 3 0
+  }
+
+  class ovation:Group
+  basic
+  1000003 1000003
+  1 0 3 1 3 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    BiAssoc
+    protected ooHandle(User) users[] <-> groups[]
+    135217733
+    1000005 1000002
+    2 1
+    0 0 3 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String groupName
+    5013
+    3 2 0 0
+  }
+
+  class ovation:Resource
+  basic
+  1000004 1000004
+  1 0 5 1 5 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(int8) data
+    2 1 0
+
+    Embedded
+    private ooUtf8String uti
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    5 4 0 0
+  }
+
+  class ovation:KeywordTag
+  basic
+  1000005 1000005
+  1 0 3 1 3 0 0
+  {
+    Embedded
+    : public EntityBase
+    1000000
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(TaggableEntityBase) tagged[] <-> keywords[]
+    135217732
+    1000004 1000001
+    2 1
+    0 0 3 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String tag
+    5013
+    3 2 0 0
+  }
+
+  class ovation:TimelineElement
+  basic
+  1000006 1000006
+  1 0 5 0 5 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    Embedded
+    private ooDateTime startTime
+    5036
+    2 1 0 0
+
+    Embedded
+    private ooDateTime endTime
+    5036
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String startTimeZone
+    5013
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String endTimeZone
+    5013
+    5 4 0 0
+  }
+
+  class ovation:PurposeAndNotesEntity
+  basic
+  1000007 1000007
+  1 0 3 0 3 0 0
+  {
+    Embedded
+    : public TimelineElement
+    1000006
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String purpose
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    3 2 0 0
+  }
+
+  class ovation:ExternalDevice
+  basic
+  1000008 1000008
+  1 0 4 0 4 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String manufacturer
+    5013
+    3 2 0 0
+
+    BiAssoc
+    private ooHandle(Experiment) experiment <-> externalDevices[]
+    336544326
+    1000006 1000009
+    4 0
+    0 0 1 0 2
+    4 3 0
+  }
+
+  class ovation:Experiment
+  basic
+  1000009 1000009
+  1 0 6 1 6 0 0
+  {
+    Embedded
+    : public PurposeAndNotesEntity
+    1000007
+    1 0 0 0
+
+    BiAssoc
+    protected ooHandle(Project) projects[] <-> experiments[]
+    135217735
+    1000007 1000010
+    3 1
+    0 0 1 0 2
+    2 1 0
+
+    BiAssoc
+    protected ooHandle(Source) sources[] <-> experiments[]
+    68108873
+    1000009 1000012
+    2 0
+    0 0 1 0 2
+    3 2 0
+
+    BiAssoc
+    protected ooHandle(ExternalDevice) externalDevices[] <-> experiment
+    672088646
+    1000006 1000008
+    4 1
+    4 0 1 0 2
+    4 3 0
+
+    BiAssoc
+    protected ooHandle(EpochGroup) epochGroups[] <-> experiment
+    604979786
+    1000010 1000013
+    2 0
+    4 0 1 0 2
+    5 4 0
+
+    Basic
+    private ooBoolean curated
+    6 5 0 0
+  }
+
+  class ovation:Project
+  basic
+  1000010 1000010
+  1 0 4 1 4 0 0
+  {
+    Embedded
+    : public PurposeAndNotesEntity
+    1000007
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    BiAssoc
+    private ooHandle(Experiment) experiments[] <-> projects[]
+    68108871
+    1000007 1000009
+    2 0
+    4 0 3 0 2
+    3 2 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) analysisRecords[] <-> project
+    604979784
+    1000008 1000011
+    9 0
+    4 0 1 0 2
+    4 3 0
+  }
+
+  class ovation:AnalysisRecord
+  basic
+  1000011 1000011
+  1 0 9 1 9 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    3 2 0 0
+
+    Basic
+    private int32 scmRevision
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String scmURL
+    5013
+    5 4 0 0
+
+    Embedded
+    private ooUtf8String entryFunctionName
+    5013
+    6 5 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) analysisParameters --> 
+    1544503897
+    1000025 4001
+    4 0 3 0 3
+    7 6 0
+
+    BiAssoc
+    private ooHandle(Epoch) epochs[] <-> analysisRecords[]
+    135217747
+    1000019 1000015
+    9 1
+    0 0 3 0 2
+    8 7 0
+
+    BiAssoc
+    private ooHandle(Project) project <-> analysisRecords[]
+    403653192
+    1000008 1000010
+    4 1
+    0 0 3 0 2
+    9 8 0
+  }
+
+  class ovation:Source
+  basic
+  1000012 1000012
+  1 0 6 1 6 0 0
+  {
+    Embedded
+    : private TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    BiAssoc
+    protected ooHandle(Experiment) experiments[] <-> sources[]
+    135217737
+    1000009 1000009
+    3 1
+    0 0 1 0 2
+    2 1 0
+
+    BiAssoc
+    protected ooHandle(Source) parent <-> children[]
+    2484027979
+    1000011 1000012
+    4 0
+    0 0 1 0 2
+    3 2 0
+
+    BiAssoc
+    protected ooHandle(Source) children[] <-> parent
+    1745830475
+    1000011 1000012
+    3 1
+    4 0 1 0 2
+    4 3 0
+
+    BiAssoc
+    protected ooHandle(EpochGroup) epochGroups[] <-> source
+    604979788
+    1000012 1000013
+    3 0
+    4 0 1 0 2
+    5 4 0
+
+    Embedded
+    private ooUtf8String label
+    5013
+    6 5 0 0
+  }
+
+  class ovation:EpochGroup
+  basic
+  1000013 1000013
+  1 0 7 1 7 0 0
+  {
+    Embedded
+    : public TimelineElement
+    1000006
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Experiment) experiment <-> epochGroups[]
+    403653194
+    1000010 1000009
+    5 1
+    0 0 1 0 2
+    2 1 0
+
+    BiAssoc
+    private ooHandle(Source) source <-> epochGroups[]
+    403653196
+    1000012 1000012
+    5 1
+    0 0 1 0 2
+    3 2 0
+
+    BiAssoc
+    private ooHandle(Epoch) epochs[] <-> epochGroup
+    604979789
+    1000013 1000015
+    8 0
+    4 0 1 0 2
+    4 3 0
+
+    BiAssoc
+    private ooHandle(EpochGroup) parent <-> children[]
+    2484027982
+    1000014 1000013
+    6 0
+    0 0 1 0 2
+    5 4 0
+
+    BiAssoc
+    private ooHandle(EpochGroup) children[] <-> parent
+    1745830478
+    1000014 1000013
+    5 1
+    4 0 1 0 2
+    6 5 0
+
+    Embedded
+    private ooUtf8String label
+    5013
+    7 6 0 0
+  }
+
+  class ovation:URLResource
+  basic
+  1000014 1000014
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public Resource
+    1000004
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String url
+    5013
+    2 1 0 0
+  }
+
+  class ovation:Epoch
+  basic
+  1000015 1000015
+  1 0 11 1 11 0 0
+  {
+    Embedded
+    : public TimelineElement
+    1000006
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String protocolID
+    5013
+    2 1 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) protocolParameters --> 
+    470762063
+    1000015 4001
+    0 0 3 0 3
+    3 2 0
+
+    Basic
+    private ooBoolean excludeFromAnalysis
+    4 3 0 0
+
+    BiAssoc
+    private ooHandle(Stimulus) stimuli[] <-> epoch
+    604979792
+    1000016 1000016
+    2 0
+    4 0 1 0 2
+    5 4 0
+
+    BiAssoc
+    private ooHandle(Response) responses[] <-> epoch
+    604979793
+    1000017 1000017
+    2 0
+    4 0 1 0 2
+    6 5 0
+
+    BiAssoc
+    private ooHandle(DerivedResponse) derivedResponses[] <-> epoch
+    604979794
+    1000018 1000018
+    2 0
+    4 0 1 0 2
+    7 6 0
+
+    BiAssoc
+    private ooHandle(EpochGroup) epochGroup <-> epochs[]
+    403653197
+    1000013 1000013
+    4 1
+    0 0 1 0 2
+    8 7 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) analysisRecords[] <-> epochs[]
+    68108883
+    1000019 1000011
+    8 0
+    0 0 1 0 2
+    9 8 0
+
+    BiAssoc
+    private ooHandle(Epoch) nextEpoch <-> previousEpoch
+    873415252
+    1000020 1000015
+    11 0
+    0 0 1 0 2
+    10 9 0
+
+    BiAssoc
+    private ooHandle(Epoch) previousEpoch <-> nextEpoch
+    940524116
+    1000020 1000015
+    10 1
+    0 0 1 0 2
+    11 10 0
+  }
+
+  class ovation:Stimulus
+  basic
+  1000016 1000016
+  1 0 4 1 4 0 0
+  {
+    Embedded
+    : public IOBase
+    1000019
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> stimuli[]
+    403653200
+    1000016 1000015
+    5 1
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String pluginID
+    5013
+    3 2 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) stimulusParameters --> 
+    470762071
+    1000023 4001
+    0 0 3 0 3
+    4 3 0
+  }
+
+  class ovation:Response
+  basic
+  1000017 1000017
+  1 0 4 1 4 0 0
+  {
+    Embedded
+    : public ResponseDataBase
+    1000020
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> responses[]
+    403653201
+    1000017 1000015
+    6 1
+    0 0 1 0 2
+    2 1 0
+
+    Basic
+    private float64 samplingRate
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String samplingUnits
+    5013
+    4 3 0 0
+  }
+
+  class ovation:DerivedResponse
+  basic
+  1000018 1000018
+  1 0 5 1 5 0 0
+  {
+    Embedded
+    : public ResponseDataBase
+    1000020
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> derivedResponses[]
+    403653202
+    1000018 1000015
+    7 1
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String description
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    4 3 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) derivationParameters --> 
+    470762072
+    1000024 4001
+    0 0 3 0 3
+    5 4 0
+  }
+
+  class ovation:IOBase
+  basic
+  1000019 1000019
+  1 0 4 0 4 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String units
+    5013
+    2 1 0 0
+
+    UniAssoc
+    private ooHandle(ExternalDevice) externalDevice --> 
+    470762069
+    1000021 1000008
+    0 0 3 0 3
+    3 2 0
+
+    UniAssoc
+    private ooHandle(ooMap) externalDeviceParameters --> 
+    470762070
+    1000022 4001
+    0 0 3 0 3
+    4 3 0
+  }
+
+  class ovation:ResponseDataBase
+  basic
+  1000020 1000020
+  1 0 6 0 6 0 0
+  {
+    Embedded
+    : public IOBase
+    1000019
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(int8) data
+    2 1 0
+
+    Basic
+    private int16 dataType
+    3 2 0 0
+
+    Basic
+    private int16 byteOrder
+    4 3 0 0
+
+    Basic
+    private int16 sampleBytes
+    5 4 0 0
+
+    VArrayBasic
+    private ooVArray(uint32) shape
+    6 5 0
+  }
+
+  class ovation:SavedQuery
+  basic
+  1000021 1000021
+  1 0 5 0 5 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String predicateString
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String entityClassName
+    5013
+    4 3 0 0
+
+    Basic
+    private ooBoolean active
+    5 4 0 0
+  }
+
+  class ovation:SynchronizationQuery
+  basic
+  1000022 1000022
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public SavedQuery
+    1000021
+    1 0 0 0
+
+    Basic
+    private ooBoolean active
+    2 1 0 0
+  }
+
+  class ovation:MapValueBase
+  basic
+  1000023 1000023
+  1 0 1 0 1 0 0
+  {
+    Embedded
+    : public ooObj
+    1001
+    1 0 0 0
+  }
+
+  class ovation:DateValue
+  basic
+  1000024 1000024
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    Embedded
+    private ooDateTime value
+    5036
+    2 1 0 0
+  }
+
+  class ovation:DataValue
+  basic
+  1000025 1000025
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(int8) value
+    2 1 0
+  }
+
+  class ovation:StringValue
+  basic
+  1000026 1000026
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String value
+    5013
+    2 1 0 0
+  }
+
+  class ovation:IntegerValue
+  basic
+  1000027 1000027
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    Basic
+    private int64 value
+    2 1 0 0
+  }
+
+  class ovation:FloatingPointValue
+  basic
+  1000028 1000028
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    Basic
+    private float64 value
+    2 1 0 0
+  }
+
+  class ovation:BooleanValue
+  basic
+  1000029 1000029
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    Basic
+    private ooBoolean value
+    2 1 0 0
+  }
+
+  class ovation:ooRefValue
+  basic
+  1000030 1000030
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    UniAssoc
+    private ooHandle(EntityBase) value --> 
+    470762074
+    1000026 1000000
+    0 0 3 0 3
+    2 1 0
+  }
+
+  class ovation:NumericDataValue
+  basic
+  1000031 1000031
+  1 0 6 0 6 0 0
+  {
+    Embedded
+    : public MapValueBase
+    1000023
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(int8) data
+    2 1 0
+
+    Basic
+    private int16 dataType
+    3 2 0 0
+
+    Basic
+    private int16 byteOrder
+    4 3 0 0
+
+    Basic
+    private int16 sampleBytes
+    5 4 0 0
+
+    VArrayBasic
+    private ooVArray(uint32) shape
+    6 5 0
+  }
+
+  class ovation:Preferences
+  basic
+  1000032 1000032
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public ooObj
+    1001
+    1 0 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) preferencesMap --> 
+    470762075
+    1000027 4001
+    0 0 3 0 3
+    2 1 0
+  }
+
+  class ovation:EncryptionKeyIdentifier
+  basic
+  1000033 1000033
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public ooObj
+    1001
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String keyIdentifier
+    5013
+    2 1 0 0
+  }
+
+  class ovation:AnnotatableEntityBase
+  basic
+  1000034 1000034
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    BiAssoc
+    protected ooHandle(Annotation) annotations[] <-> annotated[]
+    68108892
+    1000028 1000035
+    3 0
+    0 0 3 0 2
+    2 1 0
+  }
+
+  class ovation:Annotation
+  basic
+  1000035 1000035
+  1 0 3 1 3 0 0
+  {
+    Embedded
+    : public TaggableEntityBase
+    1000001
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String text
+    5013
+    2 1 0 0
+
+    BiAssoc
+    private ooHandle(AnnotatableEntityBase) annotated[] <-> annotations[]
+    135217756
+    1000028 1000034
+    2 1
+    0 0 1 0 2
+    3 2 0
+  }
+
+  class ovation:TimelineAnnotation
+  basic
+  1000036 1000036
+  1 0 5 0 5 0 0
+  {
+    Embedded
+    : public Annotation
+    1000035
+    1 0 0 0
+
+    Embedded
+    private ooDateTime startTime
+    5036
+    2 1 0 0
+
+    Embedded
+    private ooDateTime endTime
+    5036
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String startTimeZone
+    5013
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String endTimeZone
+    5013
+    5 4 0 0
+  }
+
+  class ovation:Note
+  basic
+  1000037 1000037
+  1 0 1 0 1 0 0
+  {
+    Embedded
+    : public Annotation
+    1000035
+    1 0 0 0
+  }
+
+  class ovation:IOBase
+  basic
+  1000019 1000038
+  1 0 5 0 4 0 1
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    5 0 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String units
+    5013
+    2 1 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    UniAssoc
+    private ooHandle(ExternalDevice) externalDevice --> 
+    470762069
+    1000021 1000008
+    0 0 3 0 3
+    3 2 0
+
+    UniAssoc
+    private ooHandle(ooMap) externalDeviceParameters --> 
+    470762070
+    1000022 4001
+    0 0 3 0 3
+    4 3 0
+  }
+
+  class ovation:ResponseDataBase
+  basic
+  1000020 1000039
+  1 0 6 0 6 0 1
+  {
+    Embedded
+    : public IOBase
+    1000038
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(int8) data
+    2 1 0
+
+    Basic
+    private int16 dataType
+    3 2 0 0
+
+    Basic
+    private int16 byteOrder
+    4 3 0 0
+
+    Basic
+    private int16 sampleBytes
+    5 4 0 0
+
+    VArrayBasic
+    private ooVArray(uint32) shape
+    6 5 0
+  }
+
+  class ovation:TimelineElement
+  basic
+  1000006 1000040
+  1 0 6 0 5 0 0
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    6 0 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooDateTime startTime
+    5036
+    2 1 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooDateTime endTime
+    5036
+    3 2 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String startTimeZone
+    5013
+    4 3 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String endTimeZone
+    5013
+    5 4 0 1
+    base change: 1 2 1 {
+      1
+    }
+  }
+
+  class ovation:PurposeAndNotesEntity
+  basic
+  1000007 1000041
+  1 0 3 0 3 0 0
+  {
+    Embedded
+    : public TimelineElement
+    1000040
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String purpose
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    3 2 0 0
+  }
+
+  class ovation:AnalysisRecord
+  basic
+  1000011 1000042
+  1 0 12 1 11 0 1
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    10 0 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    3 2 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Basic
+    private int32 scmRevision
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String scmURL
+    5013
+    5 4 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String entryFunctionName
+    5013
+    6 5 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    UniAssoc
+    private ooHandle(ooMap) analysisParameters --> 
+    1544503897
+    1000025 4001
+    4 0 3 0 3
+    7 6 0
+
+    BiAssoc
+    private ooHandle(Epoch) epochs[] <-> analysisRecords[]
+    135217747
+    1000019 1000015
+    9 1
+    0 0 3 0 2
+    8 7 0
+
+    BiAssoc
+    private ooHandle(Project) project <-> analysisRecords[]
+    403653192
+    1000008 1000010
+    4 1
+    0 0 3 0 2
+    9 8 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) input[] <-> output[]
+    68108898
+    1000034 1000011
+    12 0
+    0 0 3 0 2
+    11 9 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) output[] <-> input[]
+    135217762
+    1000034 1000011
+    11 1
+    0 0 3 0 2
+    12 10 0
+  }
+
+  class ovation:DerivedResponse
+  basic
+  1000018 1000043
+  1 0 5 1 5 0 1
+  {
+    Embedded
+    : public ResponseDataBase
+    1000039
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> derivedResponses[]
+    403653202
+    1000018 1000015
+    7 1
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String description
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    4 3 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) derivationParameters --> 
+    470762072
+    1000024 4001
+    0 0 3 0 3
+    5 4 0
+  }
+
+  class ovation:Epoch
+  basic
+  1000015 1000044
+  1 0 14 1 14 0 0
+  {
+    Embedded
+    : public TimelineElement
+    1000040
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String protocolID
+    5013
+    2 1 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) protocolParameters --> 
+    470762063
+    1000015 4001
+    0 0 3 0 3
+    3 2 0
+
+    Basic
+    private ooBoolean excludeFromAnalysis
+    4 3 0 0
+
+    BiAssoc
+    private ooHandle(Stimulus) stimuli[] <-> epoch
+    1678721616
+    1000016 1000016
+    2 0
+    4 0 1 0 2
+    5 4 0
+
+    BiAssoc
+    private ooHandle(Response) responses[] <-> epoch
+    1678721617
+    1000017 1000017
+    2 0
+    4 0 1 0 2
+    6 5 0
+
+    BiAssoc
+    private ooHandle(DerivedResponse) derivedResponses[] <-> epoch
+    1678721618
+    1000018 1000018
+    2 0
+    4 0 1 0 2
+    7 6 0
+
+    BiAssoc
+    private ooHandle(EpochGroup) epochGroup <-> epochs[]
+    2551136845
+    1000013 1000013
+    4 1
+    0 0 1 0 2
+    8 7 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) analysisRecords[] <-> epochs[]
+    68108883
+    1000019 1000011
+    8 0
+    0 0 1 0 2
+    9 8 0
+
+    BiAssoc
+    private ooHandle(Epoch) nextEpoch <-> previousEpoch
+    873415252
+    1000020 1000015
+    11 0
+    0 0 1 0 2
+    10 9 0
+
+    BiAssoc
+    private ooHandle(Epoch) previousEpoch <-> nextEpoch
+    940524116
+    1000020 1000015
+    10 1
+    0 0 1 0 2
+    11 10 0
+
+    UniAssoc
+    private ooHandle(ooMap) stimuliMap --> 
+    1544503903
+    1000031 4001
+    4 0 3 0 3
+    12 11 0
+
+    UniAssoc
+    private ooHandle(ooMap) responsesMap --> 
+    1544503904
+    1000032 4001
+    4 0 3 0 3
+    13 12 0
+
+    UniAssoc
+    private ooHandle(ooMap) derivedResponsesMap --> 
+    1544503905
+    1000033 4001
+    4 0 3 0 3
+    14 13 0
+  }
+
+  class ovation:EpochGroup
+  basic
+  1000013 1000045
+  1 0 7 1 7 0 0
+  {
+    Embedded
+    : public TimelineElement
+    1000040
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Experiment) experiment <-> epochGroups[]
+    2551136842
+    1000010 1000009
+    5 1
+    0 0 1 0 2
+    2 1 0
+
+    BiAssoc
+    private ooHandle(Source) source <-> epochGroups[]
+    2551136844
+    1000012 1000012
+    5 1
+    0 0 1 0 2
+    3 2 0
+
+    BiAssoc
+    private ooHandle(Epoch) epochs[] <-> epochGroup
+    1678721613
+    1000013 1000015
+    8 0
+    4 0 1 0 2
+    4 3 0
+
+    BiAssoc
+    private ooHandle(EpochGroup) parent <-> children[]
+    2484027982
+    1000014 1000013
+    6 0
+    0 0 1 0 2
+    5 4 0
+
+    BiAssoc
+    private ooHandle(EpochGroup) children[] <-> parent
+    1745830478
+    1000014 1000013
+    5 1
+    4 0 1 0 2
+    6 5 0
+
+    Embedded
+    private ooUtf8String label
+    5013
+    7 6 0 0
+  }
+
+  class ovation:Experiment
+  basic
+  1000009 1000046
+  1 0 6 1 6 0 0
+  {
+    Embedded
+    : public PurposeAndNotesEntity
+    1000041
+    1 0 0 0
+
+    BiAssoc
+    protected ooHandle(Project) projects[] <-> experiments[]
+    2282701383
+    1000007 1000010
+    3 1
+    0 0 1 0 2
+    2 1 0
+
+    BiAssoc
+    protected ooHandle(Source) sources[] <-> experiments[]
+    68108873
+    1000009 1000012
+    2 0
+    0 0 1 0 2
+    3 2 0
+
+    BiAssoc
+    protected ooHandle(ExternalDevice) externalDevices[] <-> experiment
+    1745830470
+    1000006 1000008
+    4 1
+    4 0 1 0 2
+    4 3 0
+
+    BiAssoc
+    protected ooHandle(EpochGroup) epochGroups[] <-> experiment
+    1678721610
+    1000010 1000013
+    2 0
+    4 0 1 0 2
+    5 4 0
+
+    Basic
+    private ooBoolean curated
+    6 5 0 0
+  }
+
+  class ovation:ExternalDevice
+  basic
+  1000008 1000047
+  1 0 5 1 4 0 0
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    5 0 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String manufacturer
+    5013
+    3 2 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    BiAssoc
+    private ooHandle(Experiment) experiment <-> externalDevices[]
+    2484027974
+    1000006 1000009
+    4 0
+    0 0 1 0 2
+    4 3 0
+  }
+
+  class ovation:Project
+  basic
+  1000010 1000048
+  1 0 5 1 5 0 0
+  {
+    Embedded
+    : public PurposeAndNotesEntity
+    1000041
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    BiAssoc
+    private ooHandle(Experiment) experiments[] <-> projects[]
+    1141850695
+    1000007 1000009
+    2 0
+    4 0 3 0 2
+    3 2 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) analysisRecords[] <-> project
+    1678721608
+    1000008 1000011
+    9 0
+    4 0 1 0 2
+    4 3 0
+
+    UniAssoc
+    private ooHandle(ooMap) analysisRecordsMap --> 
+    1544503902
+    1000030 4001
+    4 0 3 0 3
+    5 4 0
+  }
+
+  class ovation:Resource
+  basic
+  1000004 1000049
+  1 0 6 1 5 0 0
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    6 0 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    VArrayBasic
+    private ooVArray(int8) data
+    2 1 0
+
+    Embedded
+    private ooUtf8String uti
+    5013
+    3 2 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    4 3 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String name
+    5013
+    5 4 0 1
+    base change: 1 2 1 {
+      1
+    }
+  }
+
+  class ovation:URLResource
+  basic
+  1000014 1000050
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public Resource
+    1000049
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String url
+    5013
+    2 1 0 0
+  }
+
+  class ovation:Response
+  basic
+  1000017 1000051
+  1 0 4 1 4 0 1
+  {
+    Embedded
+    : public ResponseDataBase
+    1000039
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> responses[]
+    2551136849
+    1000017 1000015
+    6 1
+    0 0 1 0 2
+    2 1 0
+
+    Basic
+    private float64 samplingRate
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String samplingUnits
+    5013
+    4 3 0 0
+  }
+
+  class ovation:SavedQuery
+  basic
+  1000021 1000052
+  1 0 6 0 5 0 1
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    6 0 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String predicateString
+    5013
+    3 2 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Embedded
+    private ooUtf8String entityClassName
+    5013
+    4 3 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    Basic
+    private ooBoolean active
+    5 4 0 0
+  }
+
+  class ovation:Source
+  basic
+  1000012 1000053
+  1 0 7 1 6 0 0
+  {
+    Embedded
+    : private AnnotatableEntityBase
+    1000034
+    7 0 0 1
+    base change: 1 2 1 {
+      1
+    }
+
+    BiAssoc
+    protected ooHandle(Experiment) experiments[] <-> sources[]
+    135217737
+    1000009 1000009
+    3 1
+    0 0 1 0 2
+    2 1 0
+
+    BiAssoc
+    protected ooHandle(Source) parent <-> children[]
+    2484027979
+    1000011 1000012
+    4 0
+    0 0 1 0 2
+    3 2 0
+
+    BiAssoc
+    protected ooHandle(Source) children[] <-> parent
+    1745830475
+    1000011 1000012
+    3 1
+    4 0 1 0 2
+    4 3 0
+
+    BiAssoc
+    protected ooHandle(EpochGroup) epochGroups[] <-> source
+    1678721612
+    1000012 1000013
+    3 0
+    4 0 1 0 2
+    5 4 0
+
+    Embedded
+    private ooUtf8String label
+    5013
+    6 5 0 1
+    base change: 1 2 1 {
+      1
+    }
+  }
+
+  class ovation:Stimulus
+  basic
+  1000016 1000054
+  1 0 4 1 4 0 1
+  {
+    Embedded
+    : public IOBase
+    1000038
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> stimuli[]
+    2551136848
+    1000016 1000015
+    5 1
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String pluginID
+    5013
+    3 2 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) stimulusParameters --> 
+    470762071
+    1000023 4001
+    0 0 3 0 3
+    4 3 0
+  }
+
+  class ovation:SynchronizationQuery
+  basic
+  1000022 1000055
+  1 0 2 0 2 1 0
+  {
+    Embedded
+    : public SavedQuery
+    1000052
+    1 0 0 0
+
+    Basic
+    private ooBoolean active
+    2 1 0 0
+  }
+
+  class ovation:Response
+  basic
+  1000017 1000056
+  1 0 6 1 6 0 1
+  {
+    Embedded
+    : public ResponseDataBase
+    1000039
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> responses[]
+    2551136849
+    1000017 1000015
+    6 1
+    0 0 1 0 2
+    2 1 0
+
+    VArrayBasic
+    private ooVArray(float64) samplingRates
+    5 2 0
+
+    Basic
+    private float64 samplingRate
+    3 3 0 0
+
+    Embedded
+    private ooUtf8String samplingUnits
+    5013
+    4 4 0 0
+
+    Embedded
+    private ooUtf8String uti
+    5013
+    6 5 0 0
+  }
+
+  class ovation:Response
+  basic
+  1000017 1000057
+  1 0 6 1 5 0 1
+  {
+    Embedded
+    : public ResponseDataBase
+    1000039
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> responses[]
+    2551136849
+    1000017 1000015
+    6 1
+    0 0 1 0 2
+    2 1 0
+
+    VArrayBasic
+    private ooVArray(float64) samplingRates
+    5 2 0
+
+    Embedded
+    private ooUtf8String samplingUnits
+    5013
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String uti
+    5013
+    6 4 0 0
+  }
+
+  class ovation:SavedQuery
+  basic
+  1000021 1000058
+  1 0 7 0 6 0 0
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    6 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String predicateString
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String entityClassName
+    5013
+    4 3 0 0
+
+    Basic
+    private ooBoolean active
+    5 4 0 0
+
+    VArrayBasic
+    private ooVArray(int8) expressionTree
+    7 5 0
+  }
+
+  class ovation:AnalysisRecord
+  basic
+  1000011 1000059
+  1 0 13 1 12 0 1
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    10 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    3 2 0 0
+
+    Basic
+    private int32 scmRevision
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String scmRev
+    5013
+    13 4 0 0
+
+    Embedded
+    private ooUtf8String scmURL
+    5013
+    5 5 0 0
+
+    Embedded
+    private ooUtf8String entryFunctionName
+    5013
+    6 6 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) analysisParameters --> 
+    1544503897
+    1000025 4001
+    4 0 3 0 3
+    7 7 0
+
+    BiAssoc
+    private ooHandle(Epoch) epochs[] <-> analysisRecords[]
+    135217747
+    1000019 1000015
+    9 1
+    0 0 3 0 2
+    8 8 0
+
+    BiAssoc
+    private ooHandle(Project) project <-> analysisRecords[]
+    2551136840
+    1000008 1000010
+    4 1
+    0 0 3 0 2
+    9 9 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) input[] <-> output[]
+    68108898
+    1000034 1000011
+    12 0
+    0 0 3 0 2
+    11 10 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) output[] <-> input[]
+    135217762
+    1000034 1000011
+    11 1
+    0 0 3 0 2
+    12 11 0
+  }
+
+  class ovation:AnalysisRecord
+  basic
+  1000011 1000060
+  1 0 13 1 11 0 0
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    10 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String notes
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String scmRev
+    5013
+    13 3 0 0
+
+    Embedded
+    private ooUtf8String scmURL
+    5013
+    5 4 0 0
+
+    Embedded
+    private ooUtf8String entryFunctionName
+    5013
+    6 5 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) analysisParameters --> 
+    1544503897
+    1000025 4001
+    4 0 3 0 3
+    7 6 0
+
+    BiAssoc
+    private ooHandle(Epoch) epochs[] <-> analysisRecords[]
+    135217747
+    1000019 1000015
+    9 1
+    0 0 3 0 2
+    8 7 0
+
+    BiAssoc
+    private ooHandle(Project) project <-> analysisRecords[]
+    2551136840
+    1000008 1000010
+    4 1
+    0 0 3 0 2
+    9 8 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) input[] <-> output[]
+    68108898
+    1000034 1000011
+    12 0
+    0 0 3 0 2
+    11 9 0
+
+    BiAssoc
+    private ooHandle(AnalysisRecord) output[] <-> input[]
+    135217762
+    1000034 1000011
+    11 1
+    0 0 3 0 2
+    12 10 0
+  }
+
+  class ovation:IOBase
+  basic
+  1000019 1000061
+  1 0 6 0 5 0 0
+  {
+    Embedded
+    : public AnnotatableEntityBase
+    1000034
+    5 0 0 0
+
+    Embedded
+    private ooUtf8String units
+    5013
+    2 1 0 0
+
+    Embedded
+    private ooUtf8String dimensionLabels
+    5013
+    6 2 0 0
+
+    UniAssoc
+    private ooHandle(ExternalDevice) externalDevice --> 
+    470762069
+    1000021 1000008
+    0 0 3 0 3
+    3 3 0
+
+    UniAssoc
+    private ooHandle(ooMap) externalDeviceParameters --> 
+    470762070
+    1000022 4001
+    0 0 3 0 3
+    4 4 0
+  }
+
+  class ovation:ResponseDataBase
+  basic
+  1000020 1000062
+  1 0 6 0 6 0 0
+  {
+    Embedded
+    : public IOBase
+    1000061
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(int8) data
+    2 1 0
+
+    Basic
+    private int16 dataType
+    3 2 0 0
+
+    Basic
+    private int16 byteOrder
+    4 3 0 0
+
+    Basic
+    private int16 sampleBytes
+    5 4 0 0
+
+    VArrayBasic
+    private ooVArray(uint32) shape
+    6 5 0
+  }
+
+  class ovation:Response
+  basic
+  1000017 1000063
+  1 0 6 1 5 0 0
+  {
+    Embedded
+    : public ResponseDataBase
+    1000062
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> responses[]
+    2551136849
+    1000017 1000015
+    6 1
+    0 0 1 0 2
+    2 1 0
+
+    VArrayBasic
+    private ooVArray(float64) samplingRates
+    5 2 0
+
+    Embedded
+    private ooUtf8String samplingUnits
+    5013
+    4 3 0 0
+
+    Embedded
+    private ooUtf8String uti
+    5013
+    6 4 0 0
+  }
+
+  class ovation:Stimulus
+  basic
+  1000016 1000064
+  1 0 4 1 4 0 0
+  {
+    Embedded
+    : public IOBase
+    1000061
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> stimuli[]
+    2551136848
+    1000016 1000015
+    5 1
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String pluginID
+    5013
+    3 2 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) stimulusParameters --> 
+    470762071
+    1000023 4001
+    0 0 3 0 3
+    4 3 0
+  }
+
+  class ovation:DerivedResponse
+  basic
+  1000018 1000065
+  1 0 5 1 5 0 1
+  {
+    Embedded
+    : public ResponseDataBase
+    1000062
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> derivedResponses[]
+    2551136850
+    1000018 1000015
+    7 1
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String description
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    4 3 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) derivationParameters --> 
+    470762072
+    1000024 4001
+    0 0 3 0 3
+    5 4 0
+  }
+
+  class ovation:URLResponse
+  basic
+  1000066 1000066
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public Response
+    1000063
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String url
+    5013
+    2 1 0 0
+  }
+
+  class ovation:IndexedURLResponse
+  basic
+  1000067 1000067
+  1 0 3 0 3 0 0
+  {
+    Embedded
+    : public URLResponse
+    1000066
+    1 0 0 0
+
+    Basic
+    private uint64 start
+    2 1 0 0
+
+    Basic
+    private uint64 end
+    3 2 0 0
+  }
+
+  class ovation:Shape
+  basic
+  1000068 1000068
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public EntityBase
+    1000000
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(ImageAnnotation) annotations[] <-> shape
+    604979811
+    1000035 1000069
+    2 0
+    0 0 1 0 2
+    2 1 0
+  }
+
+  class ovation:ImageAnnotation
+  non-persistent
+  1000069 1000069
+  1 0 0 1 0 0 0
+  {  }
+
+  class ovation:CoordinateSystem
+  basic
+  1000070 1000070
+  1 0 5 0 5 0 0
+  {
+    Embedded
+    : public EntityBase
+    1000000
+    1 0 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    2 1 0 0
+
+    VArrayBasic
+    private ooVArray(float64) origin
+    3 2 0
+
+    Embedded
+    private ooUtf8String units
+    5013
+    4 3 0 0
+
+    VArrayBasic
+    private ooVArray(float64) pixelsToUnits
+    5 4 0
+  }
+
+  class ovation:ImageAnnotation
+  basic
+  1000069 1000071
+  1 0 2 1 2 0 0
+  {
+    Embedded
+    : public Annotation
+    1000035
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Shape) shape <-> annotations[]
+    403653219
+    1000035 1000068
+    2 1
+    0 0 1 0 2
+    2 1 0
+  }
+
+  class ovation:Line
+  basic
+  1000072 1000072
+  1 0 5 0 5 0 0
+  {
+    Embedded
+    : public Shape
+    1000068
+    1 0 0 0
+
+    Basic
+    private float64 startX
+    2 1 0 0
+
+    Basic
+    private float64 startY
+    3 2 0 0
+
+    Basic
+    private float64 endX
+    4 3 0 0
+
+    Basic
+    private float64 endY
+    5 4 0 0
+  }
+
+  class ovation:Polygon
+  basic
+  1000073 1000073
+  1 0 3 0 3 0 0
+  {
+    Embedded
+    : public Shape
+    1000068
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(float64) xCoordinates
+    2 1 0
+
+    VArrayBasic
+    private ooVArray(float64) yCoordinates
+    3 2 0
+  }
+
+  class ovation:Point
+  basic
+  1000074 1000074
+  1 0 2 0 2 0 0
+  {
+    Embedded
+    : public Shape
+    1000068
+    1 0 0 0
+
+    VArrayBasic
+    private ooVArray(float64) coordinates
+    2 1 0
+  }
+
+  class ovation:Oval
+  basic
+  1000075 1000075
+  1 0 5 0 5 0 0
+  {
+    Embedded
+    : public Shape
+    1000068
+    1 0 0 0
+
+    Basic
+    private float64 width
+    2 1 0 0
+
+    Basic
+    private float64 height
+    3 2 0 0
+
+    Basic
+    private float64 x
+    4 3 0 0
+
+    Basic
+    private float64 y
+    5 4 0 0
+  }
+
+  class ovation:DerivedResponse
+  basic
+  1000018 1000076
+  1 0 9 0 9 0 0
+  {
+    Embedded
+    : public ResponseDataBase
+    1000062
+    1 0 0 0
+
+    BiAssoc
+    private ooHandle(Epoch) epoch <-> derivedResponses[]
+    2551136850
+    1000018 1000015
+    7 1
+    0 0 1 0 2
+    2 1 0
+
+    Embedded
+    private ooUtf8String description
+    5013
+    3 2 0 0
+
+    Embedded
+    private ooUtf8String name
+    5013
+    4 3 0 0
+
+    UniAssoc
+    private ooHandle(ooMap) derivationParameters --> 
+    470762072
+    1000024 4001
+    0 0 3 0 3
+    5 4 0
+
+    Embedded
+    private ooUtf8String scmRev
+    5013
+    6 5 0 0
+
+    Embedded
+    private ooUtf8String scmURL
+    5013
+    7 6 0 0
+
+    Embedded
+    private ooUtf8String entryFunctionName
+    5013
+    8 7 0 0
+
+    Embedded
+    private ooUtf8String uti
+    5013
+    9 8 0 0
+  }
+
+}
+
+schema *
+0
+1000077 1000036
+{
+  protected  {
+    1000022
+  }
+}

@@ -44,12 +44,12 @@ public class ResourceViewTopComponentTest extends OvationTestCase{
     @BeforeClass
     public static void setUpClass()
     {
-        OvationTestCase.setUpClass(mgr, 5);
+        OvationTestCase.setUpDatabase(mgr, 5);
     }
     
     @Before
     public void setUp() {
-        super.setUp();
+        dsc = setUpTest();
 
         String UNUSED_NAME = "name";
         String UNUSED_PURPOSE = "purpose";
@@ -67,6 +67,19 @@ public class ResourceViewTopComponentTest extends OvationTestCase{
 
         Ovation.enableLogging(LogLevel.DEBUG);
     }
+    
+    
+    @After
+    public void tearDown()
+    {
+        tearDownTest();
+    }
+    
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        OvationTestCase.tearDownDatabase(mgr);
+    }
+
 
     
     @Test

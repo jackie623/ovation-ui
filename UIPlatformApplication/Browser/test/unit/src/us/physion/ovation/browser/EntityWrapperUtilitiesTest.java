@@ -40,16 +40,29 @@ public class EntityWrapperUtilitiesTest extends OvationTestCase{
     @BeforeClass
     public static void setUpClass()
     {
-        OvationTestCase.setUpClass(mgr, 2);
+        OvationTestCase.setUpDatabase(mgr, 2);
     }
     
     @Before
     public void setUp() {
-        super.setUp();
+        dsc = setUpTest();
 
         treeMap = new HashMap<String, Node>();
         em = new ExplorerManager();
     }
+    
+    
+    @After
+    public void tearDown()
+    {
+        tearDownTest();
+    }
+    
+     @AfterClass
+    public static void tearDownClass() throws Exception {
+        OvationTestCase.tearDownDatabase(mgr);
+    }
+
 
     @Test
     public void testCreateNodeForNodeThatAlreadyExists() {

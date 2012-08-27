@@ -31,7 +31,7 @@ public class OvationTestCase {
     }
 
     
-	public static void setUpClass(TestManager tm, int defaultID) {
+   public static void setUpDatabase(TestManager tm, int defaultID) {
 
         File f = new File(tm.getConnectionFile());
         if (!f.exists()) {
@@ -58,25 +58,26 @@ public class OvationTestCase {
         }
 
     }
-
-	public static void tearDownClass(TestManager tm) throws Exception {
+    public static void tearDownDatabase(TestManager tm) throws Exception {
         DatabaseManager.deleteLocalDatabase(tm.getConnectionFile());
     }
 
-    @Before
-	public void setUp() {
-        try {
+    
+    public IAuthenticatedDataStoreCoordinator setUpTest() {
+        IAuthenticatedDataStoreCoordinator dsc = null;
+	try {
             dsc = tm.setupDatabase();
         } catch (Exception e) {
-            tearDown();
+	    System.err.println(e.getMessage());
+            tearDownTest();
             fail(e.getMessage());
         }
 
         Ovation.enableLogging(LogLevel.DEBUG);
+	return dsc;
     }
 
-    @After
-	public void tearDown() {
+    public void tearDownTest() {
         tm.tearDownDatabase();
     }
     

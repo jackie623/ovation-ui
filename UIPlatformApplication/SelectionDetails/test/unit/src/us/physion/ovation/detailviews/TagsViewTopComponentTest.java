@@ -35,12 +35,12 @@ public class TagsViewTopComponentTest extends OvationTestCase{
     @BeforeClass
     public static void setUpClass()
     {
-        OvationTestCase.setUpClass(mgr, 6);
+        OvationTestCase.setUpDatabase(mgr, 6);
     }
     
     @Before
     public void setUp() {
-        super.setUp();
+        dsc = setUpTest();
 
         String UNUSED_NAME = "name";
         String UNUSED_PURPOSE = "purpose";
@@ -57,6 +57,17 @@ public class TagsViewTopComponentTest extends OvationTestCase{
         p2.addTag("tag1");
         p2.addTag("another tag");
         
+    }
+    
+    @After
+    public void tearDown()
+    {
+        tearDownTest();
+    }
+    
+     @AfterClass
+    public static void tearDownClass() throws Exception {
+        OvationTestCase.tearDownDatabase(mgr);
     }
 
    

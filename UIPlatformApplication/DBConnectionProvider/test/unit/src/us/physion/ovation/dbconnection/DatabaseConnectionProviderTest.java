@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.*;
 import static org.junit.Assert.*;
+import org.openide.util.Exceptions;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.LogLevel;
 import ovation.Ovation;
@@ -32,14 +33,24 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     @BeforeClass
     public static void setUpClass()
     {
-        OvationTestCase.setUpClass(mgr, 3);
+        OvationTestCase.setUpDatabase(mgr, 3);
     }
     
     @Before
     public void setUp() {
-        super.setUp();
+       dsc = setUpTest();
     }
-
+    
+    @After
+    public void tearDown()
+    {
+        tearDownTest();
+    }
+    
+     @AfterClass
+    public static void tearDownClass() throws Exception {
+        OvationTestCase.tearDownDatabase(mgr);
+    }
     
     @Test
     public void testShouldRunUpdaterReturnsFalseIfUserCancels(){

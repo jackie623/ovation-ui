@@ -20,7 +20,6 @@ import ovation.DataStoreCoordinator;
 import ovation.DatabaseIsUpgradingException;
 import ovation.Ovation;
 import ovation.OvationException;
-import ovation.util.CommandUtilities;
 import us.physion.ovation.dbconnection.UpdateJarStep;
 import us.physion.ovation.dbconnection.UpdateSchemaStep;
 
@@ -165,7 +164,7 @@ public class UpgradeTool implements IUpgradeDB {
                                     username,
                                     password);
 
-                            CommandUtilities.runCommand(pb);
+                            runCommand(pb);
 
                         } catch (Exception e) {
                             throw new RuntimeException("Could not run jar '" + file + "'. " + e.getMessage());
@@ -178,7 +177,7 @@ public class UpgradeTool implements IUpgradeDB {
                                     file.getAbsolutePath(),
                                     connectionFile);
 
-                            CommandUtilities.runCommand(pb);
+                            runCommand(pb);
 
                         } catch (Exception e) {
                             throw new RuntimeException("Could not upgrade schema using file '" + file + "'. " + e.getMessage());
@@ -236,5 +235,64 @@ public class UpgradeTool implements IUpgradeDB {
             return;
         
         uiUpdater.update(percent, text);
+    }
+    
+    
+    //TODO: why can't I use commandUtilities here, netbeans?
+    private void runCommand(ProcessBuilder pb)
+    {
+        try {
+            Process p = pb.start();
+
+            InputStreamHandler inputHandler = new InputStreamHandler(new InputStreamReader(p.getInputStream()));
+            InputStreamHandler errHandler = new InputStreamHandler(new InputStreamReader(p.getErrorStream()));
+
+            inputHandler.start();
+            errHandler.start();
+
+            try {
+                int err = p.waitFor();
+                if (err != 0) {
+                    System.out.println("Error: " + errHandler.getCaptureBuffer());
+                    Ovation.getLogger().error("Unable to complete command: " + errHandler.getCaptureBuffer());
+                    throw new OvationException(errHandler.getCaptureBuffer().toString());
+                }
+            } catch (InterruptedException e) {
+                throw new OvationException("Unable to complete command: " + e.getLocalizedMessage());
+            }
+
+        } catch (IOException e) {
+            throw new OvationException("Communication with sub-process lost: " + e.getLocalizedMessage());
+        }
+    }
+    
+    class InputStreamHandler extends Thread {
+
+        private StringBuffer captureBuffer;
+        private InputStreamReader stream;
+
+        public InputStreamReader getStream() {
+            return stream;
+        }
+
+        public StringBuffer getCaptureBuffer() {
+            return captureBuffer;
+        }
+
+        InputStreamHandler(InputStreamReader inputStream) {
+            stream = inputStream;
+            captureBuffer = new StringBuffer();
+        }
+
+        public void run() {
+            try {
+                int nextChar;
+                while ((nextChar = getStream().read()) >= 0) {
+                    getCaptureBuffer().append((char) nextChar);
+                }
+            } catch (IOException e) {
+                Ovation.getLogger().error(e.getLocalizedMessage());
+            }
+        }
     }
 }

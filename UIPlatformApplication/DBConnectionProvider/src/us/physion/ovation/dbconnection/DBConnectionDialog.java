@@ -424,7 +424,14 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 UpdaterInProgressDialog uiUpdater = new UpdaterInProgressDialog();
                 UpgradeTool tool = new UpgradeTool(versions, connectionFile, username, password, uiUpdater);
                 uiUpdater.setUpgradeTool(tool);
-                success = runUpdater(tool, uiUpdater, true);
+                try{
+                    success = runUpdater(tool, uiUpdater, true);
+                } catch (Exception e)
+                {
+                    cancelled = true;
+                    showErrors(e);
+                    return c;
+                }
             }
             if (success)
             {
@@ -442,6 +449,12 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 cancelled = true;
                 return c;
             }
+        }
+        catch (DatabaseIsUpgradingException ex)
+        {
+            DBIsUpgradingDialog d = new DBIsUpgradingDialog();
+            d.showDialog();
+                    
         }
         catch (Exception ex) {
             showErrors(ex);
@@ -498,8 +511,12 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         } catch (DatabaseIsUpgradingException e)
         {
             inProgress.cancel();
-            //TODO: pop p a dialog here
+            //TODO: pop up a dialog here
             
+        } catch (Exception e)
+        {
+            inProgress.cancel();
+            throw new RuntimeException(e);
         }
         if (inProgress.isCancelled())
         {

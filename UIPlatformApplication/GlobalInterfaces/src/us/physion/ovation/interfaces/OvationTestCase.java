@@ -44,15 +44,28 @@ public class OvationTestCase {
 		}
 	    }
             
-            int nodeFdId = 0;
-            if (System.getProperty("NODE_FDID") != null) {
-                nodeFdId = Integer.parseInt(System.getProperty("NODE_FDID"));
-            }
+            String nodeFdIdString = System.getProperty("NODE_FDID");
+	    if (nodeFdIdString == null)
+	    {
+		nodeFdIdString = System.getenv("NODE_FDID");
+	    }
+	    if (nodeFdIdString == null)
+	    {
+		nodeFdIdString = "0";
+	    }
+	    int nodeFdId = Integer.parseInt(nodeFdIdString);
 
-            int jobFdId = defaultID;
-            if (System.getProperty("JOB_FDID") != null) {
-                jobFdId = Integer.parseInt(System.getProperty("JOB_FDID"));
-            }
+
+            String jobFdIdString = System.getProperty("JOB_FDID");
+	    if (jobFdIdString == null)
+	    {
+		jobFdIdString = System.getenv("JOB_FDID");
+	    }
+	    int jobFdId = defaultID;
+	    if (jobFdIdString != null)
+	    {
+	        jobFdId = Integer.parseInt(jobFdIdString);
+	    }
             
             DatabaseManager.createLocalDatabase(tm.getConnectionFile(), lockServer, nodeFdId + jobFdId);
         }

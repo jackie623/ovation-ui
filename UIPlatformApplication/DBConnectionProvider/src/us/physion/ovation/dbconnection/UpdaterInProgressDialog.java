@@ -102,9 +102,9 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
                     .add(forceButton))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(progressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(18, 18, 18)
                 .add(cancelButton)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(10, Short.MAX_VALUE))
         );
 
         pack();
@@ -152,6 +152,8 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
         d.showDialog();
         if (!d.isCancelled())
         {
+            showContinueButton(false);
+
             if (tool != null)
                 tool.forceUpdate();
         }
@@ -213,12 +215,27 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
     private javax.swing.JProgressBar progressBar;
     // End of variables declaration//GEN-END:variables
 
+    public void showContinueButton(final boolean show)
+    {
+        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                forceButton.setVisible(show);
+                forceButton.setEnabled(show);
+            }
+        });
+        
+    }
+    
     @Override
     public void update(final int i, final String string) {
+        
         Runnable r = new Runnable(){
 
             @Override
             public void run() {
+   
                 if (i < 0) {
                     progressBar.setIndeterminate(true);
                 } else {
@@ -226,6 +243,10 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
                     progressBar.setValue(i);
                 }
                 if (string != null) {
+                    //TODO: change the updater interface
+                    if (string.equals("Initializing")) {
+                        showContinueButton(false);
+                    }
                     System.out.println("Update jar: " + string);
                     jLabel1.setText(string);
                 }

@@ -40,6 +40,7 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
         okButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         downloadLink = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -50,6 +51,7 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel1.setFont(new java.awt.Font("Lucida Grande", 1, 14)); // NOI18N
         jLabel1.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.jLabel1.text")); // NOI18N
 
         downloadLink.setForeground(new java.awt.Color(11, 0, 128));
@@ -61,6 +63,8 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(InstallLatestVersionDialog.class, "InstallLatestVersionDialog.jLabel2.text")); // NOI18N
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -68,25 +72,31 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
             .add(layout.createSequentialGroup()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
-                        .add(24, 24, 24)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                            .add(okButton)
-                            .add(jLabel1)))
+                        .add(20, 20, 20)
+                        .add(jLabel2))
                     .add(layout.createSequentialGroup()
-                        .add(77, 77, 77)
-                        .add(downloadLink, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(34, Short.MAX_VALUE))
+                        .add(333, 333, 333)
+                        .add(okButton))
+                    .add(layout.createSequentialGroup()
+                        .add(221, 221, 221)
+                        .add(downloadLink, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(layout.createSequentialGroup()
+                        .add(256, 256, 256)
+                        .add(jLabel1)))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                .add(42, 42, 42)
-                .add(jLabel1)
+                .add(12, 12, 12)
+                .add(jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 16, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .add(18, 18, 18)
+                .add(jLabel2)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 14, Short.MAX_VALUE)
                 .add(downloadLink, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(okButton)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -194,6 +204,7 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton downloadLink;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JButton okButton;
     // End of variables declaration//GEN-END:variables
 }

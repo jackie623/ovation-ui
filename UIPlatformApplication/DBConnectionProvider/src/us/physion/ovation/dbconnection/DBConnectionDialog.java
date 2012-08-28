@@ -454,6 +454,19 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         {
             DBIsUpgradingDialog d = new DBIsUpgradingDialog();
             d.showDialog();
+            if (d.forceUpgrade())
+            {
+                try {
+                    DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).removeUpgradeLock("OVATION_UPGRADE_FLAG");
+                } catch (DatabaseOpenException ex1) {
+                    showErrors(ex1);
+                    return c;
+                } catch (DatabaseNotFoundException ex1) {
+                    showErrors(ex1);
+                    return c;
+                }
+               return getContextFromConnectionFile(connectionFile, username, password);
+            }
                     
         }
         catch (Exception ex) {
@@ -483,7 +496,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 InstallLatestVersionDialog installVersionDialog = new InstallLatestVersionDialog();
                 installVersionDialog.showDialog();
             }
-            return false;
+            return true;
         }
         else if (databaseVersion < apiVersion)
         {

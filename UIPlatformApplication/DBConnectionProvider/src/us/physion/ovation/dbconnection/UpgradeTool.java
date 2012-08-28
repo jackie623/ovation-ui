@@ -8,6 +8,10 @@ import com.objy.db.DatabaseNotFoundException;
 import com.objy.db.DatabaseOpenException;
 import java.io.*;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
@@ -152,7 +156,7 @@ public class UpgradeTool implements IUpgradeDB {
 
                     if (step instanceof UpdateJarStep) {
 
-                        File file = new File(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
+                        File file = downloadFile(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
                         try {
                             ProcessBuilder pb = new ProcessBuilder("java",
                                     "-Djava.security.policy=security.txt",
@@ -170,7 +174,7 @@ public class UpgradeTool implements IUpgradeDB {
                             throw new RuntimeException("Could not run jar '" + file + "'. " + e.getMessage());
                         }
                     } else if (step instanceof UpdateSchemaStep) {
-                        File file = new File(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
+                        File file = downloadFile(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
                         try {
                             ProcessBuilder pb = new ProcessBuilder(new File(objyBin, "ooschemaupgrade").getPath(),
                                     "-infile",
@@ -235,6 +239,29 @@ public class UpgradeTool implements IUpgradeDB {
             return;
         
         uiUpdater.update(percent, text);
+    }
+    
+    private File downloadFile(String filename) 
+    {
+        if (filename.toLowerCase().startsWith("http"))
+        {
+            try {
+                URL url = new URL(filename);
+                String[] pathSegments = url.getPath().split("/");
+                String name = pathSegments[pathSegments.length-1];
+                File f = File.createTempFile(name.split("\\.")[0], name.split("\\.")[1]);
+                ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+                FileOutputStream fos = new FileOutputStream(f);
+                fos.getChannel().transferFrom(rbc, 0, 1 << 24);
+                
+                return f;
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+                throw new RuntimeException(ex);
+            } 
+
+        }
+        return new File(filename);
     }
     
     

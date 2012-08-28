@@ -4,6 +4,13 @@
  */
 package us.physion.ovation.dbconnection;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import org.openide.util.Exceptions;
 import us.physion.ovation.interfaces.UpdateStep;
 
 /**
@@ -20,6 +27,7 @@ public class UpdateJarStep implements UpdateStep{
     }
     @Override
     public String getStepDescriptor() {
+        
         return jarfile;
     }
     

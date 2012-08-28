@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.dbconnection;
 
+import com.objy.db.app.Session;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
@@ -93,22 +94,61 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
                     DBConnectionDialog dialog = new DBConnectionDialog();
                     dialog.showDialog();
 
-                    if (!dialog.isCancelled()) {
-                        setDsc(dialog.getDataStoreCoordinator());
-                        setWaitingFlag(false);
+                    ConnectionHandler h = UpgradeUtilities.connect(dialog);
+                    while (!h.isCancelled() )
+                    {
+                        if (h.connectionAcquired())
+                        {
+                            setDsc(h.getDataStoreCoordinator());
+                            setWaitingFlag(false);
 
-                        for (PropertyChangeListener l : listeners) {
-                            dialog.addPropertyChangeListener(l);
+                            final DBConnectionDialog d = dialog;
+                            runOnEDT(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    for (PropertyChangeListener l : listeners) {
+                                        d.addPropertyChangeListener(l);
+                                    }
+                                    d.firePropertyChange("ovation.connectionChanged", 0, 1);
+                                }
+                            });
+                            break;
+
+                        }else if(h.errorOccurred())
+                        {
+                            dialog.showErrors(new RuntimeException(h.getError()));
+                            dialog.showDialog();
                         }
-                        dialog.firePropertyChange("ovation.connectionChanged", 0, 1);
+                        
+                        h = UpgradeUtilities.connect(dialog);
+                        
+                    } 
+                    if (h.isCancelled())
+                    {
+                        Session s = Session.getCurrent();
+                        if (s != null)
+                        {
+                           s.terminate();
+                        }
                     }
+                    
+                   /* if (!dialog.isCancelled()) {
+                            setDsc(dialog.getDataStoreCoordinator());
+                            setWaitingFlag(false);
+
+                            for (PropertyChangeListener l : listeners) {
+                                dialog.addPropertyChangeListener(l);
+                            }
+                    }*/
+                    
                 } finally {
                     setWaitingFlag(false);
                 }
             }
         };
 
-        runOnEDT(r);
+        runOffEDT(r);
 
         return dsc;
     }

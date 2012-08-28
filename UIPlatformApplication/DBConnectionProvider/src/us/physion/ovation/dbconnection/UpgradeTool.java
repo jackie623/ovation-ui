@@ -8,9 +8,7 @@ import com.objy.db.DatabaseNotFoundException;
 import com.objy.db.DatabaseOpenException;
 import java.io.*;
 import java.lang.reflect.Method;
-import java.rmi.AlreadyBoundException;
-import java.rmi.RMISecurityManager;
-import java.rmi.RemoteException;
+import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -117,15 +115,29 @@ public class UpgradeTool implements IUpgradeDB {
             System.setSecurityManager(new RMISecurityManager());
         }
 
+        
+        Registry r = null;
         try {
             pu = new ProgressUpdater(connectionFile, username, password, uiUpdater);
+            r = LocateRegistry.createRegistry(10002);
             UnicastRemoteObject.exportObject(pu, 10002);
-            Registry r = LocateRegistry.createRegistry(10002);
             r.bind("ProgressUpdater", pu);
 
         } catch (RemoteException e) {
             throw new RuntimeException(e.getMessage());
         } catch (AlreadyBoundException e) {
+            try {
+                r.unbind("ProgressUpdater");
+                r.bind("ProgressUpdater", pu);
+            } catch (AlreadyBoundException ex) {
+                throw new RuntimeException(ex);
+            } catch (NotBoundException ex) {
+                throw new RuntimeException(ex);
+            } catch (AccessException ex) {
+                throw new RuntimeException(ex);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException(e.getMessage());
         }
 

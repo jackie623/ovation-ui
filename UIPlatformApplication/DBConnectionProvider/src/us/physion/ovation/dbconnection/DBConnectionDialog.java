@@ -34,6 +34,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     DefaultComboBoxModel connectionComboBoxModel;
     IAuthenticatedDataStoreCoordinator dsc;
     Boolean cancelled = false;
+    String connectionFile;
+    String username;
+    String password;
 
     public boolean isCancelled() {
         return cancelled;
@@ -85,7 +88,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         this(new JFrame(), true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
     }
 
-    private void showErrors(final Exception e) {
+    protected void showErrors(final Exception e) {
              
         DatabaseConnectionProvider.runOnEDT(new Runnable() {
 
@@ -353,7 +356,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         System.out.println(Ovation.getBuildNumber());
         */
         
-       
+       /*
         final String username = viewModel.getUsername();
         final String password = viewModel.getPassword();
         final String connectionFile = connectionFileComboBox.getSelectedItem().toString();
@@ -390,7 +393,12 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         };
         
         DatabaseConnectionProvider.runOffEDT(r);
-       
+        */
+        username = viewModel.getUsername();
+        password = viewModel.getPassword();
+        connectionFile = connectionFileComboBox.getSelectedItem().toString();
+        prefs.addConnectionFile(connectionFile);
+        disposeOnEDT();
     }//GEN-LAST:event_connectAction
 
     private void cancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelAction
@@ -474,6 +482,21 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             return c;
         }
         return c;
+    }
+    
+    protected String getConnectionFile()
+    {
+        return connectionFile;
+    }
+    
+    protected String getUsername()
+    {
+        return username;
+    }
+    
+    protected String getPassword()
+    {
+        return password;
     }
     
     protected boolean shouldRunUpdater(int databaseVersion, int apiVersion)

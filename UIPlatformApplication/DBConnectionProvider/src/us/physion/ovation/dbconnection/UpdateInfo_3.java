@@ -40,8 +40,8 @@ public class UpdateInfo_3 implements UpdateInfo{
     @Override
     public List<UpdateStep> getUpdateSteps() {
         List<UpdateStep> steps = new LinkedList<UpdateStep>();
-        steps.add(new UpdateSchemaStep("/Users/huecotanks/Ovation/production/schemas/r16/ovation.schema"));
-        steps.add(new UpdateJarStep("/Users/huecotanks/Ovation/ovation-ui/UIPlatformApplication/Update_3.jar"));//for development, this is a hardcoded path, in production and tests, this should be on s3
+        steps.add(new UpdateSchemaStep("https:///Users/huecotanks/Ovation/production/schemas/r16/ovation.schema"));
+        steps.add(new UpdateJarStep("https:///Users/huecotanks/Ovation/ovation-ui/UIPlatformApplication/Update_3.jar"));//for development, this is a hardcoded path, in production and tests, this should be on s3
         return steps;
     }
 }

@@ -22,6 +22,7 @@ import java.util.*;
 import org.openide.util.Exceptions;
 import ovation.DataStoreCoordinator;
 import ovation.DatabaseIsUpgradingException;
+import ovation.LogLevel;
 import ovation.Ovation;
 import ovation.OvationException;
 import us.physion.ovation.dbconnection.UpdateJarStep;
@@ -120,7 +121,7 @@ public class UpgradeTool implements IUpgradeDB {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new RMISecurityManager());
         }
-
+        
         try {
             pu = new ProgressUpdater(connectionFile, username, password, uiUpdater);
             UnicastRemoteObject.exportObject(pu, 10002);
@@ -174,6 +175,7 @@ public class UpgradeTool implements IUpgradeDB {
                             throw new RuntimeException("Could not run jar '" + file + "'. " + e.getMessage());
                         }
                     } else if (step instanceof UpdateSchemaStep) {
+                        
                         File file = downloadFile(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
                         try {
                             ProcessBuilder pb = new ProcessBuilder(new File(objyBin, "ooschemaupgrade").getPath(),
@@ -257,7 +259,7 @@ public class UpgradeTool implements IUpgradeDB {
                 return f;
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
-                throw new RuntimeException(ex);
+                throw new RuntimeException(ex.getLocalizedMessage());
             } 
 
         }
@@ -279,6 +281,7 @@ public class UpgradeTool implements IUpgradeDB {
 
             try {
                 int err = p.waitFor();
+
                 if (err != 0) {
                     System.out.println("Error: " + errHandler.getCaptureBuffer());
                     Ovation.getLogger().error("Unable to complete command: " + errHandler.getCaptureBuffer());

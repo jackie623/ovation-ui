@@ -19,10 +19,7 @@ import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
-import us.physion.ovation.interfaces.IUpgradeDB;
-import us.physion.ovation.interfaces.UpdateInfo;
-import us.physion.ovation.interfaces.UpdateStep;
-import us.physion.ovation.interfaces.Updater;
+import us.physion.ovation.interfaces.*;
 
 /**
  *
@@ -87,7 +84,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
 
     protected void showErrors(final Exception e) {
              
-        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+        EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {
@@ -104,7 +101,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     }
     
     private void disposeOnEDT() {
-        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+        EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {
@@ -387,7 +384,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             
         };
         
-        DatabaseConnectionProvider.runOffEDT(r);
+        EventQueueUtilities.runOffEDT(r);
        
     }//GEN-LAST:event_connectAction
 
@@ -403,6 +400,8 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
         } catch (SchemaVersionException ex2)
         {
+            new ErrorDialog("Schema Exception").showDialog();
+
             int databaseVersion = ex2.getDatabaseSchemaNumber();
             int apiVersion = ex2.getAPISchemaNumber();
             boolean success = shouldRunUpdater(databaseVersion, apiVersion); //ask the user if they want to run the upgrader
@@ -423,7 +422,13 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 UpgradeTool tool = new UpgradeTool(versions, connectionFile, username, password, uiUpdater);
                 uiUpdater.setUpgradeTool(tool);
                 try{
+                    new ErrorDialog("Running updater").showDialog();
                     success = runUpdater(tool, uiUpdater, true);
+                    if (success)
+                        new ErrorDialog("Success").showDialog();
+                    else{
+                        new ErrorDialog("Failure, but no exception? Weird").showDialog();
+                    }
                 } catch (Exception e)
                 {
                     cancelled = true;
@@ -433,6 +438,8 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             }
             if (success)
             {
+                new ErrorDialog("Getting context again").showDialog();
+                
                 try {
                     c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
                 } catch (DatabaseOpenException ex) {
@@ -535,7 +542,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         } catch (Exception e)
         {
             inProgress.cancel();
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getLocalizedMessage());
         }
         if (inProgress.isCancelled())
         {
@@ -546,49 +553,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         }
     }
     
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /*
-         * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel. For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DBConnectionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /*
-         * Create and display the dialog
-         */
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                DBConnectionDialog dialog = new DBConnectionDialog();
-
-                dialog.setVisible(true);
-            }
-        });
-    }
+   
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JButton chooseButton;

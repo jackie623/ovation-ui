@@ -7,13 +7,15 @@ package us.physion.ovation.dbconnection;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
+import org.openide.util.Exceptions;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IUpdateUI;
 
 /**
  *
  * @author huecotanks
  */
-public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpdateUI{
+public class UpdaterInProgressDialog extends ModalDialogBase implements IUpdateUI{
 
     
     private UpgradeTool tool;
@@ -21,7 +23,7 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
      * Creates new form UpdaterInProgressDialog
      */
     public UpdaterInProgressDialog() {
-        super(new JFrame(), true);
+        super();
         initComponents();
         
         this.getRootPane().setDefaultButton(cancelButton);
@@ -116,28 +118,6 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
         return cancelled;
     }
     
-    private void disposeOnEDT() {
-        DatabaseConnectionProvider.runOnEDT(new Runnable() {
-
-            @Override
-            public void run() {
-                UpdaterInProgressDialog.this.dispose();
-            }
-        });
-    }
-    protected void showDialog()
-    {
-        DatabaseConnectionProvider.runOnEDT(new Runnable(){
-
-            @Override
-            public void run() {
-                UpdaterInProgressDialog.this.setLocationRelativeTo(null);
-                UpdaterInProgressDialog.this.pack();
-                UpdaterInProgressDialog.this.setVisible(true);
-            }
-        });
-    }
-    
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         if (cancelButton.getText().toLowerCase().equals("cancel"))
             cancel();
@@ -217,7 +197,7 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
 
     public void showContinueButton(final boolean show)
     {
-        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+        EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {
@@ -226,6 +206,25 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
             }
         });
         
+    }
+    
+    public void showDialog()
+    {
+        try {
+            EventQueueUtilities.runAndWaitOnEDT(new Runnable(){
+
+                @Override
+                public void run() {
+                    UpdaterInProgressDialog.this.setLocationRelativeTo(null);
+                    UpdaterInProgressDialog.this.pack();
+                    UpdaterInProgressDialog.this.setVisible(true);
+                }
+            });
+        } catch (InterruptedException ex) {
+            cancelled = true;
+            this.disposeOnEDT();
+            Exceptions.printStackTrace(ex);
+        }
     }
     
     @Override
@@ -253,11 +252,11 @@ public class UpdaterInProgressDialog extends javax.swing.JDialog implements IUpd
             }
         };
 
-        DatabaseConnectionProvider.runOnEDT(r);
+        EventQueueUtilities.runOnEDT(r);
         
         if (i >= 100)
         {
-            DatabaseConnectionProvider.runOnEDT(new Runnable(){
+            EventQueueUtilities.runOnEDT(new Runnable(){
 
                 @Override
                 public void run() {

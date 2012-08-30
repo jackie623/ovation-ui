@@ -7,18 +7,19 @@ package us.physion.ovation.dbconnection;
 import javax.swing.JFrame;
 import org.openide.util.Exceptions;
 import ovation.DataStoreCoordinator;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 
 /**
  *
  * @author huecotanks
  */
-public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
+public class ShouldRunUpdaterDialog extends ModalDialogBase{
 
     /**
      * Creates new form ShouldRunUpdaterDialog
      */
     public ShouldRunUpdaterDialog() {
-        super(new JFrame(), true);
+        super();
         initComponents();
         this.getRootPane().setDefaultButton(cancelButton);
     }
@@ -29,19 +30,11 @@ public class ShouldRunUpdaterDialog extends javax.swing.JDialog {
         return cancelled;
     }
     
-    private void disposeOnEDT() {
-        DatabaseConnectionProvider.runOnEDT(new Runnable() {
-
-            @Override
-            public void run() {
-                ShouldRunUpdaterDialog.this.dispose();
-            }
-        });
-    }
+   
     public void showDialog()
     {
         try {
-            DatabaseConnectionProvider.runAndWaitOnEDT(new Runnable(){
+            EventQueueUtilities.runAndWaitOnEDT(new Runnable(){
 
                 @Override
                 public void run() {

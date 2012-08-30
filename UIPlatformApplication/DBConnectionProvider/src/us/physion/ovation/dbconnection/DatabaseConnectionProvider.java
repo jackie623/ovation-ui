@@ -26,6 +26,7 @@ import org.openide.util.lookup.ServiceProvider;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import us.physion.ovation.interfaces.ConnectionListener;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 
 @ServiceProvider(service = ConnectionProvider.class)
 /**
@@ -108,7 +109,7 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
             }
         };
 
-        runOnEDT(r);
+        EventQueueUtilities.runOnEDT(r);
 
         return dsc;
     }
@@ -131,33 +132,5 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
         connectionListeners.remove(cl);
     }
 
-    public static void runOnEDT(Runnable r) {
-        if (EventQueue.isDispatchThread()) {
-            r.run();
-        } else {
-            SwingUtilities.invokeLater(r);
-        }
-    }
     
-    public static void runAndWaitOnEDT(Runnable r) throws InterruptedException {
-        if (EventQueue.isDispatchThread()) {
-            r.run();
-        } else {
-            try{
-                SwingUtilities.invokeAndWait(r);
-            } catch (InvocationTargetException e)
-            {
-                e.printStackTrace(); //TODO: handle this better
-            }
-        }
-    }
-    
-    public static void runOffEDT(Runnable r) {
-        if (EventQueue.isDispatchThread()) {
-            Thread t = new Thread(r);//TODO: executor service
-            t.start();
-        } else {
-            r.run();
-        }
-    }
 }

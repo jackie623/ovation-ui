@@ -6,6 +6,7 @@ package us.physion.ovation.dbconnection;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 
 /**
  *
@@ -19,7 +20,7 @@ public class ModalDialogBase extends JDialog {
 
     public void showDialog() {
         try {
-            DatabaseConnectionProvider.runAndWaitOnEDT(new Runnable() {
+            EventQueueUtilities.runAndWaitOnEDT(new Runnable() {
 
                 @Override
                 public void run() {
@@ -36,7 +37,7 @@ public class ModalDialogBase extends JDialog {
     }
 
     public void disposeOnEDT() {
-        DatabaseConnectionProvider.runOnEDT(new Runnable() {
+        EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {

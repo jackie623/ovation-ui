@@ -82,10 +82,10 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     }
     
     @Test
-    public void testShouldRunUpdaterReturnsFalseIfDatabaseVersionIsGreaterThanSchemaVersionButAlertsUserOfThis(){
+    public void testShouldRunUpdaterReturnsTrueIfDatabaseVersionIsGreaterThanSchemaVersionButAlertsUserOfThis(){
         DBConnectionDialog d = new DBConnectionDialog();
         ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
-        assertFalse(d.shouldRunUpdater(2, 1, false, shouldRun)); 
+        assertTrue(d.shouldRunUpdater(2, 1, false, shouldRun)); 
     }
     
     @Test

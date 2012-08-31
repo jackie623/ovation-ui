@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.rmi.RMISecurityManager;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,8 +39,12 @@ public class ResourceViewTopComponentTest extends OvationTestCase{
     
     static TestManager mgr = new SelectionViewTestManager();
     public ResourceViewTopComponentTest() {
+        if (System.getSecurityManager() == null) {
+            System.out.println("There was no security manager"));
+            System.setSecurityManager(new RMISecurityManager());
+        }
         System.out.println("Test constructor");
-        System.out.println(System.getProperty("user.dir"));
+        System.out.println(System.getProperty("java.security.policy"));
 
         setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
     }

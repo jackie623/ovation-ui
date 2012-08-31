@@ -30,9 +30,7 @@ public class SelectionViewTestManager extends TestManager {
 
     @Override
     public String getConnectionFile() {
-        String path =
-                System.getProperty("user.home") + File.separator
-                + "data" + File.separator
+        String path ="data" + File.separator
                 + "selectionDetails" + File.separator
                 + "selection-details.connection";
         return path;

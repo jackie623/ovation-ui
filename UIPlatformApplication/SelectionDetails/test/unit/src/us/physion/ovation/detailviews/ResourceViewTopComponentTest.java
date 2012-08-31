@@ -40,7 +40,7 @@ public class ResourceViewTopComponentTest extends OvationTestCase{
     static TestManager mgr = new SelectionViewTestManager();
     public ResourceViewTopComponentTest() {
         if (System.getSecurityManager() == null) {
-            System.out.println("There was no security manager"));
+            System.out.println("There was no security manager");
             System.setSecurityManager(new RMISecurityManager());
         }
         System.out.println("Test constructor");

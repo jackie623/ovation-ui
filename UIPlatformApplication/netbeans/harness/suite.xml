@@ -570,6 +570,7 @@ Alternatively use "zip -yr ${app.name}.app" to create a simple zipped distributi
         <subant target="test" buildpath="${modules.test.sorted}" inheritrefs="false" inheritall="false">
             <property name="cluster.path.evaluated" value="${cluster.path.evaluated}"/> <!-- Just for speed of pre-7.0 projects -->
             <property name="continue.after.failing.tests" value="${continue.after.failing.tests}"/>
+	    <property name="java.security.policy" value="${basedir}/../lib/security.txt"/>
         </subant>
     </target>
 

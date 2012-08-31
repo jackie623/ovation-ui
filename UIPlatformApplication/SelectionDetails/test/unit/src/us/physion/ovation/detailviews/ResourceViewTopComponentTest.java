@@ -38,6 +38,9 @@ public class ResourceViewTopComponentTest extends OvationTestCase{
     
     static TestManager mgr = new SelectionViewTestManager();
     public ResourceViewTopComponentTest() {
+        System.out.println("Test constructor");
+        System.out.println(System.getProperty("user.dir"));
+
         setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
     }
     

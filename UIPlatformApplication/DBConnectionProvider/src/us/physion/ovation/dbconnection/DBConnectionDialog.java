@@ -82,15 +82,13 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         this(new JFrame(), true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
     }
 
-    private void showErrors(final Exception e) {
+    protected void showErrors(final Exception e) {
              
         EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {
-               // DBConnectionDialog.this.setVisible(true);
                 errorScrollPane.setVisible(true);
-                DBConnectionDialog.this.pack();
                 if (e instanceof UserAuthenticationException) {
                     errorTextArea.setText("**Error: Username and password combination was not found.");
                 } else {
@@ -450,6 +448,10 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 } catch (DatabaseNotFoundException ex) {
                     showErrors(ex);
                     return c;
+                } catch (Exception ex)
+                {
+                    showErrors(ex);
+                    return c;
                 }
             }
             else{
@@ -469,6 +471,10 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                     showErrors(ex1);
                     return c;
                 } catch (DatabaseNotFoundException ex1) {
+                    showErrors(ex1);
+                    return c;
+                } catch (Exception ex1)
+                {
                     showErrors(ex1);
                     return c;
                 }

@@ -5,6 +5,7 @@
 package us.physion.ovation.editor;
 
 import java.awt.Font;
+import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -18,7 +19,7 @@ import org.jfree.ui.RectangleInsets;
  *
  * @author huecotanks
  */
-class ChartWrapper
+class ChartWrapper implements ResponseGroupWrapper
 {
     DefaultXYDataset _ds;
     String _xAxis;
@@ -53,6 +54,11 @@ class ChartWrapper
     private TextTitle convertTitle(String s)
     {
         return new TextTitle(s, new Font("timesnewroman", Font.BOLD, 20));
+    }
+    
+    public JPanel generatePanel()
+    {
+        return generateChartPanel();
     }
 
 }

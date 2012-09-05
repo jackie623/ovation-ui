@@ -8,11 +8,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.FutureTask;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -48,6 +46,9 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleInsets;
+import org.openide.explorer.ExplorerUtils;
+import org.openide.explorer.view.BeanTreeView;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 
@@ -74,9 +75,10 @@ preferredID = "ResponseViewTopComponent")
 public final class ResponseViewTopComponent extends TopComponent {
     
     Lookup.Result global;
-    List<ChartPanel> chartPanels = new ArrayList<ChartPanel>();
-    ChartTableModel chartModel = new ChartTableModel(chartPanels);
-
+    List<ResponsePanel> responsePanels = new ArrayList<ResponsePanel>();
+    ChartTableModel chartModel = new ChartTableModel(responsePanels);
+    Lookup l;
+    
     private LookupListener listener = new LookupListener() {
 
         @Override
@@ -101,7 +103,7 @@ public final class ResponseViewTopComponent extends TopComponent {
         setToolTipText(Bundle.HINT_ResponseViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
-        jTable1.setDefaultRenderer(ChartPanel.class, new ChartCellRenderer());
+        jTable1.setDefaultRenderer(ResponsePanel.class, new ResponseCellRenderer());
     }
    
     /**
@@ -112,47 +114,42 @@ public final class ResponseViewTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        responseListPane = new BeanTreeView();
         jTable1 = new javax.swing.JTable();
 
-        jTable1.setModel(chartModel);
-        jScrollPane1.setViewportView(jTable1);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 510, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
-        );
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        responseListPane.setViewportView(jTable1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(responseListPane, javax.swing.GroupLayout.DEFAULT_SIZE, 510, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(responseListPane, javax.swing.GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JScrollPane responseListPane;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
-        jPanel1.setVisible(false);
+        responseListPane.setVisible(false);
     }
 
     @Override
@@ -176,14 +173,14 @@ public final class ResponseViewTopComponent extends TopComponent {
         updateEntitySelection(global.allInstances());
     }
     
-    protected List<ChartWrapper> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
+    protected List<ResponseGroupWrapper> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
         if (entities.size() == 0)
         {
-            jPanel1.setVisible(false);
+            responseListPane.setVisible(false);
             return null;
         }
-        
-        LinkedList<ChartWrapper> chartList = new LinkedList<ChartWrapper>();
+
+        LinkedList<ResponseGroupWrapper> responseGroupList = new LinkedList<ResponseGroupWrapper>();
         for (IEntityWrapper ew: entities)
         {
             if (ew.getType().isAssignableFrom(Epoch.class))
@@ -191,136 +188,87 @@ public final class ResponseViewTopComponent extends TopComponent {
                 Epoch epoch = (Epoch)(ew.getEntity());//getEntity gets the context for the given thread
                 for (String name: epoch.getResponseNames())
                 {
-                    ResponseWrapper entity = ResponseWrapper.createIfPlottable(epoch.getResponse(name));
+                    ResponseWrapper entity = ResponseWrapper.createIfDisplayable(epoch.getResponse(name), name);
                     if (entity == null)
                     {
                         continue;
                     }
-                    ChartWrapper current = null;
-                    for (ChartWrapper chart : chartList)
+                    ResponseGroupWrapper current = null;
+                    for (ResponseGroupWrapper wrapper : responseGroupList)
                     {
-                        if (entity.xUnits().equals(chart.getXAxis()) && entity.yUnits().equals(chart.getYAxis())) {
-                            current = chart;
-                            current.setTitle("Responses for " + epoch.getProtocolID());
-                            break;
-                        }
+                        if (wrapper instanceof ChartWrapper) {
+                            ChartWrapper chart = (ChartWrapper) wrapper;
+                            if (entity.xUnits().equals(chart.getXAxis()) && entity.yUnits().equals(chart.getYAxis())) {
+                                chart.setTitle("Responses for " + epoch.getProtocolID());
+                                addXYDataset(chart.getDataset(), entity, name);
+                                current = chart;
+                                break;
+                            }
+                        } 
                     }
-                    if (current == null)
+                    if (current == null)// response doesn't need to be added to existing chart
                     {
-                        current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
-                        current.setTitle(ew.getDisplayName());
-                        chartList.add(current);
+                        if (entity.isPlottable())
+                            addXYDataset(entity.cw.getDataset(), entity, name);
+                        
+                        responseGroupList.add(entity);
                     }
-                    
-                    addXYDataset(current.getDataset(), entity, name);
                 }
                 
             }
             else if (ew.getType().isAssignableFrom(Response.class)) {
-                ResponseWrapper entity = ResponseWrapper.createIfPlottable(ew);
-                if (entity != null) {
-                    ChartWrapper current = new ChartWrapper(new DefaultXYDataset(), entity.xUnits(), entity.yUnits());
-                    current.setTitle(ew.getDisplayName());
-                    chartList.add(current);
-                    addXYDataset(current.getDataset(), entity, ew.getDisplayName());
+                ResponseWrapper entity = ResponseWrapper.createIfDisplayable(ew, ew.getDisplayName());
+                if (entity == null) {
+                    continue;
+                }
+                
+                if (entity.isPlottable)
+                {
+                    responseGroupList.add(entity);
+                    addXYDataset(entity.cw.getDataset(), entity, ew.getDisplayName());
                 }
             }
         }
-        /*if (EventQueue.isDispatchThread())
-        {
-            System.out.println("Already was event dispach queue, try again");
-        }
-        List<ChartPanel> panels = new LinkedList();
-        for (ChartWrapper c : chartList) {
-            panels.add(c.generateChartPanel());
-        }*/
-        runOnEDT(updateChartRunnable(chartList));
-        return chartList;
+        
+        EventQueueUtilities.runOnEDT(updateChartRunnable(responseGroupList));
+        return responseGroupList;
     }
     
-     private Runnable updateChartRunnable(final List<ChartWrapper> charts)
+     private Runnable updateChartRunnable(final List<ResponseGroupWrapper> reponseGroups)
     {
         final int height = this.getHeight();
         return new Runnable(){
 
             @Override
             public void run() {
-                if (charts.size() == 0) {
-                    jPanel1.setVisible(false);
+                if (reponseGroups.size() == 0) {
+                    responseListPane.setVisible(false);
                     return;
                 }
                 
-                int initialSize = chartPanels.size();
-                while (!chartPanels.isEmpty()) {
-                        chartPanels.remove(0);
+                int initialSize = responsePanels.size();
+                while (!responsePanels.isEmpty()) {
+                        responsePanels.remove(0);
                 }
-                if (charts.size() < initialSize) {
-                    chartModel.fireTableRowsDeleted(charts.size() +1, initialSize - 1);
+                if (reponseGroups.size() < initialSize) {
+                    chartModel.fireTableRowsDeleted(reponseGroups.size() +1, initialSize - 1);
                 }
                 
-                
-                for (ChartWrapper c : charts) {
-                    ChartPanel chart = c.generateChartPanel();
-
-                    chartPanels.add(chart);
-                    int rowheight = (height / chartPanels.size());
+                int rowheight = (height / reponseGroups.size());
                     if (rowheight >= 1) {
                         jTable1.setRowHeight(rowheight);
                     }
+                for (ResponseGroupWrapper c : reponseGroups) {
+                    JPanel p = c.generatePanel();
+
+                    responsePanels.add(new ResponsePanel(p));
+                    
                 }
 
                 chartModel.fireTableDataChanged();
-                jPanel1.setVisible(true);
+                responseListPane.setVisible(true);
             }
         };
-    }
-    
-    private Runnable updateChartRunnable2(final List<ChartPanel> charts)
-    {
-        final int height = this.getHeight();
-        return new Runnable(){
-
-            @Override
-            public void run() {
-                if (charts.size() == 0) {
-                    jPanel1.setVisible(false);
-                    return;
-                }
-                
-                int initialSize = chartPanels.size();
-                while (!chartPanels.isEmpty()) {
-                        chartPanels.remove(0);
-                }
-                if (charts.size() < initialSize) {
-                    chartModel.fireTableRowsDeleted(charts.size() +1, initialSize - 1);
-                }
-                
-                
-                for (ChartPanel chart : charts) {
-
-                    chartPanels.add(chart);
-                    int rowheight = (height / chartPanels.size());
-                    if (rowheight >= 1) {
-                        jTable1.setRowHeight(rowheight);
-                    }
-                }
-
-                chartModel.fireTableDataChanged();
-                jPanel1.setVisible(true);
-            }
-        };
-    }
-    
-    private void runOnEDT(Runnable r) {
-        
-        if (EventQueue.isDispatchThread())
-        {
-            r.run();
-        }
-        else{
-            SwingUtilities.invokeLater(r);
-        }
-        
     }
 
     protected static void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
@@ -377,4 +325,5 @@ public final class ResponseViewTopComponent extends TopComponent {
     {
         return chartModel;
     }
+
 }

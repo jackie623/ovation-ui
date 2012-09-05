@@ -4,20 +4,20 @@
  */
 package us.physion.ovation.editor;
 
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 
 /**
  *
  * @author huecotanks
  */
 public class ResponsePanel {
-    JPanel panel;
-    ResponsePanel(JPanel p)
+    JComponent panel;
+    ResponsePanel(JComponent p)
     {
         panel = p;
     }
     
-    public JPanel getPanel()
+    public JComponent getPanel()
     {
         return panel;
     }

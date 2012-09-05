@@ -4,12 +4,19 @@
  */
 package us.physion.ovation.editor;
 
+import com.pixelmed.dicom.DicomException;
+import com.pixelmed.dicom.DicomInputStream;
+import com.pixelmed.display.SingleImagePanel;
+import com.pixelmed.display.SourceImage;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.FutureTask;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -48,6 +55,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleInsets;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
+import org.openide.util.*;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
@@ -117,17 +125,7 @@ public final class ResponseViewTopComponent extends TopComponent {
         responseListPane = new BeanTreeView();
         jTable1 = new javax.swing.JTable();
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
+        jTable1.setModel(chartModel);
         responseListPane.setViewportView(jTable1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -181,6 +179,26 @@ public final class ResponseViewTopComponent extends TopComponent {
         }
 
         LinkedList<ResponseGroupWrapper> responseGroupList = new LinkedList<ResponseGroupWrapper>();
+        DicomInputStream din = null;
+        try {
+            din = new DicomInputStream(new File("/Users/huecotanks/test-dicom.dcm"));
+            responseGroupList.add(new DicomWrapper(din));
+        } catch (DicomException ex) {
+            Exceptions.printStackTrace(ex);
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+            throw new RuntimeException(ex);
+
+        } finally {
+            if (din != null) {
+                try {
+                    din.close();
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
         for (IEntityWrapper ew: entities)
         {
             if (ew.getType().isAssignableFrom(Epoch.class))
@@ -259,7 +277,7 @@ public final class ResponseViewTopComponent extends TopComponent {
                         jTable1.setRowHeight(rowheight);
                     }
                 for (ResponseGroupWrapper c : reponseGroups) {
-                    JPanel p = c.generatePanel();
+                    JComponent p = c.generatePanel();
 
                     responsePanels.add(new ResponsePanel(p));
                     
@@ -324,6 +342,20 @@ public final class ResponseViewTopComponent extends TopComponent {
     protected ChartTableModel getChartTableModel()
     {
         return chartModel;
+    }
+    
+    protected class DicomWrapper implements ResponseGroupWrapper
+    {
+        SourceImage src;
+        DicomWrapper(DicomInputStream in) throws IOException, DicomException
+        {
+            src = new SourceImage(in);
+        }
+        @Override
+        public JComponent generatePanel() {
+            return new SingleImagePanel(src);
+        }
+        
     }
 
 }

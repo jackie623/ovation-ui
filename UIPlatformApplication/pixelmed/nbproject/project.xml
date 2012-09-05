@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>pixelmed</code-name-base>
+            <suite-component/>
+            <module-dependencies/>
+            <public-packages>
+                <package>apple.dts.samplecode.osxadapter</package>
+                <package>com.pixelmed.anatproc</package>
+                <package>com.pixelmed.apps</package>
+                <package>com.pixelmed.convert</package>
+                <package>com.pixelmed.database</package>
+                <package>com.pixelmed.dicom</package>
+                <package>com.pixelmed.display</package>
+                <package>com.pixelmed.display.event</package>
+                <package>com.pixelmed.displaywave</package>
+                <package>com.pixelmed.dose</package>
+                <package>com.pixelmed.doseocr</package>
+                <package>com.pixelmed.event</package>
+                <package>com.pixelmed.ftp</package>
+                <package>com.pixelmed.geometry</package>
+                <package>com.pixelmed.network</package>
+                <package>com.pixelmed.query</package>
+                <package>com.pixelmed.scpecg</package>
+                <package>com.pixelmed.server</package>
+                <package>com.pixelmed.test</package>
+                <package>com.pixelmed.transfermonitor</package>
+                <package>com.pixelmed.utils</package>
+                <package>com.pixelmed.validate</package>
+                <package>com.pixelmed.web</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/pixelmed.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/pixelmed.jar</binary-origin>
+            </class-path-extension>
+        </data>
+    </configuration>
+</project>

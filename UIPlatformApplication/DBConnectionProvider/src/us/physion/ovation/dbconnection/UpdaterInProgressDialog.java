@@ -210,8 +210,8 @@ public class UpdaterInProgressDialog extends ModalDialogBase implements IUpdateU
     
     public void showDialog()
     {
-        try {
-            EventQueueUtilities.runAndWaitOnEDT(new Runnable(){
+        //try {
+            EventQueueUtilities.runOnEDT(new Runnable(){
 
                 @Override
                 public void run() {
@@ -220,11 +220,11 @@ public class UpdaterInProgressDialog extends ModalDialogBase implements IUpdateU
                     UpdaterInProgressDialog.this.setVisible(true);
                 }
             });
-        } catch (InterruptedException ex) {
+       /* } catch (InterruptedException ex) {
             cancelled = true;
             this.disposeOnEDT();
             Exceptions.printStackTrace(ex);
-        }
+        }*/
     }
     
     @Override

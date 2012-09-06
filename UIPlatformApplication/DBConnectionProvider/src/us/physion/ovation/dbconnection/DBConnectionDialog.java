@@ -400,8 +400,6 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
         } catch (SchemaVersionException ex2)
         {
-            new ErrorDialog("Schema Exception").showDialog();
-
             int databaseVersion = ex2.getDatabaseSchemaNumber();
             int apiVersion = ex2.getAPISchemaNumber();
             boolean success = shouldRunUpdater(databaseVersion, apiVersion); //ask the user if they want to run the upgrader
@@ -422,13 +420,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 UpgradeTool tool = new UpgradeTool(versions, connectionFile, username, password, uiUpdater);
                 uiUpdater.setUpgradeTool(tool);
                 try{
-                    new ErrorDialog("Running updater").showDialog();
                     success = runUpdater(tool, uiUpdater, true);
-                    if (success)
-                        new ErrorDialog("Success").showDialog();
-                    else{
-                        new ErrorDialog("Failure, but no exception? Weird").showDialog();
-                    }
                 } catch (Exception e)
                 {
                     cancelled = true;
@@ -438,8 +430,6 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             }
             if (success)
             {
-                new ErrorDialog("Getting context again").showDialog();
-                
                 try {
                     c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
                 } catch (DatabaseOpenException ex) {

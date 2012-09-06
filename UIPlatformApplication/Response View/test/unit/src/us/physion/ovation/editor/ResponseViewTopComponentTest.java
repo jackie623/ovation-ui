@@ -105,14 +105,12 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         
         Collection<ResponseGroupWrapper> chartWrappers= t.updateEntitySelection(entities);
         
-        System.out.println(chartWrappers.size());
-        
-        assertTrue(chartWrappers.size() == entities.size());
+        assertEquals(chartWrappers.size(), entities.size());
         
         for (ResponseGroupWrapper w : chartWrappers)
         {
-            if (w instanceof ChartWrapper) {
-                ChartWrapper p = (ChartWrapper) w;
+            if (w instanceof ChartGroupWrapper) {
+                ChartGroupWrapper p = (ChartGroupWrapper) w;
                 XYDataset ds = p.getDataset();
                 Comparable key = ds.getSeriesKey(0);
                 assertEquals(key, dev.getName());
@@ -121,7 +119,7 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
                     assertTrue(i / samplingRate == ds.getXValue(0, i));
                 }
 
-                assertEquals(p.getXAxis(), ResponseWrapper.convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]));
+                assertEquals(p.getXAxis(), ChartWrapper.convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]));
                 assertEquals(p.getYAxis(), r.getUnits());
             }
         }
@@ -144,12 +142,10 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         String dataUTI = Response.NUMERIC_DATA_UTI;
         Response r = epoch.insertResponse(dev, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
         
-        ResponseWrapper rw = ResponseWrapper.createIfDisplayable(r, dev.getName());
-        DefaultXYDataset ds = new DefaultXYDataset();
-        ResponseViewTopComponent.addXYDataset( ds, rw, dev.getName());
+        ChartWrapper rw = (ChartWrapper)ResponseWrapperFactory.create(r);
         
-        ChartWrapper cw = new ChartWrapper(ds, rw.xUnits(), rw.yUnits());
-        cw.setTitle(dev.getName());
+        ChartGroupWrapper cw = (ChartGroupWrapper)rw.createGroup();
+        DefaultXYDataset ds = cw.getDataset();
         ChartPanel p = cw.generateChartPanel();
         XYPlot plot = p.getChart().getXYPlot();
         Comparable key = ds.getSeriesKey(0);
@@ -159,19 +155,108 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
             assertTrue(i / samplingRate == ds.getXValue(0, i));
         }
 
-        assertEquals(plot.getDomainAxis().getLabel(), ResponseWrapper.convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]));
+        assertEquals(plot.getDomainAxis().getLabel(), ChartWrapper.convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]));
         assertEquals(plot.getRangeAxis().getLabel(), r.getUnits());
     }
     
     @Test
     public void testGraphsMultipleSelectedEntitiesWithSharedUnits()
     {
-    
+        ResponseViewTopComponent t = new ResponseViewTopComponent();
+        //assertNotNull(Lookup.getDefault().lookup(ConnectionProvider.class));
+        Collection entities = new HashSet();
+        ExternalDevice dev1 = experiment.externalDevice("device-name", "manufacturer");
+        ExternalDevice dev2 = experiment.externalDevice("second-device-name", "manufacturer");
+        double[] d = new double[10000];
+        for (int i=0; i< d.length; ++i)
+        {
+            d[i] = i;
+        }
+        NumericData data = new NumericData(d);
+        String units = "units";
+        String dimensionLabel = "dimension label";
+        double samplingRate = 3;
+        String samplingRateUnits = "Hz";
+        String dataUTI = Response.NUMERIC_DATA_UTI;
+        Response r1 = epoch.insertResponse(dev1, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
+        Response r2 = epoch.insertResponse(dev2, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
+
+        entities.add(new TestEntityWrapper(dsc, epoch));
+        
+        Collection<ResponseGroupWrapper> chartWrappers= t.updateEntitySelection(entities);
+        
+        assertEquals(1, chartWrappers.size());
+        
+        Set<String> series = new HashSet();
+        for (ResponseGroupWrapper w : chartWrappers)
+        {
+            if (w instanceof ChartGroupWrapper) {
+                ChartGroupWrapper p = (ChartGroupWrapper) w;
+                XYDataset ds = p.getDataset();
+                series.add(ds.getSeriesKey(0).toString());
+                series.add(ds.getSeriesKey(1).toString());
+            }
+        }
+        
+        assertEquals(series.size(), 2);
+        assertTrue(series.contains(dev1.getName()));
+        assertTrue(series.contains(dev2.getName()));
+        
     }
     
     @Test
     public void testGraphsMultipleSelectedEntitiesWithoutSharedUnits()
     {
+        ResponseViewTopComponent t = new ResponseViewTopComponent();
+        //assertNotNull(Lookup.getDefault().lookup(ConnectionProvider.class));
+        Collection entities = new HashSet();
+        ExternalDevice dev1 = experiment.externalDevice("device-name", "manufacturer");
+        ExternalDevice dev2 = experiment.externalDevice("second-device-name", "manufacturer");
+        double[] d = new double[10000];
+        for (int i=0; i< d.length; ++i)
+        {
+            d[i] = i;
+        }
+        NumericData data = new NumericData(d);
+        String units = "units";
+        String dimensionLabel = "dimension label";
+        double samplingRate = 3;
+        String samplingRateUnits = "Hz";
+        String dataUTI = Response.NUMERIC_DATA_UTI;
+        Response r1 = epoch.insertResponse(dev1, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
+        Response r2 = epoch.insertResponse(dev2, new HashMap(), data, "other-units", dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
+
+        entities.add(new TestEntityWrapper(dsc, r1));
+        entities.add(new TestEntityWrapper(dsc, r2));
+        
+        Collection<ResponseGroupWrapper> chartWrappers= t.updateEntitySelection(entities);
+        
+        assertEquals(chartWrappers.size(), entities.size());
+        
+        Set<String> series = new HashSet();
+        for (ResponseGroupWrapper w : chartWrappers)
+        {
+            if (w instanceof ChartGroupWrapper) {
+                ChartGroupWrapper p = (ChartGroupWrapper) w;
+                XYDataset ds = p.getDataset();
+                series.add(ds.getSeriesKey(0).toString());
+            }
+        }
+        
+        assertEquals(series.size(),  entities.size());
+        assertTrue(series.contains(dev1.getName()));
+        assertTrue(series.contains(dev2.getName()));
+    }
     
+    @Test 
+    public void testDisplaysDicomURLResponse()
+    {
+        
+    }
+    
+    @Test
+    public void testDisplaysDicomResponse()
+    {
+        fail("implement");
     }
 }

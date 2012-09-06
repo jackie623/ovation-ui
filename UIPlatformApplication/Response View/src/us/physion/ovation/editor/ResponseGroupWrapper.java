@@ -12,4 +12,8 @@ import java.awt.Component;
  */
 public interface ResponseGroupWrapper {
     public Component generatePanel();
+    
+    public boolean shouldAdd(ResponseWrapper r);
+    
+    public void add(ResponseWrapper r);
 }

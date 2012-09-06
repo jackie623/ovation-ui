@@ -4,61 +4,85 @@
  */
 package us.physion.ovation.editor;
 
-import java.awt.Font;
-import javax.swing.JPanel;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.title.TextTitle;
+import java.io.InputStream;
 import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.ui.RectangleInsets;
+import ovation.NumericData;
+import ovation.Response;
+import ovation.URLResponse;
 
 /**
  *
  * @author huecotanks
  */
-class ChartWrapper implements ResponseGroupWrapper
-{
-    DefaultXYDataset _ds;
-    String _xAxis;
-    String _yAxis;
-    String _title;
+public class ChartWrapper implements ResponseWrapper{
+    NumericData data;
+    InputStream dataStream;
+    String name;
+    double samplingRate;
+    String yunits;
+    String xunits;
     
-    ChartWrapper(DefaultXYDataset ds, String xAxis, String yAxis)
+    public ChartWrapper(Response r)
     {
-        _ds = ds;
-        _xAxis = xAxis;
-        _yAxis = yAxis;
+        if (r instanceof URLResponse)
+        {
+            dataStream = ((URLResponse) r).getDataStream();
+        }else{
+            data = r.getData();
+        }
+        name = r.getExternalDevice().getName();
+        samplingRate = r.getSamplingRates()[0];
+        yunits = r.getUnits();
+        xunits = convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]);
+        
     }
-    DefaultXYDataset getDataset(){ return _ds;}
-    String getXAxis() { return _xAxis;}
-    String getYAxis() { return _yAxis;}
-    void setTitle(String s) {_title = s;}
-    String getTitle() {return _title;}
+   
+    protected static String convertSamplingRateUnitsToGraphUnits(String samplingRateUnits){
+       if (samplingRateUnits.toLowerCase().contains("hz"))
+       {
+           String prefix = samplingRateUnits.substring(0, samplingRateUnits.toLowerCase().indexOf("hz"));
+           return "Time (in " + prefix + "Seconds)";
+       }
+       else return ("1 / " + samplingRateUnits);
+    }
     
-    ChartPanel generateChartPanel()
-    {
-        JFreeChart chart = ChartFactory.createXYLineChart(getTitle(), getXAxis(), getYAxis(), getDataset(), PlotOrientation.VERTICAL, true, true, true);
-        ChartPanel p = new ChartPanel(chart);
+    
 
-        chart.setTitle(convertTitle(getTitle()));
-        chart.setPadding(new RectangleInsets(20, 20, 20, 20));
-        XYPlot plot = chart.getXYPlot();
-        plot.getDomainAxis().setLabelFont(new Font("Times New Roman", 1, 16));//new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-        plot.getRangeAxis().setLabelFont(new Font("Times New Roman", 1, 15));//new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-        return p;
+    @Override
+    public ResponseGroupWrapper createGroup() {
+        ChartGroupWrapper g = new ChartGroupWrapper(new DefaultXYDataset(), xunits, yunits);
+        g.setTitle(getName());
+        g.addXYDataset(this);
+        return g;
     }
     
-    private TextTitle convertTitle(String s)
+    public String getXUnits()
     {
-        return new TextTitle(s, new Font("Times New Roman", 1, 20));
+        return xunits;
     }
     
-    public JPanel generatePanel()
+    public String getYUnits()
     {
-        return generateChartPanel();
+        return yunits;
     }
-
+    
+    public double getSamplingRate()
+    {
+       return samplingRate; 
+    }
+    
+    public String getName()
+    {
+        return name;
+    }
+    
+    public NumericData getNumericData()
+    {
+        return data;
+    }
+    
+    public InputStream getDataStream()
+    {
+        return dataStream;
+    }
 }

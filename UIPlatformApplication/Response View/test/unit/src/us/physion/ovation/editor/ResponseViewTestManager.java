@@ -13,6 +13,15 @@ import ovation.test.TestManager;
  */
 public class ResponseViewTestManager extends TestManager {
 
+    String connectionFile;
+    ResponseViewTestManager()
+    {
+        connectionFile = new File(".").getAbsolutePath() + File.separator
+                + "data" + File.separator
+                + "responseView" + File.separator
+                + "response-test.connection";
+    }
+    
     @Override
     public String getLicenseText() {
         return "crS9RjS6wJgmZkJZ1WRbdEtIIwynAVmqFwrooGgsM7ytyR+wCD3xpjJEENey+b0GVVEgib++HAKh94LuvLQXQ2lL2UCUo75xJwVLL3wmd21WbumQqKzZk9p6fkHCVoiSxgon+2RaGA75ckKNmUVTeIBn+QkalKCg9p1P7FbWqH3diXlAOKND2mwjI8V4unq7aaKEUuCgdU9V/BjFBkoytG8FzyBCNn+cBUNTByYy7RxYxH37xECZJ6/hG/vP4QjKpks9cu3yQL9QjXBQIizrzini0eQj62j+QzCSf0oQg8KdIeZHuU+ZSZZ1pUHLYiOiQWaOL9cVPxqMzh5Q/Zvu6Q==";
@@ -30,10 +39,7 @@ public class ResponseViewTestManager extends TestManager {
 
     @Override
     public String getConnectionFile() {
-        String path ="data" + File.separator
-                + "responseView" + File.separator
-                + "response-test.connection";
-        return path;
+        return connectionFile;
     }
 
     @Override

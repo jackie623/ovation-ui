@@ -57,7 +57,6 @@ import org.openide.util.*;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
-
 /**
  * Top component which displays something.
  */
@@ -79,31 +78,29 @@ preferredID = "ResponseViewTopComponent")
     "HINT_ResponseViewTopComponent=This plots the currently selected numeric Response data"
 })
 public final class ResponseViewTopComponent extends TopComponent {
-    
+
     Lookup.Result global;
     List<ResponsePanel> responsePanels = new ArrayList<ResponsePanel>();
     ChartTableModel chartModel = new ChartTableModel(responsePanels);
     Lookup l;
-    
     private LookupListener listener = new LookupListener() {
 
         @Override
         public void resultChanged(LookupEvent le) {
-            
+
             //TODO: we should have some other Interface for things that can update the tags view
             //then we could get rid of the Library dependancy on the Explorer API
-            if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
-            {
+            if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider) {
                 updateEntitySelection();
             }
         }
     };
+
     public ResponseViewTopComponent() {
         initTopComponent();
     }
-    
-    private void initTopComponent()
-    {
+
+    private void initTopComponent() {
         initComponents();
         setName(Bundle.CTL_ResponseViewTopComponent());
         setToolTipText(Bundle.HINT_ResponseViewTopComponent());
@@ -111,7 +108,7 @@ public final class ResponseViewTopComponent extends TopComponent {
         global.addLookupListener(listener);
         jTable1.setDefaultRenderer(ResponsePanel.class, new ResponseCellRenderer());
     }
-   
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -137,11 +134,11 @@ public final class ResponseViewTopComponent extends TopComponent {
             .addComponent(responseListPane, javax.swing.GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable jTable1;
     private javax.swing.JScrollPane responseListPane;
     // End of variables declaration//GEN-END:variables
+
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
@@ -164,100 +161,78 @@ public final class ResponseViewTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
-    protected void updateEntitySelection()
-    {
-        updateEntitySelection(global.allInstances());
+
+    protected void updateEntitySelection() {
+        final Collection<? extends IEntityWrapper> entities = global.allInstances();
+        Runnable r = new Runnable() {
+
+            @Override
+            public void run() {
+                updateEntitySelection(entities);
+            }
+        };
+
+        EventQueueUtilities.runOffEDT(r);
     }
-    
+
     protected List<ResponseGroupWrapper> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
-        if (entities.size() == 0)
-        {
-            responseListPane.setVisible(false);
+        if (entities.size() == 0) {
+            EventQueueUtilities.runOnEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                    responseListPane.setVisible(false);
+                }
+            });
+
             return null;
         }
 
-        LinkedList<ResponseGroupWrapper> responseGroupList = new LinkedList<ResponseGroupWrapper>();
-        /*DicomInputStream din = null;
-        try {
-            din = new DicomInputStream(new File("/Users/jackie/test-dicom.dcm"));
-            responseGroupList.add(new DicomWrapper(din, "the name"));
-        } catch (DicomException ex) {
-            Exceptions.printStackTrace(ex);
-            throw new RuntimeException(ex);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-            throw new RuntimeException(ex);
+        LinkedList<ResponseWrapper> responseList = new LinkedList<ResponseWrapper>();
 
-        } finally {
-            if (din != null) {
-                try {
-                    din.close();
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-        }*/
-        for (IEntityWrapper ew: entities)
-        {
-            if (ew.getType().isAssignableFrom(Epoch.class))
-            {
-                Epoch epoch = (Epoch)(ew.getEntity());//getEntity gets the context for the given thread
-                for (String name: epoch.getResponseNames())
-                {
-                    ResponseWrapper entity = ResponseWrapper.createIfDisplayable(epoch.getResponse(name), name);
-                    if (entity == null)
-                    {
-                        continue;
+        for (IEntityWrapper ew : entities) {
+            if (ew.getType().isAssignableFrom(Epoch.class)) {
+                Epoch epoch = (Epoch) (ew.getEntity());//getEntity gets the context for the given thread
+                for (String name : epoch.getResponseNames()) {
+                    ResponseWrapper entity = ResponseWrapperFactory.create(epoch.getResponse(name));
+                    if (entity != null) {
+                        responseList.add(entity);
                     }
-                    ResponseGroupWrapper current = null;
-                    for (ResponseGroupWrapper wrapper : responseGroupList)
-                    {
-                        if (wrapper instanceof ChartWrapper) {
-                            ChartWrapper chart = (ChartWrapper) wrapper;
-                            if (entity.xUnits().equals(chart.getXAxis()) && entity.yUnits().equals(chart.getYAxis())) {
-                                chart.setTitle("Responses for " + epoch.getProtocolID());
-                                addXYDataset(chart.getDataset(), entity, name);
-                                current = chart;
-                                break;
-                            }
-                        } 
-                    }
-                    if (current == null)// response doesn't need to be added to existing chart
-                    {
-                        if (entity.isPlottable) {
-                            responseGroupList.add(entity);
-                            addXYDataset(entity.cw.getDataset(), entity, ew.getDisplayName());
-                        } else {
-                            responseGroupList.add(new DicomWrapper(entity, entity.getName()));
-                        }
-                    }
+
                 }
-                
-            }
-            else if (ew.getType().isAssignableFrom(Response.class) || ew.getType().isAssignableFrom(URLResponse.class)) {
-                ResponseWrapper entity = ResponseWrapper.createIfDisplayable(ew, ew.getDisplayName());
-                if (entity == null) {
-                    continue;
-                }
-                
-                if (entity.isPlottable)
-                {
-                    responseGroupList.add(entity);
-                    addXYDataset(entity.cw.getDataset(), entity, ew.getDisplayName());
-                }else{
-                    responseGroupList.add(new DicomWrapper(entity, ew.getDisplayName()));
+
+            } else if (ew.getType().isAssignableFrom(Response.class) || ew.getType().isAssignableFrom(URLResponse.class)) {
+                ResponseWrapper entity = ResponseWrapperFactory.create((Response) (ew.getEntity()));
+                if (entity != null) {
+                    responseList.add(entity);
                 }
             }
         }
-        
-        EventQueueUtilities.runOnEDT(updateChartRunnable(responseGroupList));
-        return responseGroupList;
+
+        List<ResponseGroupWrapper> responseGroups = new LinkedList<ResponseGroupWrapper>();
+
+        for (ResponseWrapper rw : responseList) {
+            boolean added = false;
+            for (ResponseGroupWrapper group : responseGroups) {
+                if (group.shouldAdd(rw)) {
+                    group.add(rw);
+                    added = true;
+                    break;
+                }
+
+            }
+            if (!added) {
+                responseGroups.add(rw.createGroup());
+            }
+        }
+
+        EventQueueUtilities.runOnEDT(updateChartRunnable(responseGroups));
+        return responseGroups;
     }
-    
-     private Runnable updateChartRunnable(final List<ResponseGroupWrapper> reponseGroups)
-    {
+
+    private Runnable updateChartRunnable(final List<ResponseGroupWrapper> reponseGroups) {
         final int height = this.getHeight();
-        return new Runnable(){
+        return new Runnable() {
 
             @Override
             public void run() {
@@ -265,24 +240,24 @@ public final class ResponseViewTopComponent extends TopComponent {
                     responseListPane.setVisible(false);
                     return;
                 }
-                
+
                 int initialSize = responsePanels.size();
                 while (!responsePanels.isEmpty()) {
-                        responsePanels.remove(0);
+                    responsePanels.remove(0);
                 }
                 if (reponseGroups.size() < initialSize) {
-                    chartModel.fireTableRowsDeleted(reponseGroups.size() +1, initialSize - 1);
+                    chartModel.fireTableRowsDeleted(reponseGroups.size() + 1, initialSize - 1);
                 }
-                
+
                 int rowheight = (height / reponseGroups.size());
-                    if (rowheight >= 1) {
-                        jTable1.setRowHeight(rowheight);
-                    }
+                if (rowheight >= 1) {
+                    jTable1.setRowHeight(rowheight);
+                }
                 for (ResponseGroupWrapper c : reponseGroups) {
                     Component p = c.generatePanel();
 
                     responsePanels.add(new ResponsePanel(p));
-                    
+
                 }
 
                 chartModel.fireTableDataChanged();
@@ -291,102 +266,8 @@ public final class ResponseViewTopComponent extends TopComponent {
         };
     }
 
-    protected static void addXYDataset(DefaultXYDataset ds, ResponseWrapper rw, String name)
-    {
-        NumericData d = rw.getData();
-        double samplingRate = rw.getSamplingRate();
-        long[] shape = d.getShape();
-        long size = 1;
-        for (int dimension = 0; dimension<shape.length; dimension++)
-        {
-            size = size*shape[dimension];
-        }
-        
-        if (shape.length == 1)
-        {
-            if (d.getDataFormat() == NumericDataFormat.FloatingPointDataType)
-            {
-                double[] floatingData = d.getFloatingPointData();
-                double[][] data = new double[2][(int) size];
-                for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = floatingData[i];
-                    data[0][i] = i/samplingRate;
-                }
-                ds.addSeries(name, data);
-            }
-            else if (d.getDataFormat() == NumericDataFormat.SignedFixedPointDataType)
-            {
-                int[] integerData = d.getIntegerData();
-                double[][] data = new double[(int) size][2];
-                for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = integerData[i];
-                    data[0][i] = i/samplingRate;
-                }
-                ds.addSeries(name, data);
-            }
-            else if (d.getDataFormat() == NumericDataFormat.UnsignedFixedPointDataType)
-            {
-                long[] longData = d.getUnsignedIntData();
-                double[][] data = new double[(int) size][2];
-                for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = longData[i];
-                    data[0][i] = i/samplingRate;
-                }
-                ds.addSeries(name, data);
-            }
-            
-            else{
-                Ovation.getLogger().debug("NumericData object has unknown type: " + d.getDataFormat());
-            }
-        }
-    }
     //for testing
-    protected ChartTableModel getChartTableModel()
-    {
+    protected ChartTableModel getChartTableModel() {
         return chartModel;
     }
-    
-    protected class DicomWrapper implements ResponseGroupWrapper
-    {
-        String name;
-        SourceImage src;
-        DicomWrapper(DicomInputStream in, String name) throws IOException, DicomException
-        {
-            src = new SourceImage(in);
-            this.name = name;
-        }
-        DicomWrapper(ResponseWrapper r, String name) 
-        {
-            DicomInputStream in = null;
-            try {
-                in = new DicomInputStream(r.getDataStream());
-                src = new SourceImage(in);
-                this.name = name;
-            } catch (DicomException ex) {
-                Exceptions.printStackTrace(ex);
-                throw new RuntimeException(ex.getLocalizedMessage());
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-                throw new RuntimeException(ex.getLocalizedMessage());
-            } finally{
-                if (in != null)
-                {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
-                        throw new RuntimeException(ex.getLocalizedMessage());
-                    }
-                }
-            }
-        }
-        
-        @Override
-        public Component generatePanel() {
-            ImagePanel p = new ImagePanel(name, new SingleImagePanel(src));
-            return p;
-        }
-        
-    }
-
 }

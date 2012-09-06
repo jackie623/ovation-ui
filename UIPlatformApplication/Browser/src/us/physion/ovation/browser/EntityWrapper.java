@@ -80,7 +80,7 @@ public class EntityWrapper implements IEntityWrapper {
         {
             return ((Epoch)e).getProtocolID();
         }
-        else if (type.isAssignableFrom(Response.class))
+        else if (type.isAssignableFrom(Response.class) || type.isAssignableFrom(URLResponse.class) )
         {
             return ((Response)e).getExternalDevice().getName();
         }

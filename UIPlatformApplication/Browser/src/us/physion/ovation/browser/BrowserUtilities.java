@@ -39,6 +39,7 @@ public class BrowserUtilities{
     protected static Map<ExplorerManager, Boolean> registeredViewManagers = new HashMap<ExplorerManager, Boolean>();
     protected static QueryListener ql;
     protected static ExecutorService executorService = Executors.newFixedThreadPool(2);
+    protected static BrowserCopyAction browserCopy = new BrowserCopyAction();
     
     protected static ConnectionListener cn = new ConnectionListener(new Runnable(){
 
@@ -52,7 +53,12 @@ public class BrowserUtilities{
     public static Map<String, Node> getNodeMap()
     {
         return browserMap;
-    }    
+    } 
+    
+    public static BrowserCopyAction myCopyAction()
+    {
+        return browserCopy;
+    }
     
     static void submit(Runnable runnable) {
         executorService.submit(runnable);

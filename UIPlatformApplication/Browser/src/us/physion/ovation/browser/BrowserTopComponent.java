@@ -9,7 +9,9 @@ import com.physion.ebuilder.expression.ExpressionTree;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import javax.swing.Action;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.openide.actions.CopyAction;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
@@ -25,6 +27,7 @@ import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.util.actions.SystemAction;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.WindowManager;
 import ovation.IAuthenticatedDataStoreCoordinator;
@@ -64,6 +67,11 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         l = ExplorerUtils.createLookup(em, getActionMap());
         associateLookup(l);
         BrowserUtilities.initBrowser(em, true);
+        
+        CopyAction globalCopyAction = SystemAction.get (CopyAction.class);
+        Object key = globalCopyAction.getActionMapKey(); // key is a special value defined by all CallbackSystemActions
+
+        getActionMap().put (key, BrowserUtilities.myCopyAction());
     }
 
     @Override

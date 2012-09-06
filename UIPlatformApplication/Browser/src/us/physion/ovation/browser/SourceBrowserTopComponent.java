@@ -5,7 +5,9 @@
 package us.physion.ovation.browser;
 
 import java.util.HashMap;
+import javax.swing.Action;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.openide.actions.CopyAction;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
@@ -14,6 +16,7 @@ import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.Node;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.actions.SystemAction;
 
 /**
  * Top component which displays something.
@@ -46,6 +49,11 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
 
         BrowserUtilities.initBrowser(em, false);
+
+        CopyAction globalCopyAction = SystemAction.get (CopyAction.class);
+        Object key = globalCopyAction.getActionMapKey(); // key is a special value defined by all CallbackSystemActions
+
+        getActionMap().put (key, BrowserUtilities.myCopyAction());
     }
 
     /**

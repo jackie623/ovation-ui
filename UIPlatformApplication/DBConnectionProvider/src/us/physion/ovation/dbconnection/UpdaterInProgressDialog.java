@@ -10,6 +10,7 @@ import javax.swing.*;
 import org.openide.util.Exceptions;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IUpdateUI;
+import us.physion.ovation.interfaces.ModalDialogBase;
 
 /**
  *

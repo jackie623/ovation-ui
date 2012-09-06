@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import org.openide.util.Exceptions;
 import ovation.DataStoreCoordinator;
 import us.physion.ovation.interfaces.EventQueueUtilities;
+import us.physion.ovation.interfaces.ModalDialogBase;
 
 /**
  *

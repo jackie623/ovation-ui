@@ -4,12 +4,12 @@
  */
 package us.physion.ovation.editor;
 
-import javax.swing.JComponent;
+import java.awt.Component;
 
 /**
  *
  * @author huecotanks
  */
 public interface ResponseGroupWrapper {
-    public JComponent generatePanel();
+    public Component generatePanel();
 }

@@ -17,7 +17,8 @@ import org.jfree.chart.ChartPanel;
  */
 public class ResponseCellRenderer implements TableCellRenderer{
      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        JComponent panel = (JComponent) value;
+        Component panel = (Component) value;
+        
         if (table.getRowCount() != 0 && table.getColumnCount() != 0);
         {
             panel.setSize(new Dimension(table.getWidth() / table.getColumnCount(), table.getHeight() / table.getRowCount()));

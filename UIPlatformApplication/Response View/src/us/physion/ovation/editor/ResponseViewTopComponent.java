@@ -11,15 +11,13 @@ import com.pixelmed.display.SourceImage;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Font;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.FutureTask;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
@@ -179,10 +177,10 @@ public final class ResponseViewTopComponent extends TopComponent {
         }
 
         LinkedList<ResponseGroupWrapper> responseGroupList = new LinkedList<ResponseGroupWrapper>();
-        DicomInputStream din = null;
+        /*DicomInputStream din = null;
         try {
-            din = new DicomInputStream(new File("/Users/huecotanks/test-dicom.dcm"));
-            responseGroupList.add(new DicomWrapper(din));
+            din = new DicomInputStream(new File("/Users/jackie/test-dicom.dcm"));
+            responseGroupList.add(new DicomWrapper(din, "the name"));
         } catch (DicomException ex) {
             Exceptions.printStackTrace(ex);
             throw new RuntimeException(ex);
@@ -198,7 +196,7 @@ public final class ResponseViewTopComponent extends TopComponent {
                     Exceptions.printStackTrace(ex);
                 }
             }
-        }
+        }*/
         for (IEntityWrapper ew: entities)
         {
             if (ew.getType().isAssignableFrom(Epoch.class))
@@ -226,10 +224,12 @@ public final class ResponseViewTopComponent extends TopComponent {
                     }
                     if (current == null)// response doesn't need to be added to existing chart
                     {
-                        if (entity.isPlottable())
-                            addXYDataset(entity.cw.getDataset(), entity, name);
-                        
-                        responseGroupList.add(entity);
+                        if (entity.isPlottable) {
+                            responseGroupList.add(entity);
+                            addXYDataset(entity.cw.getDataset(), entity, ew.getDisplayName());
+                        } else {
+                            responseGroupList.add(new DicomWrapper(entity, ew.getDisplayName()));
+                        }
                     }
                 }
                 
@@ -244,6 +244,8 @@ public final class ResponseViewTopComponent extends TopComponent {
                 {
                     responseGroupList.add(entity);
                     addXYDataset(entity.cw.getDataset(), entity, ew.getDisplayName());
+                }else{
+                    responseGroupList.add(new DicomWrapper(entity, ew.getDisplayName()));
                 }
             }
         }
@@ -277,7 +279,7 @@ public final class ResponseViewTopComponent extends TopComponent {
                         jTable1.setRowHeight(rowheight);
                     }
                 for (ResponseGroupWrapper c : reponseGroups) {
-                    JComponent p = c.generatePanel();
+                    Component p = c.generatePanel();
 
                     responsePanels.add(new ResponsePanel(p));
                     
@@ -346,14 +348,43 @@ public final class ResponseViewTopComponent extends TopComponent {
     
     protected class DicomWrapper implements ResponseGroupWrapper
     {
+        String name;
         SourceImage src;
-        DicomWrapper(DicomInputStream in) throws IOException, DicomException
+        DicomWrapper(DicomInputStream in, String name) throws IOException, DicomException
         {
             src = new SourceImage(in);
+            this.name = name;
         }
+        DicomWrapper(ResponseWrapper r, String name) 
+        {
+            DicomInputStream in = null;
+            try {
+                in = new DicomInputStream(new ByteArrayInputStream(r.getData().getDataBytes()));
+                src = new SourceImage(in);
+                this.name = name;
+            } catch (DicomException ex) {
+                Exceptions.printStackTrace(ex);
+                throw new RuntimeException(ex.getLocalizedMessage());
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+                throw new RuntimeException(ex.getLocalizedMessage());
+            } finally{
+                if (in != null)
+                {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                        throw new RuntimeException(ex.getLocalizedMessage());
+                    }
+                }
+            }
+        }
+        
         @Override
-        public JComponent generatePanel() {
-            return new SingleImagePanel(src);
+        public Component generatePanel() {
+            ImagePanel p = new ImagePanel(name, new SingleImagePanel(src));
+            return p;
         }
         
     }

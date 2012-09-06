@@ -46,14 +46,14 @@ class ChartWrapper implements ResponseGroupWrapper
         chart.setTitle(convertTitle(getTitle()));
         chart.setPadding(new RectangleInsets(20, 20, 20, 20));
         XYPlot plot = chart.getXYPlot();
-        plot.getDomainAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
-        plot.getRangeAxis().setLabelFont(new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
+        plot.getDomainAxis().setLabelFont(new Font("Times New Roman", 1, 16));//new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
+        plot.getRangeAxis().setLabelFont(new Font("Times New Roman", 1, 15));//new Font("timesnewroman", Font.LAYOUT_LEFT_TO_RIGHT, 15));
         return p;
     }
     
     private TextTitle convertTitle(String s)
     {
-        return new TextTitle(s, new Font("timesnewroman", Font.BOLD, 20));
+        return new TextTitle(s, new Font("Times New Roman", 1, 20));
     }
     
     public JPanel generatePanel()

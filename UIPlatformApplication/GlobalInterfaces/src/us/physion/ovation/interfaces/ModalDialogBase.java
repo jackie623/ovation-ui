@@ -2,12 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.physion.ovation.dbconnection;
+package us.physion.ovation.interfaces;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import us.physion.ovation.interfaces.EventQueueUtilities;
-
 /**
  *
  * @author jackie

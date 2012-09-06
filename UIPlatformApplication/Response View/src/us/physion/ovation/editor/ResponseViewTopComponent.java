@@ -228,13 +228,13 @@ public final class ResponseViewTopComponent extends TopComponent {
                             responseGroupList.add(entity);
                             addXYDataset(entity.cw.getDataset(), entity, ew.getDisplayName());
                         } else {
-                            responseGroupList.add(new DicomWrapper(entity, ew.getDisplayName()));
+                            responseGroupList.add(new DicomWrapper(entity, entity.getName()));
                         }
                     }
                 }
                 
             }
-            else if (ew.getType().isAssignableFrom(Response.class)) {
+            else if (ew.getType().isAssignableFrom(Response.class) || ew.getType().isAssignableFrom(URLResponse.class)) {
                 ResponseWrapper entity = ResponseWrapper.createIfDisplayable(ew, ew.getDisplayName());
                 if (entity == null) {
                     continue;
@@ -359,7 +359,7 @@ public final class ResponseViewTopComponent extends TopComponent {
         {
             DicomInputStream in = null;
             try {
-                in = new DicomInputStream(new ByteArrayInputStream(r.getData().getDataBytes()));
+                in = new DicomInputStream(r.getDataStream());
                 src = new SourceImage(in);
                 this.name = name;
             } catch (DicomException ex) {

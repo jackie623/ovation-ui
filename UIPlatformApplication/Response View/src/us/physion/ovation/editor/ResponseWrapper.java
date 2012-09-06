@@ -4,10 +4,12 @@
  */
 package us.physion.ovation.editor;
 
+import java.io.InputStream;
 import javax.swing.JPanel;
 import org.jfree.data.xy.DefaultXYDataset;
 import ovation.NumericData;
 import ovation.Response;
+import ovation.URLResponse;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
@@ -19,8 +21,10 @@ public class ResponseWrapper implements ResponseGroupWrapper{
     String yunits;
     double samplingRate;
     NumericData data;
+    InputStream dataStream;
     boolean isPlottable;
     ChartWrapper cw;
+    String name;
     
     protected ResponseWrapper() {}
     
@@ -28,7 +32,7 @@ public class ResponseWrapper implements ResponseGroupWrapper{
     static ResponseWrapper createIfDisplayable(Response r, String name)
     {
         ResponseWrapper rw = new ResponseWrapper();
-        
+        rw.name = name;
         if (r.getUTI().equals(Response.NUMERIC_DATA_UTI) && r.getShape().length == 1)
         {
             rw.isPlottable = true;
@@ -38,8 +42,12 @@ public class ResponseWrapper implements ResponseGroupWrapper{
         } else{
             return null;
         }
-        
-        rw.data = r.getData();
+        if (r instanceof URLResponse)
+        {
+            rw.dataStream = ((URLResponse) r).getDataStream();
+        }else{
+            rw.data = r.getData();
+        }
         rw.samplingRate = r.getSamplingRates()[0];
         rw.yunits = r.getUnits();
         rw.xunits = convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]);
@@ -64,6 +72,11 @@ public class ResponseWrapper implements ResponseGroupWrapper{
     {
         return data;
     }
+    
+    protected InputStream getDataStream()
+    {
+        return dataStream;
+    }
     protected double getSamplingRate()
     {
         return samplingRate;
@@ -80,6 +93,11 @@ public class ResponseWrapper implements ResponseGroupWrapper{
     protected boolean isPlottable()
     {
         return isPlottable;
+    }
+    
+    protected String getName()
+    {
+        return name;
     }
     protected static String convertSamplingRateUnitsToGraphUnits(String samplingRateUnits){
        if (samplingRateUnits.toLowerCase().contains("hz"))

@@ -6,7 +6,7 @@ package us.physion.ovation.editor;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import org.jfree.chart.ChartPanel;
@@ -17,7 +17,7 @@ import org.jfree.chart.ChartPanel;
  */
 public class ResponseCellRenderer implements TableCellRenderer{
      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        JPanel panel = (JPanel) value;
+        JComponent panel = (JComponent) value;
         if (table.getRowCount() != 0 && table.getColumnCount() != 0);
         {
             panel.setSize(new Dimension(table.getWidth() / table.getColumnCount(), table.getHeight() / table.getRowCount()));

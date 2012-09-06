@@ -103,25 +103,27 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         Response r = epoch.insertResponse(dev, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
         entities.add(new TestEntityWrapper(dsc, r));
         
-        Collection<ChartWrapper> chartWrappers= t.updateEntitySelection(entities);
+        Collection<ResponseGroupWrapper> chartWrappers= t.updateEntitySelection(entities);
         
         System.out.println(chartWrappers.size());
         
         assertTrue(chartWrappers.size() == entities.size());
         
-        for (ChartWrapper p : chartWrappers)
+        for (ResponseGroupWrapper w : chartWrappers)
         {
-            XYDataset ds = p.getDataset();
-            Comparable key = ds.getSeriesKey(0);
-            assertEquals(key, dev.getName());
-            for (int i=0; i<d.length; ++i)
-            {
-                assertTrue(d[i] == ds.getYValue(0, i));
-                assertTrue(i/samplingRate == ds.getXValue(0, i));
+            if (w instanceof ChartWrapper) {
+                ChartWrapper p = (ChartWrapper) w;
+                XYDataset ds = p.getDataset();
+                Comparable key = ds.getSeriesKey(0);
+                assertEquals(key, dev.getName());
+                for (int i = 0; i < d.length; ++i) {
+                    assertTrue(d[i] == ds.getYValue(0, i));
+                    assertTrue(i / samplingRate == ds.getXValue(0, i));
+                }
+
+                assertEquals(p.getXAxis(), ResponseWrapper.convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]));
+                assertEquals(p.getYAxis(), r.getUnits());
             }
-            
-            assertEquals(p.getXAxis(), ResponseWrapper.convertSamplingRateUnitsToGraphUnits(r.getSamplingUnits()[0]));
-            assertEquals(p.getYAxis(), r.getUnits());
         }
     }
     
@@ -142,7 +144,7 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         String dataUTI = Response.NUMERIC_DATA_UTI;
         Response r = epoch.insertResponse(dev, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
         
-        ResponseWrapper rw = ResponseWrapper.createIfPlottable(r);
+        ResponseWrapper rw = ResponseWrapper.createIfDisplayable(r, dev.getName());
         DefaultXYDataset ds = new DefaultXYDataset();
         ResponseViewTopComponent.addXYDataset( ds, rw, dev.getName());
         

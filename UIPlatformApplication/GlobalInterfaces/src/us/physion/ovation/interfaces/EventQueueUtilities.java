@@ -2,9 +2,12 @@ package us.physion.ovation.interfaces;
 import java.awt.EventQueue;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EventQueueUtilities
 {
+    private static ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public static void runOnEDT(Runnable r) {
 	if (EventQueue.isDispatchThread()) {
@@ -29,8 +32,7 @@ public class EventQueueUtilities
     
     public static void runOffEDT(Runnable r) {
 	if (EventQueue.isDispatchThread()) {
-	    Thread t = new Thread(r);//TODO: executor service
-	    t.start();
+	    executorService.submit(r);
 	} else {
 	    r.run();
 	}

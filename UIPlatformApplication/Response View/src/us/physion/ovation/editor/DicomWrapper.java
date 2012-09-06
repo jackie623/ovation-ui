@@ -33,7 +33,7 @@ public class DicomWrapper implements ResponseWrapper,ResponseGroupWrapper {
                 in = new DicomInputStream(new ByteArrayInputStream(r.getDataBytes()));
             }
             src = new SourceImage(in);
-            this.name = name;
+            this.name = r.getExternalDevice().getName();
         } catch (DicomException ex) {
             Exceptions.printStackTrace(ex);
             throw new RuntimeException(ex.getLocalizedMessage());

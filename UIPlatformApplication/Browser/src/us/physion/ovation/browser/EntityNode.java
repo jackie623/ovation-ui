@@ -6,20 +6,25 @@ package us.physion.ovation.browser;
 
 import java.awt.Component;
 import java.awt.Image;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.openide.actions.CopyAction;
 import org.openide.explorer.propertysheet.DefaultPropertyModel;
 import org.openide.nodes.*;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
+import org.openide.util.Utilities;
+import org.openide.util.datatransfer.ExTransferable;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 import ovation.*;
@@ -37,13 +42,13 @@ public class EntityNode extends AbstractNode{
         
     public EntityNode(Children c, Lookup l) {
         super (c, l);
-        actionList = new Action[] {new OpenAction()};
+        actionList = new Action[] {CopyAction.get(CopyAction.class)};
     }
   
    public EntityNode(Children c)
    {
        super(c);
-       actionList = new Action[0];
+       actionList = new Action[] {CopyAction.get(CopyAction.class)};
    }
    
    @Override
@@ -105,6 +110,34 @@ public class EntityNode extends AbstractNode{
         return actionList;
     }
     
+    @Override
+    public boolean canCopy() {
+        return true;
+    }
+    
+     @Override
+    public Transferable clipboardCopy() throws IOException {
+        Transferable deflt = super.clipboardCopy();
+        ExTransferable added = ExTransferable.create(deflt);
+        added.put(new ExTransferable.Single(DataFlavor.stringFlavor) {
+            @Override
+            protected String getData() {
+                Lookup.Result global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
+                Collection<? extends IEntityWrapper> entities = global.allInstances();
+                String selection = "";
+                if (entities.size() == 1) {
+                    selection += entities.iterator().next().getURI();
+                } else {
+                    for (IEntityWrapper ew : entities) {
+                        selection += ew.getURI() + "\n";
+                    }
+                }
+                System.out.println("Selection: " + selection);
+                return selection;
+            }
+        });
+        return added;
+    }
     
     private class OpenAction extends AbstractAction{
         

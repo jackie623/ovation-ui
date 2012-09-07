@@ -26,7 +26,7 @@ id = "us.physion.ovation.dbconnection.LoginLogout")
 @ActionRegistration(iconBase = "us/physion/ovation/dbconnection/switch-user.png",
 displayName = "#CTL_LoginLogout")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 1300),
+    @ActionReference(path = "Menu/File", position = 1000),
     @ActionReference(path = "Toolbars/Edit", position = 20),
     @ActionReference(path = "Shortcuts", name = "M-L")
 })

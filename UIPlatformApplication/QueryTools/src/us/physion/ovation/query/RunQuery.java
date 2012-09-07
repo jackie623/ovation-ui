@@ -33,10 +33,11 @@ import us.physion.ovation.interfaces.QueryListener;
 
 @ActionID(category = "Query",
 id = "us.physion.ovation.query.RunQuery")
-@ActionRegistration(iconBase = "us/physion/ovation/query/1339709799_question-frame.png",
+@ActionRegistration(iconBase = "us/physion/ovation/query/query.png",
 displayName = "#CTL_RunQuery")
 @ActionReferences({
     @ActionReference(path = "Menu/Tools", position = 0),
+    @ActionReference(path = "Toolbars/Find", position = 10),
     @ActionReference(path = "Shortcuts", name = "M-R")
 })
 @Messages("CTL_RunQuery=Run Query")

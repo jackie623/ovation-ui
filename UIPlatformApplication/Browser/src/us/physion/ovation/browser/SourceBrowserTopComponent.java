@@ -50,10 +50,13 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
 
         BrowserUtilities.initBrowser(em, false);
 
+        //TODO: extend existing CopyAction somehow
+        /*
         CopyAction globalCopyAction = SystemAction.get (CopyAction.class);
         Object key = globalCopyAction.getActionMapKey(); // key is a special value defined by all CallbackSystemActions
 
         getActionMap().put (key, BrowserUtilities.myCopyAction());
+        */
     }
 
     /**
@@ -67,20 +70,12 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         jButton1 = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox();
         jScrollPane1 = new BeanTreeView();
-        resetQueryButton = new javax.swing.JButton();
         removeItemButton = new javax.swing.JButton();
         insertItemButton = new javax.swing.JButton();
 
         org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.jButton1.text")); // NOI18N
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        org.openide.awt.Mnemonics.setLocalizedText(resetQueryButton, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.resetQueryButton.text")); // NOI18N
-        resetQueryButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resetQueryButtonActionPerformed(evt);
-            }
-        });
 
         org.openide.awt.Mnemonics.setLocalizedText(removeItemButton, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.removeItemButton.text")); // NOI18N
 
@@ -95,8 +90,6 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
                 .addComponent(insertItemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(removeItemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(resetQueryButton)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -104,18 +97,12 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(insertItemButton)
-                        .addComponent(removeItemButton))
-                    .addComponent(resetQueryButton))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(insertItemButton)
+                    .addComponent(removeItemButton))
                 .addGap(12, 12, 12))
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void resetQueryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetQueryButtonActionPerformed
-        BrowserUtilities.resetView();
-    }//GEN-LAST:event_resetQueryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton insertItemButton;
@@ -123,7 +110,6 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton removeItemButton;
-    private javax.swing.JButton resetQueryButton;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {

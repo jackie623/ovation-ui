@@ -8,6 +8,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import org.openide.actions.CopyAction;
 import org.openide.awt.ActionID;
@@ -24,14 +25,13 @@ import us.physion.ovation.interfaces.IEntityWrapper;
  * @author huecotanks
  */
 @ActionID(category = "Edit",
-id = "us.physion.ovation.browser.FakeCopyAction")
-@ActionRegistration(displayName = "#CTL_FakeCopyAction")
+id = "us.physion.ovation.browser.BrowserCopyAction")
+@ActionRegistration(displayName = "#CTL_BrowserCopyAction")
 @ActionReferences({
-    @ActionReference(path = "Menu/File", position = 1200),
     @ActionReference(path = "Shortcuts", name = "M-C")
 })
-@NbBundle.Messages("CTL_FakeCopyAction=Copy Entity")
-public class BrowserCopyAction extends CopyAction{
+@NbBundle.Messages("CTL_BrowserCopyAction=Copy Entity")
+public class BrowserCopyAction implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e)
     {
@@ -45,10 +45,11 @@ public class BrowserCopyAction extends CopyAction{
         else{
             for (IEntityWrapper ew : entities)
             {
-                selection += ew.getURI() + "\n"; 
+                selection += ew.getURI() + ", "; 
             }
+            selection = selection.substring(0, selection.length() - 2);
         }
-        System.out.println("Selection: "+ selection);
+       
         StringSelection data = new StringSelection(selection);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(data, data);

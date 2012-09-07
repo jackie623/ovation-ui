@@ -67,12 +67,15 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         l = ExplorerUtils.createLookup(em, getActionMap());
         associateLookup(l);
         BrowserUtilities.initBrowser(em, true);
+        
+        //TODO: extend existing CopyAction somehow
+        /*
         BrowserUtilities.myCopyAction().setEnabled(true);
 
         CopyAction globalCopyAction = SystemAction.get (CopyAction.class);
         Object key = globalCopyAction.getActionMapKey(); // key is a special value defined by all CallbackSystemActions
         getActionMap().put (key, BrowserUtilities.myCopyAction());
-
+        */
     }
 
     @Override
@@ -91,16 +94,8 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
 
         jSplitPane1 = new javax.swing.JSplitPane();
         treeViewPane = new BeanTreeView();
-        resetQueryButton = new javax.swing.JButton();
         insertItemButton = new javax.swing.JButton();
         removeItemButton = new javax.swing.JButton();
-
-        org.openide.awt.Mnemonics.setLocalizedText(resetQueryButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.resetQueryButton.text")); // NOI18N
-        resetQueryButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resetQueryButtonActionPerformed(evt);
-            }
-        });
 
         org.openide.awt.Mnemonics.setLocalizedText(insertItemButton, org.openide.util.NbBundle.getMessage(BrowserTopComponent.class, "BrowserTopComponent.insertItemButton.text")); // NOI18N
 
@@ -116,8 +111,6 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
                 .addComponent(insertItemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(removeItemButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(resetQueryButton)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -127,21 +120,15 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(insertItemButton)
-                    .addComponent(removeItemButton)
-                    .addComponent(resetQueryButton))
+                    .addComponent(removeItemButton))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void resetQueryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetQueryButtonActionPerformed
-        BrowserUtilities.resetView();
-    }//GEN-LAST:event_resetQueryButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton insertItemButton;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JButton removeItemButton;
-    private javax.swing.JButton resetQueryButton;
     private javax.swing.JScrollPane treeViewPane;
     // End of variables declaration//GEN-END:variables
     @Override

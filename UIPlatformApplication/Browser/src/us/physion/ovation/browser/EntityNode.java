@@ -109,7 +109,8 @@ public class EntityNode extends AbstractNode{
     public Action[] getActions(boolean popup) {
         return actionList;
     }
-    
+    //TODO: figure out how to make this work
+    /*
     @Override
     public boolean canCopy() {
         return true;
@@ -137,7 +138,7 @@ public class EntityNode extends AbstractNode{
             }
         });
         return added;
-    }
+    }*/
     
     private class OpenAction extends AbstractAction{
         

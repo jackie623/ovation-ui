@@ -89,22 +89,13 @@ class ChartGroupWrapper implements ResponseGroupWrapper
         
         if (shape.length == 1)
         {
-            //ResponseViewTopComponent.error("shape is correct length");
             int existingSeries = _ds.indexOf(cw.getName());
-            //ResponseViewTopComponent.error("existing series: " + existingSeries);
-
             int scale = 0;
-            //ResponseViewTopComponent.error("dsCardinality " + dsCardinality);
-            //ResponseViewTopComponent.error("dsCardinality contains key" + dsCardinality.containsKey(cw.getName()));
-
-            //if (dsCardinality.containsKey(cw.getName()));
-            //{
-            //    scale = dsCardinality.get(cw.getName());
-            //}
-            //ResponseViewTopComponent.error("scale: " + scale);
-            String newName = cw.getName(); //+ String.valueOf(scale+1);
-
-            //ResponseViewTopComponent.error("getting format");
+            if (dsCardinality.containsKey(cw.getName()))
+            {
+                scale = dsCardinality.get(cw.getName());
+            }
+            String newName = cw.getName() + "-" + String.valueOf(scale+1);
 
             if (d.getDataFormat() == NumericDataFormat.FloatingPointDataType)
             {
@@ -112,10 +103,19 @@ class ChartGroupWrapper implements ResponseGroupWrapper
                 double[] floatingData = d.getFloatingPointData();
                 double[][] data = new double[2][(int) size];
 
-                for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = (floatingData[i]); //+ _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                if (scale >= 0)
+                {
+                    for (int i = 0; i < (int) size; ++i) {
+                    data[1][i] = (floatingData[i]);
                     data[0][i] = i / samplingRate;
+                    }
+                }else{
+                    for (int i = 0; i < (int) size; ++i) {
+                    data[1][i] = (floatingData[i] + _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                    data[0][i] = i / samplingRate;
+                    } 
                 }
+                
                 dsCardinality.put(cw.getName(), scale + 1);
 
                 if (existingSeries >= 0) {
@@ -131,9 +131,17 @@ class ChartGroupWrapper implements ResponseGroupWrapper
                 int[] integerData = d.getIntegerData();
                 double[][] data = new double[(int) size][2];
                 
-                for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = (integerData[i]); //+ _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                if (scale >= 0)
+                {
+                    for (int i = 0; i < (int) size; ++i) {
+                    data[1][i] = (integerData[i]);
                     data[0][i] = i / samplingRate;
+                    }
+                }else{
+                    for (int i = 0; i < (int) size; ++i) {
+                    data[1][i] = (integerData[i] + _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                    data[0][i] = i / samplingRate;
+                    } 
                 }
                 dsCardinality.put(cw.getName(), scale + 1);
 
@@ -149,9 +157,17 @@ class ChartGroupWrapper implements ResponseGroupWrapper
                 long[] longData = d.getUnsignedIntData();
                 double[][] data = new double[(int) size][2];
                 
-                for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = (longData[i]); //+ _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                if (scale >= 0)
+                {
+                    for (int i = 0; i < (int) size; ++i) {
+                    data[1][i] = (longData[i]);
                     data[0][i] = i / samplingRate;
+                    }
+                }else{
+                    for (int i = 0; i < (int) size; ++i) {
+                    data[1][i] = (longData[i] + _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                    data[0][i] = i / samplingRate;
+                    } 
                 }
                 dsCardinality.put(cw.getName(), scale + 1);
 

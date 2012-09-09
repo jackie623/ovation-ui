@@ -5,6 +5,9 @@
 package us.physion.ovation.editor;
 
 import java.awt.Font;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -28,12 +31,16 @@ class ChartGroupWrapper implements ResponseGroupWrapper
     String _xAxis;
     String _yAxis;
     String _title;
+    Map<String, Integer> dsCardinality;
+    
+
     
     ChartGroupWrapper(DefaultXYDataset ds, String xAxis, String yAxis)
     {
         _ds = ds;
         _xAxis = xAxis;
         _yAxis = yAxis;
+        dsCardinality = new HashMap<String, Integer>();
     }
     DefaultXYDataset getDataset(){ return _ds;}
     String getXAxis() { return _xAxis;}
@@ -67,8 +74,13 @@ class ChartGroupWrapper implements ResponseGroupWrapper
      protected void addXYDataset(ChartWrapper cw)
     {
         NumericData d = cw.getNumericData();
+        
+        if (d == null)
+        {
+            return; //TODO: handle URLResponses of numericData
+        }
+        long[] shape = d.getShape(); 
         double samplingRate = cw.getSamplingRate();
-        long[] shape = d.getShape();
         long size = 1;
         for (int dimension = 0; dimension<shape.length; dimension++)
         {
@@ -77,34 +89,79 @@ class ChartGroupWrapper implements ResponseGroupWrapper
         
         if (shape.length == 1)
         {
+            //ResponseViewTopComponent.error("shape is correct length");
+            int existingSeries = _ds.indexOf(cw.getName());
+            //ResponseViewTopComponent.error("existing series: " + existingSeries);
+
+            int scale = 0;
+            //ResponseViewTopComponent.error("dsCardinality " + dsCardinality);
+            //ResponseViewTopComponent.error("dsCardinality contains key" + dsCardinality.containsKey(cw.getName()));
+
+            //if (dsCardinality.containsKey(cw.getName()));
+            //{
+            //    scale = dsCardinality.get(cw.getName());
+            //}
+            //ResponseViewTopComponent.error("scale: " + scale);
+            String newName = cw.getName(); //+ String.valueOf(scale+1);
+
+            //ResponseViewTopComponent.error("getting format");
+
             if (d.getDataFormat() == NumericDataFormat.FloatingPointDataType)
             {
+ 
                 double[] floatingData = d.getFloatingPointData();
                 double[][] data = new double[2][(int) size];
+
                 for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = floatingData[i];
-                    data[0][i] = i/samplingRate;
+                    data[1][i] = (floatingData[i]); //+ _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                    data[0][i] = i / samplingRate;
                 }
-                _ds.addSeries(cw.getName(), data);
+                dsCardinality.put(cw.getName(), scale + 1);
+
+                if (existingSeries >= 0) {
+                    _ds.addSeries(newName, data);
+            
+                } else {
+                    _ds.addSeries(cw.getName(), data);
+                }
+
             }
             else if (d.getDataFormat() == NumericDataFormat.SignedFixedPointDataType)
             {
                 int[] integerData = d.getIntegerData();
                 double[][] data = new double[(int) size][2];
+                
                 for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = integerData[i];
-                    data[0][i] = i/samplingRate;
+                    data[1][i] = (integerData[i]); //+ _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                    data[0][i] = i / samplingRate;
                 }
-                _ds.addSeries(cw.getName(), data);
+                dsCardinality.put(cw.getName(), scale + 1);
+
+                if (existingSeries >= 0) {
+                    _ds.addSeries(newName, data);
+            
+                } else {
+                    _ds.addSeries(cw.getName(), data);
+                }
             }
             else if (d.getDataFormat() == NumericDataFormat.UnsignedFixedPointDataType)
             {
                 long[] longData = d.getUnsignedIntData();
                 double[][] data = new double[(int) size][2];
+                
                 for (int i = 0; i < (int) size; ++i) {
-                    data[1][i] = longData[i];
-                    data[0][i] = i/samplingRate;
+                    data[1][i] = (longData[i]); //+ _ds.getYValue(existingSeries, i)*scale)/(scale +1);
+                    data[0][i] = i / samplingRate;
                 }
+                dsCardinality.put(cw.getName(), scale + 1);
+
+                if (existingSeries >= 0) {
+                    _ds.addSeries(newName, data);
+            
+                } else {
+                    _ds.addSeries(cw.getName(), data);
+                }
+                
                 _ds.addSeries(cw.getName(), data);
             }
             
@@ -139,7 +196,7 @@ class ChartGroupWrapper implements ResponseGroupWrapper
             } else{
                 name = getTitle();
             }
-            setTitle("Aggregate responses: " + name + ", " + ((ChartWrapper)r).getName());
+            setTitle(preface + name + ", " + ((ChartWrapper)r).getName());
         }
     }
 }

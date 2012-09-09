@@ -107,6 +107,8 @@ public final class ResponseViewTopComponent extends TopComponent {
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
         jTable1.setDefaultRenderer(ResponsePanel.class, new ResponseCellRenderer());
+        jTable1.setVisible(true);
+        responseListPane.setVisible(true);
     }
 
     /**
@@ -142,7 +144,7 @@ public final class ResponseViewTopComponent extends TopComponent {
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
-        responseListPane.setVisible(false);
+        //responseListPane.setVisible(false);
     }
 
     @Override
@@ -176,18 +178,7 @@ public final class ResponseViewTopComponent extends TopComponent {
     }
 
     protected List<ResponseGroupWrapper> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
-        if (entities.size() == 0) {
-            EventQueueUtilities.runOnEDT(new Runnable() {
-
-                @Override
-                public void run() {
-                    responseListPane.setVisible(false);
-                }
-            });
-
-            return null;
-        }
-
+        
         LinkedList<ResponseWrapper> responseList = new LinkedList<ResponseWrapper>();
 
         for (IEntityWrapper ew : entities) {
@@ -225,43 +216,51 @@ public final class ResponseViewTopComponent extends TopComponent {
                 responseGroups.add(rw.createGroup());
             }
         }
-
         EventQueueUtilities.runOnEDT(updateChartRunnable(responseGroups));
         return responseGroups;
     }
+    
+    protected static void error(String s)
+    {
+        JDialog d = new JDialog(new JFrame(), true);
+        d.setPreferredSize(new Dimension(500, 500));
+        d.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        d.setLocationRelativeTo(null);
+        JLabel l = new JLabel();
+        l.setText(s);
+        d.add(l);
+        d.setVisible(true);
+        
+    }
 
-    private Runnable updateChartRunnable(final List<ResponseGroupWrapper> reponseGroups) {
+    private Runnable updateChartRunnable(final List<ResponseGroupWrapper> responseGroups) {
         final int height = this.getHeight();
         return new Runnable() {
 
             @Override
             public void run() {
-                if (reponseGroups.size() == 0) {
-                    responseListPane.setVisible(false);
-                    return;
-                }
-
+                
+                
                 int initialSize = responsePanels.size();
                 while (!responsePanels.isEmpty()) {
                     responsePanels.remove(0);
                 }
-                if (reponseGroups.size() < initialSize) {
-                    chartModel.fireTableRowsDeleted(reponseGroups.size() + 1, initialSize - 1);
+                if (responseGroups.size() < initialSize) {
+                    chartModel.fireTableRowsDeleted(responseGroups.size(), initialSize - 1);
                 }
+                if (responseGroups.size() != 0) {
+                    int rowheight = (height / responseGroups.size());
+                    if (rowheight >= 1) {
+                        jTable1.setRowHeight(rowheight);
+                    }
+                    for (ResponseGroupWrapper c : responseGroups) {
+                        Component p = c.generatePanel();
 
-                int rowheight = (height / reponseGroups.size());
-                if (rowheight >= 1) {
-                    jTable1.setRowHeight(rowheight);
+                        responsePanels.add(new ResponsePanel(p));
+
+                    }
                 }
-                for (ResponseGroupWrapper c : reponseGroups) {
-                    Component p = c.generatePanel();
-
-                    responsePanels.add(new ResponsePanel(p));
-
-                }
-
                 chartModel.fireTableDataChanged();
-                responseListPane.setVisible(true);
             }
         };
     }

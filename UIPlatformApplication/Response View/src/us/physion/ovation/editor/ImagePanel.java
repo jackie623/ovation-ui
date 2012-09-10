@@ -28,6 +28,7 @@ public class ImagePanel extends javax.swing.JPanel {
         
         this.add(Box.createRigidArea(new Dimension(0, 10)));
         this.add(imagePanel);
+        this.add(Box.createRigidArea(new Dimension(0, 10)));
     }
     
 

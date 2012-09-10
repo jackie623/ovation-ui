@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.editor;
 
+import javax.imageio.ImageIO;
 import ovation.Response;
 
 /**
@@ -24,8 +25,17 @@ public class ResponseWrapperFactory {
             DicomWrapper d = new DicomWrapper(r);
             return d;
           
-        }else{
-            return null;
+        }else {
+            String lowercaseUTI = uti.toLowerCase();
+            for (String name : ImageIO.getReaderFormatNames())
+            {
+                if (lowercaseUTI.contains(name.toLowerCase()))
+                {
+                    DefaultImageWrapper d = new DefaultImageWrapper(r);
+                    return d;
+                }
+            }
         }
+        return null;
     }
 }

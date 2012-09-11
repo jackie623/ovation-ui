@@ -24,9 +24,9 @@ public class EventQueueUtilities
 	    try{
 	    SwingUtilities.invokeAndWait(r);
 	    } catch (InvocationTargetException e)
-		{
-		    e.printStackTrace(); //TODO: handle this better
-		}
+            {
+                e.printStackTrace(); //TODO: handle this better
+            }
 	}
     }
     

@@ -16,6 +16,7 @@ import org.netbeans.api.autoupdate.*;
 import org.netbeans.api.autoupdate.OperationContainer.OperationInfo;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
+import org.openide.ErrorManager;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
@@ -83,7 +84,6 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     }
 
     protected void showErrors(final Exception e) {
-             
         EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
@@ -95,11 +95,14 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                     errorTextArea.setText("**Error: " + e.getLocalizedMessage());
                 }
                 errorTextArea.setForeground(Color.RED);
+                pack();
+                repaint();
             }
         });
-        
+
+
     }
-    
+
     private void disposeOnEDT() {
         EventQueueUtilities.runOnEDT(new Runnable() {
 
@@ -353,7 +356,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         final String password = viewModel.getPassword();
         final String connectionFile = connectionFileComboBox.getSelectedItem().toString();
         prefs.addConnectionFile(connectionFile);
-        //this.setVisible(false);
+        
         
         //run this on a thread that's not the event queue thread
         Runnable r = new Runnable(){

@@ -16,7 +16,8 @@ public class ResponseViewTestManager extends TestManager {
     String connectionFile;
     ResponseViewTestManager()
     {
-        connectionFile = "data" + File.separator
+        String pwd = System.getProperty("WORKSPACE");
+        connectionFile = pwd + "data" + File.separator
                 + "responseView" + File.separator
                 + "response-test.connection";
     }

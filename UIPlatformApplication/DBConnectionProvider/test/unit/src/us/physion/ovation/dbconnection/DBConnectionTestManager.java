@@ -30,7 +30,8 @@ public class DBConnectionTestManager extends TestManager {
 
     @Override
     public String getConnectionFile() {
-        String path ="data" + File.separator
+        String pwd = System.getProperty("WORKSPACE");
+        String path = pwd + "data" + File.separator
                 + "dbconnection" + File.separator
                 + "dbconnection-test.connection";
         return path;

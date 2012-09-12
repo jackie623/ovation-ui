@@ -30,7 +30,8 @@ public class BrowserTestManager extends TestManager {
 
     @Override
     public String getConnectionFile() {
-        String path = "data" + File.separator
+        String pwd = System.getProperty("WORKSPACE");
+        String path = pwd + "data" + File.separator
                 + "browser" + File.separator
                 + "browser-test.connection";
         return path;

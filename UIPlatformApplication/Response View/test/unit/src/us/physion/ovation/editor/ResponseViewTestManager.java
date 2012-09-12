@@ -16,8 +16,7 @@ public class ResponseViewTestManager extends TestManager {
     String connectionFile;
     ResponseViewTestManager()
     {
-        connectionFile = new File(".").getAbsolutePath() + File.separator
-                + "data" + File.separator
+        connectionFile = "data" + File.separator
                 + "responseView" + File.separator
                 + "response-test.connection";
     }

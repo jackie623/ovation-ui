@@ -5,6 +5,8 @@
 package us.physion.ovation.detailviews;
 
 import java.io.File;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import ovation.test.TestManager;
 
 /**
@@ -30,7 +32,13 @@ public class SelectionViewTestManager extends TestManager {
 
     @Override
     public String getConnectionFile() {
-        String pwd = System.getProperty("WORKSPACE");
+        String pwd = AccessController.doPrivileged(new PrivilegedAction<String>() {
+
+            public String run() {
+                String pwd = System.getProperty("WORKSPACE");
+                return pwd;
+            }
+        });
         String path = pwd + "data" + File.separator
                 + "selectionDetails" + File.separator
                 + "selection-details.connection";

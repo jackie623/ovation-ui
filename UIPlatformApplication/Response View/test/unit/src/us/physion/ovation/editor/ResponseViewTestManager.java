@@ -5,6 +5,8 @@
 package us.physion.ovation.editor;
 
 import java.io.File;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import ovation.test.TestManager;
 
 /**
@@ -16,7 +18,13 @@ public class ResponseViewTestManager extends TestManager {
     String connectionFile;
     ResponseViewTestManager()
     {
-        String pwd = System.getProperty("WORKSPACE");
+        String pwd = AccessController.doPrivileged(new PrivilegedAction<String>() {
+
+            public String run() {
+                String pwd = System.getProperty("WORKSPACE");
+                return pwd;
+            }
+        });
         connectionFile = pwd + "data" + File.separator
                 + "responseView" + File.separator
                 + "response-test.connection";

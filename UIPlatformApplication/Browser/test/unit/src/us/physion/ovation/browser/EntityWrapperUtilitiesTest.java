@@ -8,11 +8,14 @@ import us.physion.ovation.browser.QueryChildren;
 import us.physion.ovation.browser.EntityWrapperUtilities;
 import java.io.File;
 import java.net.InetAddress;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import junit.framework.TestCase;
 import org.apache.log4j.Level;
 import org.junit.*;
 import static org.junit.Assert.*;
+import org.openide.ErrorManager;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.nodes.AbstractNode;
@@ -40,7 +43,14 @@ public class EntityWrapperUtilitiesTest extends OvationTestCase{
     @BeforeClass
     public static void setUpClass()
     {
-        OvationTestCase.setUpDatabase(mgr, 2);
+        AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+
+            public Boolean run() {
+                OvationTestCase.setUpDatabase(mgr, 2);
+                return true;
+            }
+        });
+        
     }
     
     @Before

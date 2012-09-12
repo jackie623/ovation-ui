@@ -32,6 +32,7 @@ public class BrowserTestManager extends TestManager {
 
     @Override
     public String getConnectionFile() {
+        System.out.println("Getting connection file");
         String pwd = AccessController.doPrivileged(new PrivilegedAction<String>() {
 
             public String run() {
@@ -39,9 +40,12 @@ public class BrowserTestManager extends TestManager {
                 return pwd;
             }
         });
+        System.out.println("Got working dir");
         String path = pwd + "data" + File.separator
                 + "browser" + File.separator
                 + "browser-test.connection";
+        System.out.println("Got connection file");
+
         return path;
     }
 

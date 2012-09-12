@@ -7,6 +7,7 @@ package us.physion.ovation.browser;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import org.openide.ErrorManager;
 import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
@@ -39,14 +40,27 @@ public class EntityWrapper implements IEntityWrapper {
     
     @Override
     public IEntityBase getEntity(){
-        IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
-        if (dsc == null)
+        IEntityBase b = null;
+        try{
+            IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+            if (dsc == null)
+            {
+                return null;
+            }
+            DataContext c = dsc.getContext();
+            b = c.objectWithURI(uri);
+        
+        } catch (RuntimeException e)
         {
-            return null;
+            ErrorManager.getDefault().notify(e);
+            throw e;
         }
-        DataContext c = dsc.getContext();
-      
-        return c.objectWithURI(uri);
+        catch(Exception e)
+        {
+            ErrorManager.getDefault().notify(e);
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
+        return b;
     }
     @Override
     public String getURI()

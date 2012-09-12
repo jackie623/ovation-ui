@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.swing.JFrame;
+import org.openide.ErrorManager;
 import org.openide.util.Exceptions;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 
@@ -113,8 +114,10 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
 
             } catch (URISyntaxException ex) {
                 Exceptions.printStackTrace(ex);
+                ErrorManager.getDefault().notify(ex);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
+                ErrorManager.getDefault().notify(ex);
             }
 
         }
@@ -148,6 +151,7 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
         } catch (InterruptedException ex) {
             this.disposeOnEDT();
             Exceptions.printStackTrace(ex);
+            ErrorManager.getDefault().notify(ex);
         }
 
 

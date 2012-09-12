@@ -185,7 +185,14 @@ public final class ResponseViewTopComponent extends TopComponent {
             if (ew.getType().isAssignableFrom(Epoch.class)) {
                 Epoch epoch = (Epoch) (ew.getEntity());//getEntity gets the context for the given thread
                 for (String name : epoch.getResponseNames()) {
-                    ResponseWrapper entity = ResponseWrapperFactory.create(epoch.getResponse(name));
+                    ResponseWrapper entity = null;
+                    try
+                    {
+                        entity = ResponseWrapperFactory.create(epoch.getResponse(name));
+                    } catch (OvationException e)
+                    {
+                        //pass - dont create display response if an error gets thrown reading from the response
+                    }
                     if (entity != null) {
                         responseList.add(entity);
                     }
@@ -193,7 +200,12 @@ public final class ResponseViewTopComponent extends TopComponent {
                 }
 
             } else if (ew.getType().isAssignableFrom(Response.class) || ew.getType().isAssignableFrom(URLResponse.class)) {
-                ResponseWrapper entity = ResponseWrapperFactory.create((Response) (ew.getEntity()));
+                ResponseWrapper entity = null;
+                try {
+                    entity = ResponseWrapperFactory.create((Response)ew.getEntity());
+                } catch (OvationException e) {
+                    //pass - dont create display response if an error gets thrown reading from the response
+                }
                 if (entity != null) {
                     responseList.add(entity);
                 }

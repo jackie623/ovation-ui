@@ -169,7 +169,11 @@ made subject to such option by the copyright holder.
             <attribute name="javaval"/>
             <sequential>
                 <presetdef name="junit">
-                    <junit fork="yes" jvm="@{javaval}"/>
+                    <junit fork="yes" jvm="@{javaval}">
+		      <sysproperty key="java.security.policy" path="${java.security.policy}"/>
+		      <sysproperty key="java.security.debug" path="all"/>
+		      <env key="OVATION_SCHEMA_FILE" path="${OVATION_SCHEMA_FILE}"/>
+		    </junit>
                 </presetdef>
             </sequential>
         </macrodef>

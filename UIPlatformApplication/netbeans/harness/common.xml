@@ -638,7 +638,9 @@ made subject to such option by the copyright holder.
                 </batchtest>
                 <classpath refid="test.@{test.type}.run.cp"/>
                 <syspropertyset refid="test.@{test.type}.properties"/>
-                <jvmarg line="${test.bootclasspath.prepend.args}"/>
+                <jvmarg value="-Djava.security.policy=${java.security.policy}"/>
+                <jvmarg value="-Djava.security.debug=all"/>
+		<jvmarg line="${test.bootclasspath.prepend.args}"/>
                 <jvmarg line="${test.run.args}"/>
                 <!--needed to have tests NOT to steal focus when running, works in latest apple jdk update only.-->
                 <sysproperty key="apple.awt.UIElement" value="@{disable.apple.ui}"/>

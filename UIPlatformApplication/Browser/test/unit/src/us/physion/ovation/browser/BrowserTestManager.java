@@ -33,13 +33,13 @@ public class BrowserTestManager extends TestManager {
     @Override
     public String getConnectionFile() {
         System.out.println("Getting connection file");
-        String pwd = AccessController.doPrivileged(new PrivilegedAction<String>() {
+        String pwd = System.getProperty("WORKSPACE");/*AccessController.doPrivileged(new PrivilegedAction<String>() {
 
             public String run() {
                 String pwd = System.getProperty("WORKSPACE");
                 return pwd;
             }
-        });
+        });*/
         System.out.println("Got working dir");
         String path = pwd + "data" + File.separator
                 + "browser" + File.separator

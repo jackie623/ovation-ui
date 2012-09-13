@@ -40,6 +40,8 @@ public class BrowserTestManager extends TestManager {
                 return pwd;
             }
         });*/
+        System.out.println(System.getProperty("java.security.debug"));
+        System.out.println(System.getProperty("java.security.policy"));
         System.out.println("Got working dir");
         String path = pwd + "data" + File.separator
                 + "browser" + File.separator

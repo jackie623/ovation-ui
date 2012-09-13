@@ -43,6 +43,7 @@ public class EntityWrapperUtilitiesTest extends OvationTestCase{
     @BeforeClass
     public static void setUpClass()
     {
+        Ovation.enableLogging(LogLevel.ALL);
         AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 
             public Boolean run() {

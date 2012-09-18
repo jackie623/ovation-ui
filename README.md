@@ -1,3 +1,16 @@
+INSTALL
+-------
+
+Mac: Download the Ovation application, double click to unzip, and drag to the /Applications directory.  
+Windows: Download the Ovation application, and extract all files. Copy directory to your preferred executable directory.
+Linux: Download the Ovation application, and unzip. Copy resulting directory to your preffered executable directory.
+
+RUN
+---
+
+Mac: Double-click the ovation application (in /Applications)
+Windows/Linux: Double-click the ovation shell or executable file (named ovation or ovation.exe, respectively). It can be found in the ovation/bin/ directory. 
+
 LICENSE
 -------
 

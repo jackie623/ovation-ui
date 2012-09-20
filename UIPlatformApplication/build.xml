@@ -84,4 +84,6 @@ ivy is in at least one of ant's lib dir or the local lib dir. -->
             depends="init-ivy">
         <ivy:retrieve/>
     </target>
+    
+    <property name="app.icon.icns" value="${basedir}/../osx/ovation.icns"/>
 </project>

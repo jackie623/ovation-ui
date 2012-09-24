@@ -4,21 +4,22 @@
 */nbproject/private/
 
 *.class
-/UIPlatformApplication/QueryTools/build/*
-/UIPlatformApplication/build/
-**/*/build/*
-/UIPlatformApplication/DBConnectionProvider/build/
-/UIPlatformApplication/QueryTools/nbproject/private/
-/UIPlatformApplication/OvationAPI/build/
-/UIPlatformApplication/GlobalInterfaceLibrary/build/
-/UIPlatformApplication/SelectionDetails/build/
-/UIPlatformApplication/SelectionDetails/nbproject/private/
-/UIPlatformApplication/Browser/build/
+/ovation-ui/QueryTools/build/*
+/ovation-ui/build/
+/ovation-ui/*/build/
+/ovation-ui/*/release/
+/ovation-ui/DBConnectionProvider/build/
+/ovation-ui/QueryTools/nbproject/private/
+/ovation-ui/OvationAPI/build/
+/ovation-ui/GlobalInterfaceLibrary/build/
+/ovation-ui/SelectionDetails/build/
+/ovation-ui/SelectionDetails/nbproject/private/
+/ovation-ui/Browser/build/
 
-/UIPlatformApplication/Editor/build/
-/UIPlatformApplication/TestManager/build/
-/UIPlatformApplication/DBConnectionProvider/nbproject/private/
-/UIPlatformApplication/Beans Binding/build/
-UIPlatformApplication/nbproject/private/platform-private.properties
-/UIPlatformApplication/dist/
-/UIPlatformApplication/JFreeChart/build/
+/ovation-ui/Editor/build/
+/ovation-ui/TestManager/build/
+/ovation-ui/DBConnectionProvider/nbproject/private/
+/ovation-ui/Beans Binding/build/
+ovation-ui/nbproject/private/platform-private.properties
+/ovation-ui/dist/
+/ovation-ui/JFreeChart/build/

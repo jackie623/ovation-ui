@@ -83,24 +83,33 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         this(new JFrame(), true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
     }
 
-    protected void showErrors(final Exception e) {
+    protected void showErrors(final Exception e, DataStoreCoordinator toClose) {
+        String message = "";
+        try{
+            if (toClose != null)
+            {
+                toClose.close();
+            }
+        }catch (Exception ex){ 
+            message += "\n**Error thrown while closing database connection: " + ex.getLocalizedMessage();
+        }
+        
+        final String otherError = message;
         EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {
                 errorScrollPane.setVisible(true);
                 if (e instanceof UserAuthenticationException) {
-                    errorTextArea.setText("**Error: Username and password combination was not found.");
+                    errorTextArea.setText("**Error: Username and password combination was not found." + otherError);
                 } else {
-                    errorTextArea.setText("**Error: " + e.getLocalizedMessage());
+                    errorTextArea.setText("**Error: " + e.getLocalizedMessage() + otherError);
                 }
                 errorTextArea.setForeground(Color.RED);
                 pack();
                 repaint();
             }
         });
-
-
     }
 
     private void disposeOnEDT() {
@@ -372,11 +381,11 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 try {
                     authenticated = c.authenticateUser(username, password);
                 } catch (Exception ex) {
-                    showErrors(ex);
+                    showErrors(ex, c.getCoordinator());
                     return;
                 }
                 if (!authenticated) {
-                    showErrors(new UserAuthenticationException());
+                    showErrors(new UserAuthenticationException(), c.getCoordinator());
                     return;
                 }
                 dsc = c.getAuthenticatedDataStoreCoordinator();
@@ -398,9 +407,11 @@ public class DBConnectionDialog extends javax.swing.JDialog {
 
     protected DataContext getContextFromConnectionFile(String connectionFile, String username, String password)
     {
+        DataStoreCoordinator dsc = null;
         DataContext c = null;
         try {
-            c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
+            dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
+            c = dsc.getContext();
         } catch (SchemaVersionException ex2)
         {
             int databaseVersion = ex2.getDatabaseSchemaNumber();
@@ -427,23 +438,18 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 } catch (Exception e)
                 {
                     cancelled = true;
-                    showErrors(e);
+                    showErrors(e, dsc);
                     return c;
                 }
             }
             if (success)
             {
                 try {
-                    c = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).getContext();
-                } catch (DatabaseOpenException ex) {
-                    showErrors(ex);
-                    return c;
-                } catch (DatabaseNotFoundException ex) {
-                    showErrors(ex);
-                    return c;
+                    dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
+                    c = dsc.getContext();
                 } catch (Exception ex)
                 {
-                    showErrors(ex);
+                    showErrors(ex, dsc);
                     return c;
                 }
             }
@@ -459,16 +465,11 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             if (d.forceUpgrade())
             {
                 try {
-                    DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile).removeUpgradeLock("OVATION_UPGRADE_FLAG");
-                } catch (DatabaseOpenException ex1) {
-                    showErrors(ex1);
-                    return c;
-                } catch (DatabaseNotFoundException ex1) {
-                    showErrors(ex1);
-                    return c;
+                    dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
+                    dsc.removeUpgradeLock("OVATION_UPGRADE_FLAG");
                 } catch (Exception ex1)
                 {
-                    showErrors(ex1);
+                    showErrors(ex1, dsc);
                     return c;
                 }
                return getContextFromConnectionFile(connectionFile, username, password);
@@ -476,7 +477,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                     
         }
         catch (Exception ex) {
-            showErrors(ex);
+            showErrors(ex, dsc);
             return c;
         }
         return c;
@@ -491,7 +492,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     {
         if (databaseVersion <0 || apiVersion <0 )
         {
-            showErrors(new RuntimeException("Invalid database schema version (" + databaseVersion + ") or api schema version (" + apiVersion + ")"));
+            showErrors(new RuntimeException("Invalid database schema version (" + databaseVersion + ") or api schema version (" + apiVersion + ")"), null);
             return false;
         }
         

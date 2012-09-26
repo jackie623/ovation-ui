@@ -56,10 +56,10 @@ public class EntityNode extends AbstractNode{
    {
        Sheet sheet = Sheet.createDefault();
        IEntityWrapper obj = getLookup().lookup(IEntityWrapper.class);
-       IEntityBase e = obj.getEntity();
 
        IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
        DataContext c = dsc.getContext();
+       IEntityBase e = obj.getEntity();
        
        Sheet.Set myProperties = createPropertySetForUser(obj, e, c.currentAuthenticatedUser());
        

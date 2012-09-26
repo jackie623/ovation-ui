@@ -19,6 +19,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import org.openide.ErrorManager;
 import org.openide.util.Exceptions;
 import ovation.DataStoreCoordinator;
 import ovation.DatabaseIsUpgradingException;
@@ -161,6 +162,7 @@ public class UpgradeTool implements IUpgradeDB {
                         try {
                             ProcessBuilder pb = new ProcessBuilder("java",
                                     "-Djava.security.policy=security.txt",
+                                    "-Dno.parallel.scan=true",
                                     "-cp",
                                     System.getProperty("java.class.path") + ":" + file.getAbsolutePath(),
                                     "-jar",

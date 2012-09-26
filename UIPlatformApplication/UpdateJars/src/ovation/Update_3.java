@@ -10,6 +10,9 @@ import java.lang.InterruptedException;
 import ovation.*;
 import com.objy.db.app.*;
 import java.util.Iterator;
+import java.net.URI;
+import java.util.Set;
+import java.util.HashSet;
 /**
  *
  * @author huecotanks
@@ -18,98 +21,28 @@ import java.util.Iterator;
 public class Update_3 extends Updater{
 
     IUpdateProgress pu;
+    DataContext c;
+
     @Override
     public boolean runUpdate(DataContext c, IUpdateProgress pu)
     {
 	this.pu = pu;
+	this.c = c;
 	System.setProperty("no.parallel.scan", "true");
 	if (pu != null)
 	{ 
 	    update(-1, "Migrating DerivedResponses");
 	}
 
-	Iterator<DerivedResponse> derivedResponses = c.query(DerivedResponse.class, "true");
-	if (!derivedResponses.hasNext())
-	{
-	    update(-1, "Warning: No DerivedResponses in the database");
-	}
-	
-	int count =1;
-	while (derivedResponses.hasNext())
-	    {
-		update ((count++)%99, "Updating derived response " + count);
+	updateDerivedResponses();
+	moveUsers();
+	moveSources();
 
-		DerivedResponse a = derivedResponses.next();
-		c.beginTransaction();
-		try{
-		    a.setUTI(Response.NUMERIC_DATA_UTI);
-		    c.commitTransaction();
-		} catch(Exception e)
-		    {
-			c.abortTransaction();
-			throw new OvationException("Error while updating: "  + e.getMessage());
-		    }
+        return true;
+    }
 
-		if (a.getUTI() == null)
-		    throw new OvationException("Error while updating: UTI was not set properly");
-	    }
-
-	//moves all the users into one container
-        //
-	c.beginTransaction();
-	try{
-	    Iterator<User> users = c.DBUtilities().getUsersAndGroupsDB().scan("ovation.User", "true");//c.getUsersIterator();
-	    int i = 0;
-	if (!users.hasNext())
-	{
-	    throw new OvationException("No Users in the database!");
-	}
-	
-	while (users.hasNext()){
-	    
-	    update(i++, "Moving Users");
-
-	    c.beginTransaction();
-	    User u = users.next();
-
-	    String containerID = c.DBUtilities().getUsersAndGroupsContainer().getOid().getString();
-	    try{
-		if (!u.getContainer().getOid().getString().equals(containerID))
-		{
-		    u.move(c.DBUtilities().getUsersAndGroupsContainer());
-		}
-		c.commitTransaction();
-	    }
-	    catch (Exception e)
-	    {
-		c.abortTransaction();
-		throw new OvationException("Error while updating: "  + e.getMessage());
-	    }
-	    
-	}
-	c.commitTransaction();
-	} catch (Exception e)
-	{
-	    c.abortTransaction();
-	    throw new OvationException(e.getMessage(), e);
-	}
-
-	c.beginTransaction();
-	try{
-	    Iterator<User> users = c.DBUtilities().getUsersAndGroupsDB().scan("ovation.User", "true");//c.getUsersIterator();                                                                                                                                                                    
-	    String containerID = c.DBUtilities().getUsersAndGroupsContainer().getOid().getString();
-	    while (users.hasNext()){
-		User u = users.next();
-		if (!u.getContainer().getOid().getString().equals(containerID))
-		{
-		    throw new OvationException("Update failed: Unable to move user to proper container");
-		}
-	    }
-	} finally{
-	    c.commitTransaction();
-	}
-	
-	
+    public void moveSources()
+    {
 	update(-1, "Moving Sources");
 
 	Iterator<Source> sources = c.query(c.DBUtilities().getSourcesDB(), Source.class, "true");
@@ -139,16 +72,141 @@ public class Update_3 extends Updater{
 	    c.beginTransaction();
 	    try{
 		if (!u.getContainer().getOid().getString().equals(containerID))
-		    {
-			throw new OvationException("Update failed: Unable to move source to proper container");
-		    }
+		{
+		    throw new OvationException("Update failed: Unable to move source to proper container");
+		}
 	    } finally{
 		c.commitTransaction();
 	    }
+	}
+    }
+    public void moveUsers()
+    {
+	Set<User> users = new HashSet<User>();
+	String containerID = null;
+	c.beginTransaction();
+	try{
+	    containerID = c.DBUtilities().getUsersAndGroupsContainer().getOid().getString();
+	    Iterator<User> userItr = c.DBUtilities().getUsersAndGroupsDB().scan("ovation.User", "true");//c.getUsersIterator();
+	    if (!userItr.hasNext())
+	    {
+		throw new OvationException("No users in the database!");
+	    }
+	    update(-1, "Finding Users");
+	    while (userItr.hasNext())
+		users.add(userItr.next());
+	    
+	} finally
+	{
+	    c.commitTransaction();
+	}
 
+	int i =0;
+	for (User u: users)
+	{
+	    Set<URI> set = new HashSet<URI>();
+
+	    update(-1, "Finding objects owned by user " + ++i);
+	    Iterator<IEntityBase> itr = c.query(EntityBase.class, "owner.uuid == '" + u.getUuid() + "'");
+	    while (itr.hasNext())
+	    {
+		set.add(itr.next().getURI());
+	    }
+	    if (set.isEmpty())
+	    {
+		update(-1, "Warning: no objects found for current user");
+	    }
+		
+	    c.beginWriteTransaction();
+	    try{
+		if (!u.getContainer().getOid().getString().equals(containerID))
+		{
+		    u.move(c.DBUtilities().getUsersAndGroupsContainer());
+		}
+		c.commitTransaction();
+	    }
+	    catch (Exception e)
+	    {
+		c.abortTransaction();
+		throw new OvationException("Error while updating: "  + e.getMessage());
+	    }
+
+	    // for each object in the database, transfer ownership to the new user
+	    for (URI uri: set)
+	    {
+		IEntityBase e = c.objectWithURI(uri);
+		try{
+		    e.transferOwnership(u);
+		} catch (UserAccessException ex){
+		    update(-1, "Warning: unable to transfer ownership of object");
+		    //pass
+		}
+		c.beginTransaction();
+		String userOid = u.getOidString();
+		try{
+		    if (!e.getOwner().getOidString().equals(userOid))
+		    {
+			throw new OvationException("User '" + userOid + "' was moved, but ownership was not properly transfered");
+		    }
+		}finally
+		{
+		    c.commitTransaction();
+		}
+	    }  
 	}
 	
-        return true;
+	update(-1, "Verifying");
+	c.beginTransaction();
+	try{
+	    for (User u : users){
+		if (!u.getContainer().getOid().getString().equals(containerID))
+		{
+		    throw new OvationException("Upgrade failed: Unable to move user to proper container");
+		}
+	    }
+	} finally{
+	    c.commitTransaction();
+	}
+    }
+
+    public void updateDerivedResponses()
+    {
+	Iterator<DerivedResponse> derivedResponses = c.query(DerivedResponse.class, "true");
+	if (!derivedResponses.hasNext())
+	{
+	    update(-1, "Warning: No DerivedResponses in the database");
+	}
+
+	Set<URI> uris = new HashSet();
+	int count =1;
+	while (derivedResponses.hasNext())
+	    {
+		update (-1, "Updating derived response " + count++);
+
+		DerivedResponse a = derivedResponses.next();
+		Epoch e = a.getEpoch();
+		uris.add(e.getURI());
+      		e.resetDerivedResponsesMap();//deletes the ooMap containing DerivedResponse names
+		c.beginWriteTransaction();
+		try{
+		    a.setUTI(Response.NUMERIC_DATA_UTI);
+		    c.commitTransaction();
+		} catch(Exception ex)
+		    {
+			c.abortTransaction();
+			throw new OvationException("Error while updating: "  + ex.getMessage());
+		    }
+
+		if (a.getUTI() == null)
+		    throw new OvationException("Error while updating: UTI was not set properly");
+	    }
+	count = 1;
+        for (URI uri : uris)
+	{
+	    Epoch e = (Epoch)c.objectWithURI(uri);
+	    update(-1, "Updating epoch maps "  + count++);
+	    e.repopulateDerivedResponseMap(); //calls getDerivedResponsesooMap
+	}
     }
 
 

@@ -255,9 +255,9 @@ public class UpgradeTool implements IUpgradeDB {
                 String name = pathSegments[pathSegments.length-1];
                 File f = File.createTempFile(name.split("\\.")[0], name.split("\\.")[1]);
                 FileOutputStream fos = new FileOutputStream(f);
-                InputStream input = url.openStream();
+                InputStream input = new BufferedInputStream(url.openStream());
                 
-                byte[] buffer = new byte[4096];
+                byte[] buffer = new byte[4096*4];
                 int n = - 1;
                 while ((n = input.read(buffer)) != -1) {
                     if (n > 0) {

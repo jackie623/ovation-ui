@@ -24,6 +24,8 @@ import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 import org.openide.util.lookup.ServiceProvider;
 import ovation.IAuthenticatedDataStoreCoordinator;
+import ovation.LogLevel;
+import ovation.Ovation;
 import us.physion.ovation.interfaces.ConnectionListener;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.EventQueueUtilities;
@@ -41,6 +43,7 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
 
     public DatabaseConnectionProvider() {
 
+        Ovation.enableLogging(LogLevel.DEBUG);
         connectionListeners = Collections.synchronizedSet(new HashSet());
     }
 

@@ -27,9 +27,7 @@ import ovation.KeywordTag;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
-/**
- * Top component which displays something.
- */
+
 @ConvertAsProperties(dtd = "-//us.physion.ovation.detailviews//TagsView//EN",
 autostore = false)
 @TopComponent.Description(preferredID = "TagsViewTopComponent",

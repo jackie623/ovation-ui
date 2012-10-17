@@ -372,6 +372,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
 
             @Override
             public void run() {
+                ProgressHandle ph = ProgressHandleFactory.createHandle("Connecting..."); 
+                try{ 
+                ph.start();
                 DataContext c = getContextFromConnectionFile(connectionFile, username, password);
                 if (c == null) {
                     return;
@@ -390,14 +393,15 @@ public class DBConnectionDialog extends javax.swing.JDialog {
                 }
                 dsc = c.getAuthenticatedDataStoreCoordinator();
                 cancelled = false;
+                } finally{
+                    ph.finish();
+                }
                 
                 disposeOnEDT();
             }
             
         };
-        
         EventQueueUtilities.runOffEDT(r);
-       
     }//GEN-LAST:event_connectAction
 
     private void cancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelAction

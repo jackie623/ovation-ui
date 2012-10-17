@@ -68,8 +68,6 @@ public final class PropertiesViewTopComponent extends TopComponent {
         });
     }
     public PropertiesViewTopComponent() {
-        Ovation.enableLogging();
-        Ovation.getLogger().debug("PropertiesViewTopComponent constructor");
         initComponents();
         setName(Bundle.CTL_PropertiesViewTopComponent());
         setToolTipText(Bundle.HINT_PropertiesViewTopComponent());
@@ -92,10 +90,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(15, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

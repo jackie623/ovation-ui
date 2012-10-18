@@ -4,20 +4,23 @@
  */
 package us.physion.ovation.detailviews;
 
+import javax.swing.JPanel;
 import javax.swing.JTable;
 
 /**
  *
  * @author huecotanks
  */
-public class EditableTable extends javax.swing.JPanel {
+public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
+    private JTable table;
     /**
      * Creates new form EditableTable
      */
     public EditableTable(JTable table) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
+        this.table = table;
     }
 
     /**
@@ -75,4 +78,14 @@ public class EditableTable extends javax.swing.JPanel {
     private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public JTable getTable() {
+        return table;
+    }
+    
+    @Override
+    public JPanel getPanel() {
+        return this;
+    }
 }

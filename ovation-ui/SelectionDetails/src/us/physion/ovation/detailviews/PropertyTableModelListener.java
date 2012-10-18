@@ -9,9 +9,11 @@ import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import org.openide.util.Lookup;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
+import us.physion.ovation.interfaces.ConnectionProvider;
 
 /**
  *
@@ -21,8 +23,8 @@ class PropertyTableModelListener implements TableModelListener {
 
     Set<String> uris;
     IAuthenticatedDataStoreCoordinator dsc;
-    public PropertyTableModelListener(IAuthenticatedDataStoreCoordinator dsc, Set<String> uriSet) {
-        this.dsc = dsc;
+    public PropertyTableModelListener(Set<String> uriSet) {
+        dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         uris = uriSet;
     }
 

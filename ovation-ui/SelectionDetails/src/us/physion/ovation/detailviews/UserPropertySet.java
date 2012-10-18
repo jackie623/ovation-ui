@@ -34,6 +34,11 @@ class UserPropertySet {
         }
         return s;
     }
+    
+    String getUuid()
+    {
+        return uuid;
+    }
 
     boolean isCurrentUser() {
         return current;

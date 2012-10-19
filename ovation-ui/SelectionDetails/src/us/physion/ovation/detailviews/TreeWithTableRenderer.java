@@ -56,15 +56,15 @@ public class TreeWithTableRenderer extends JScrollPane {
             }
             if (!userProps.isEmpty()) {
                 String uuid = u.getUuid();
-                UserPropertySet propertySet = new UserPropertySet(u.getUsername(), uuid, owners.contains(uuid), uuid.equals(c.currentAuthenticatedUser().getUuid()), userProps, this);
+                UserPropertySet propertySet = new UserPropertySet(u, owners.contains(uuid), c.currentAuthenticatedUser().getUuid().equals(uuid), userProps, uris);
                 DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(propertySet.getDisplayName());
-                userNode.add(new DefaultMutableTreeNode(propertySet));
+                userNode.add(new TableNode(propertySet));
 
                 root.add(userNode);
             }
         }
 
-        ((DefaultMutableTreeNode)((DefaultTreeModel) tree.getModel()).getRoot()).removeAllChildren();
+        //((DefaultMutableTreeNode)((DefaultTreeModel) tree.getModel()).getRoot()).removeAllChildren();
         ((DefaultTreeModel) tree.getModel()).setRoot(root);
     }
 
@@ -72,6 +72,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         super();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
         tree = new JTree(root);
+        tree.setRootVisible(false);
         TableInTreeCellRenderer r = new TableInTreeCellRenderer();
         tree.setCellRenderer(r);
         tree.setRowHeight(0);
@@ -87,6 +88,9 @@ public class TreeWithTableRenderer extends JScrollPane {
     class TableInTreeCellRenderer extends AbstractCellEditor implements
             TreeCellEditor, TreeCellRenderer {
 
+        TablePanel currentPanel;
+        boolean trueFalse = true;
+        
         boolean isCurrentUser;
         Map<String, TablePanel> tableLookup;
         
@@ -94,6 +98,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         {
             super();
             tableLookup = new HashMap<String, TablePanel>();
+            //this.addCellEditorListener(new PropertyTableModelListener(new HashSet<String>()));
         }
         
         public Component getTreeCellRendererComponent(JTree tree, Object value,
@@ -107,7 +112,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                 //table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             if (o instanceof UserPropertySet)
             {   
-                String user = ((UserPropertySet)o).getUuid();
+                String user = ((UserPropertySet)o).getURI();
                 //lookup tables
                 TablePanel panel;
                 if (tableLookup.containsKey(user))
@@ -140,7 +145,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                 JTable table = panel.getTable();
                 table.setModel(tableModel);
                 if (((UserPropertySet) o).isCurrentUser()) {
-                    tableModel.addTableModelListener(new PropertyTableModelListener(uris));
+                    tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree,(TableNode) value ));
                 }
                 //table.setPreferredScrollableViewportSize(table.getPreferredSize());
 
@@ -154,9 +159,33 @@ public class TreeWithTableRenderer extends JScrollPane {
         }
         
         @Override
-        public Object getCellEditorValue() {//default value, not used
-            return "value";
+        public Object getCellEditorValue() {
+            return null;//currentPanel
         }
+       /* 
+        @Override
+        public void cancelCellEditing() {
+            System.out.println("cancelling cell editing");
+            return;
+        }
+        
+        @Override
+        public boolean stopCellEditing() {
+            System.out.println("stopping cell editing");
+            return true;
+        }
+        
+        @Override
+        protected void fireEditingCanceled() {
+            System.out.println("Editing cancelled");
+            return;
+        }
+        
+        @Override
+        protected void fireEditingStopped() {
+            System.out.println("Editing stopped");
+            return;
+        }*/
 
         @Override
         public boolean isCellEditable(final EventObject event) {
@@ -190,21 +219,22 @@ public class TreeWithTableRenderer extends JScrollPane {
                 final boolean expanded,
                 final boolean leaf,
                 final int row) {
+            tree.setRowHeight(0);
             Object o = ((DefaultMutableTreeNode) value).getUserObject();
             if (o instanceof UserPropertySet)
             {
-                String user = ((UserPropertySet)o).getUuid();
-                System.out.println(tableLookup.get(user));
-                return tableLookup.get(user).getPanel();
+                currentPanel = tableLookup.get(((UserPropertySet)o).getURI());
+                return currentPanel.getPanel();
             }
             else{
                 Component editor = getTreeCellRendererComponent(tree,
                     value, true, expanded, leaf, row, true);
+                currentPanel = null;
                 return editor;
             }
         }
         
-        public void valueForPathChanged(TreePath path, Object newValue) {
+       public void valueForPathChanged(TreePath path, Object newValue) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
                 System.out.println(newValue.getClass() + " newValue: " + newValue);
         }

@@ -4,7 +4,14 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import org.openide.util.Lookup;
+import ovation.DataContext;
+import ovation.IEntityBase;
+import ovation.User;
+import us.physion.ovation.interfaces.ConnectionProvider;
 
 /**
  *
@@ -12,19 +19,43 @@ import java.util.Map;
  */
 class UserPropertySet {
     String username;
-    String uuid;
+    String userURI;
     boolean isOwner;
     boolean current;
     Map<String, Object> properties;
-    private final TreeWithTableRenderer outer;
+    Set<String> uris;
 
-    UserPropertySet(String username, String userUuid, boolean owner, boolean currentUser, Map<String, Object> props, final TreeWithTableRenderer outer) {
-        this.outer = outer;
-        this.username = username;
-        this.uuid = userUuid;
-        this.isOwner = owner;
+    UserPropertySet(User u, boolean isOwner, boolean currentUser, Map<String, Object> props, Set<String> uris)
+    {
+        username = u.getUsername();
+        this.isOwner = isOwner;
         this.properties = props;
         this.current = currentUser;
+        this.uris = uris;
+        userURI = u.getURIString();
+    }
+    
+    void refresh() {
+        DataContext c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+        User u = (User)c.objectWithURI(userURI);
+        
+        boolean owner = false;
+        String uuid = u.getUuid();
+        Map<String, Object> props = new HashMap<String, Object>();
+        for (String uri: uris)
+        {
+            IEntityBase eb = c.objectWithURI(uri);
+            if (eb.getOwner().getUuid().equals(uuid))
+            {
+                owner = true;
+            }
+            props.putAll(eb.getUserProperties(u));
+        }
+        
+        username = u.getUsername();
+        this.isOwner = owner;
+        this.properties = props;
+        this.current = c.currentAuthenticatedUser().getUuid().equals(u.getUuid());
     }
 
     String getDisplayName() {
@@ -35,9 +66,9 @@ class UserPropertySet {
         return s;
     }
     
-    String getUuid()
+    String getURI()
     {
-        return uuid;
+        return userURI;
     }
 
     boolean isCurrentUser() {

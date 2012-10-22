@@ -71,6 +71,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
     {
         ((TreeWithTableRenderer)jScrollPane1).setEntities(entities);
     }
+    
     public PropertiesViewTopComponent() {
         initComponents();
         setName(Bundle.CTL_PropertiesViewTopComponent());

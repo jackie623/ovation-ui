@@ -47,7 +47,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                 uris.add(e.getURIString());
                 owners.add(e.getOwner().getUuid());
         }
-        Iterator<User> users = c.getUsersIterator();
+        Iterator<User> users = c.query(User.class, "true");
         while (users.hasNext()) {
             User u = users.next();
             Map<String, Object> userProps = new HashMap();
@@ -62,7 +62,11 @@ public class TreeWithTableRenderer extends JScrollPane {
 
                 root.add(userNode);
             }
-        }
+          }
+
+        // clear any selection first -- this prevents a null pointer exception
+        // if you click on a different entity while editing this one.
+        tree.setSelectionPath(null);  
 
         //((DefaultMutableTreeNode)((DefaultTreeModel) tree.getModel()).getRoot()).removeAllChildren();
         ((DefaultTreeModel) tree.getModel()).setRoot(root);
@@ -72,7 +76,6 @@ public class TreeWithTableRenderer extends JScrollPane {
         super();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
         tree = new JTree(root);
-        tree.setRootVisible(false);
         TableInTreeCellRenderer r = new TableInTreeCellRenderer();
         tree.setCellRenderer(r);
         tree.setRowHeight(0);
@@ -80,7 +83,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         tree.setCellEditor(r);
         
         uris = new HashSet<String>();
-        //tree.setRootVisible(false);
+        tree.setRootVisible(false);
         getViewport().add(tree, null);
         
     }

@@ -5,7 +5,6 @@
 package us.physion.ovation.detailviews;
 
 import java.util.Collection;
-import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -16,7 +15,7 @@ import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
-import ovation.Ovation;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
@@ -60,12 +59,17 @@ public final class PropertiesViewTopComponent extends TopComponent {
     
     public void update()
     {
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueueUtilities.runOffEDT(new Runnable() {
 
             public void run() {
-                ((TreeWithTableRenderer)jScrollPane1).setEntities(global.allInstances());
+                update(global.allInstances());
             }
         });
+    }
+    
+    public void update(Collection<? extends IEntityWrapper> entities)
+    {
+        ((TreeWithTableRenderer)jScrollPane1).setEntities(entities);
     }
     public PropertiesViewTopComponent() {
         initComponents();
@@ -74,6 +78,11 @@ public final class PropertiesViewTopComponent extends TopComponent {
 
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
+    }
+    
+    public Collection<? extends IEntityWrapper> getEntities()
+    {
+        return entities;
     }
 
     /**

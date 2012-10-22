@@ -4,6 +4,8 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.JTable;
 import javax.swing.JTree;
@@ -18,6 +20,7 @@ import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 
 /**
  *
@@ -44,33 +47,50 @@ class PropertyTableModelListener implements TableModelListener{
         
         if (tme.getType() == TableModelEvent.UPDATE || tme.getType() == TableModelEvent.INSERT)
         {
+            Map<String, Object> newProperties = new HashMap<String, Object>();
+            
             for (int i = firstRow; i <= lastRow; i++) {
                 String key = (String) t.getValueAt(i, 0);
                 if (key == null || key.isEmpty())
                     continue;
                 Object value = t.getValueAt(i, 1);
+                newProperties.put(key, value);
+                
+            }
+            final Map<String, Object> props = newProperties;
+            EventQueueUtilities.runOffEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                    
+                    DataContext c = dsc.getContext();
+                    for (String key: props.keySet())
+                    {
+                        for (String uri : uris) {
+                            IEntityBase eb = c.objectWithURI(uri);
+                            parseAndAdd(eb, key, props.get(key));
+                        }
+                    }
+                    node.resetProperties();
+                }
+            });
+        }
+    }
+
+    void deleteProperty(final String key) {
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
                 for (String uri : uris) {
                     DataContext c = dsc.getContext();
                     IEntityBase eb = c.objectWithURI(uri);
-                    parseAndAdd(eb, key, value);
+                    eb.removeProperty(key);
                 }
             }
-        }
-        node.resetProperties();
-        //((DefaultTreeModel)tree.getModel()).reload();
-        //tree.stopEditing();
-//        editingStopped(new ChangeEvent(t));
+        });
     }
 
-    void deleteProperty(String key)
-    {
-        for (String uri : uris) {
-            DataContext c = dsc.getContext();
-            IEntityBase eb = c.objectWithURI(uri);
-            eb.removeProperty(key);
-        }
-    }
-    
     void parseAndAdd(IEntityBase eb, String key, Object value)
     {
         if (value instanceof String) {

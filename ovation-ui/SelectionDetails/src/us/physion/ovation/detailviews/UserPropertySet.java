@@ -79,4 +79,9 @@ class UserPropertySet {
         return properties;
     }
     
+    String getUsername()
+    {
+        return username;
+    }
+    
 }

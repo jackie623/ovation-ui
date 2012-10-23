@@ -32,8 +32,8 @@ class PropertyTableModelListener implements TableModelListener{
     Set<String> uris;
     IAuthenticatedDataStoreCoordinator dsc;
     TableNode node;
-    public PropertyTableModelListener(Set<String> uriSet, JTree tree, TableNode node) {
-        dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+    public PropertyTableModelListener(Set<String> uriSet, JTree tree, TableNode node, IAuthenticatedDataStoreCoordinator dsc) {
+        this.dsc = dsc;
         uris = uriSet;
         this.tree = tree;
         this.node = node;

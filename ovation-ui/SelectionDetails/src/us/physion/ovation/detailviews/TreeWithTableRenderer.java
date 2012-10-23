@@ -18,11 +18,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.tree.*;
 import org.openide.util.Lookup;
-import ovation.DataContext;
-import ovation.IEntityBase;
-import ovation.LogLevel;
-import ovation.Ovation;
-import ovation.User;
+import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
@@ -39,8 +35,11 @@ public class TreeWithTableRenderer extends JScrollPane {
         return tree;
     }
 
-    public void setEntities(Collection<? extends IEntityWrapper> entities) {
-        DataContext c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+    public void setEntities(Collection<? extends IEntityWrapper> entities, DataContext c) {
+        if (c == null)
+        {
+            c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+        }
         Set<UserPropertySet> properties = new HashSet<UserPropertySet>();
         uris.clear();
         Set<IEntityBase> entitybases = new HashSet();
@@ -210,18 +209,15 @@ public class TreeWithTableRenderer extends JScrollPane {
                 //table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             if (o instanceof UserPropertySet)
             {   
-                JPanel panel = getPanelFromPropertySet((UserPropertySet)o);
-                
-                if (((UserPropertySet)o).isCurrentUser()) {
-                    TableModel tableModel = getTableModel((UserPropertySet)o);
-                    tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree,(TableNode) value ));
-                }
-
+                JPanel panel = getPanelFromPropertySet((UserPropertySet)o, (TableNode)value, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+                return panel;
             }
             return null;
         }
+       
+       
         
-       JPanel getPanelFromPropertySet(UserPropertySet p)
+       JPanel getPanelFromPropertySet(UserPropertySet p, TableNode node, IAuthenticatedDataStoreCoordinator dsc)
        {
            String user = p.getURI();
                 //lookup tables
@@ -261,6 +257,10 @@ public class TreeWithTableRenderer extends JScrollPane {
                 
                 //panel.setSize(new Dimension(500, 500));
                 //table.setSize(panel.getSize());
+                
+                if (p.isCurrentUser()) {
+                    tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree, node, dsc));
+                }
                 
                 return panel.getPanel();
        }

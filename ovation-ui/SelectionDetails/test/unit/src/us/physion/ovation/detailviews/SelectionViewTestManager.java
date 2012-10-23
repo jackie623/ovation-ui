@@ -39,6 +39,10 @@ public class SelectionViewTestManager extends TestManager {
                 return pwd;
             }
         });
+        if (pwd == null)
+        {
+            pwd = "/Users/huecotanks/Ovation/ui/";
+        }
         String path = pwd + "data" + File.separator
                 + "selectionDetails" + File.separator
                 + "selection-details.connection";

@@ -15,6 +15,7 @@ import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import ovation.DataContext;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
@@ -62,7 +63,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             public void run() {
-                update(global.allInstances());
+                update(global.allInstances(), null);
             }
         });
     }
@@ -73,9 +74,10 @@ public final class PropertiesViewTopComponent extends TopComponent {
     }        
             
     
-    public void update(Collection<? extends IEntityWrapper> entities)
+    public void update(Collection<? extends IEntityWrapper> entities, DataContext c)
     {
-        ((TreeWithTableRenderer)jScrollPane1).setEntities(entities);
+        ((TreeWithTableRenderer)jScrollPane1).setEntities(entities, c);
+        this.entities = entities;
     }
     
     public PropertiesViewTopComponent() {

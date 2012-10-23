@@ -32,6 +32,7 @@ public class PropertyViewTest extends OvationTestCase{
     private TestEntityWrapper source;
     private TestEntityWrapper user1;
     private TestEntityWrapper user2;
+    private Set<String> userURIs;
     
     static TestManager mgr = new SelectionViewTestManager();
     public PropertyViewTest() {
@@ -47,6 +48,7 @@ public class PropertyViewTest extends OvationTestCase{
     @Before
     public void setUp() throws UserAuthenticationException {
         dsc = setUpTest();
+        Ovation.enableLogging(LogLevel.DEBUG);
 
         String UNUSED_NAME = "name";
         String UNUSED_PURPOSE = "purpose";
@@ -65,13 +67,15 @@ public class PropertyViewTest extends OvationTestCase{
         s.addProperty("id", 4);
         s.addProperty("birthday", "6/23/1988");
         
+        user1 = new TestEntityWrapper(dsc, c.currentAuthenticatedUser());
+        user2 = new TestEntityWrapper(dsc, newUser);
+        userURIs = new HashSet();
+        userURIs.add(user1.getURI());
+        userURIs.add(user2.getURI());
+        
         c.authenticateUser("newUser", "password");
         p.addProperty("color", "chartreuse");
         p.addProperty("interesting", true);
-       
-        user1 = new TestEntityWrapper(dsc, c.currentAuthenticatedUser());
-        user2 = new TestEntityWrapper(dsc, newUser);
-        Ovation.enableLogging(LogLevel.DEBUG);
     }
     
     
@@ -96,8 +100,8 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent t = new PropertiesViewTopComponent();
-        assertTrue( t.getEntities().isEmpty());
-        t.update(entitySet);
+        assertTrue( t.getEntities() == null ||t.getEntities().isEmpty());
+        t.update(entitySet, dsc.getContext());
         
         JTree tree = t.getTreeRenderer().getTree();
         DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
@@ -120,10 +124,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         //user1 properties
         Map<String, Object> props = t.getProperties(user1.getURI());
@@ -145,10 +149,11 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        
         
         String userURI = c.currentAuthenticatedUser().getURIString();
         Map<String, Object> props = t.getProperties(userURI);
@@ -169,10 +174,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user2.getURI();
         Map<String, Object> props = t.getProperties(userURI);
@@ -195,10 +200,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
         assertTrue( tc.getEntities().isEmpty());
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user1.getURI();
         Map<String, Object> props = t.getProperties(userURI);
@@ -221,10 +226,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
         assertTrue( tc.getEntities().isEmpty());
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user1.getURI();
         Map<String, Object> props = t.getProperties(userURI);
@@ -248,10 +253,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
         assertTrue( tc.getEntities().isEmpty());
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user1.getURI();
         Map<String, Object> props = t.getProperties(userURI);
@@ -276,10 +281,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = c.currentAuthenticatedUser().getURIString();
         Map<String, Object> props = t.getProperties(userURI);
@@ -300,10 +305,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = c.currentAuthenticatedUser().getURIString();
         Map<String, Object> props = t.getProperties(userURI);
@@ -328,10 +333,10 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet);
+        tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer());
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = c.currentAuthenticatedUser().getURIString();
         Map<String, Object> props = t.getProperties(userURI);
@@ -374,9 +379,15 @@ public class PropertyViewTest extends OvationTestCase{
     
     class TableTree{
         TreeWithTableRenderer renderer;
-        TableTree(TreeWithTableRenderer t)
+        TableTree(TreeWithTableRenderer t, Set<String> userURIs)
         {
             renderer = t;
+            int i =1;
+            for (String userURI :userURIs)
+            {
+                TableNode node = ((TableNode)((DefaultMutableTreeNode)getUserNode(userURI)).getChildAt(0));
+                ((TableInTreeCellRenderer)renderer.getTree().getCellRenderer()).getPanelFromPropertySet(getUserPropertySet(userURI), node, dsc);
+            }
         }
         
         DefaultMutableTreeNode getUserNode(String userURI)

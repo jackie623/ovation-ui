@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.tree.*;
 import org.openide.util.Lookup;
 import ovation.DataContext;
@@ -32,6 +33,11 @@ public class TreeWithTableRenderer extends JScrollPane {
     private ExpandableJTree tree;
     Set<String> uris;
     private Map<String, DefaultMutableTreeNode> userNodes;
+    
+    JTree getTree()
+    {
+        return tree;
+    }
 
     public void setEntities(Collection<? extends IEntityWrapper> entities) {
         DataContext c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
@@ -178,12 +184,12 @@ public class TreeWithTableRenderer extends JScrollPane {
             //this.addCellEditorListener(new PropertyTableModelListener(new HashSet<String>()));
         }
         
-        public Component getTreeCellRendererComponent(JTree tree, Object value,
+       public Component getTreeCellRendererComponent(JTree tree, Object value,
                 boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             final Object o = ((DefaultMutableTreeNode) value).getUserObject();
             if (o instanceof String) {
                 
-                if (expanded)
+                /*if (expanded)
                 {
                     Object[] thePath = ((DefaultMutableTreeNode) value).getPath();
                     Object[] childPath = new Object[thePath.length];
@@ -195,7 +201,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                     TreePath path = new TreePath(childPath);
                     //TreePath path = tree.getPathForRow(row+1);
                     tree.expandPath(path);
-                }    
+                } */   
                     
                 return new JLabel((String) o);
             }
@@ -204,7 +210,20 @@ public class TreeWithTableRenderer extends JScrollPane {
                 //table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             if (o instanceof UserPropertySet)
             {   
-                String user = ((UserPropertySet)o).getURI();
+                JPanel panel = getPanelFromPropertySet((UserPropertySet)o);
+                
+                if (((UserPropertySet)o).isCurrentUser()) {
+                    TableModel tableModel = getTableModel((UserPropertySet)o);
+                    tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree,(TableNode) value ));
+                }
+
+            }
+            return null;
+        }
+        
+       JPanel getPanelFromPropertySet(UserPropertySet p)
+       {
+           String user = p.getURI();
                 //lookup tables
                 TablePanel panel;
                 if (tableLookup.containsKey(user))
@@ -214,7 +233,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                     JTable table = new JTable();
                     table.getTableHeader().setVisible(false);
                     table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
-                    if (((UserPropertySet) o).isCurrentUser())
+                    if (p.isCurrentUser())
                     {
                         panel = new EditableTable(table);
                     }else{
@@ -224,7 +243,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                     tableLookup.put(user, panel);
                 }
 
-                Map<String, Object> props = ((UserPropertySet) o).getProperties();
+                Map<String, Object> props = p.getProperties();
                 Object[][] dataVector = new Object[props.size()][2];
                 int i=0;
                 for (Map.Entry<String, Object> entry : props.entrySet()) {
@@ -238,20 +257,26 @@ public class TreeWithTableRenderer extends JScrollPane {
 
                 JTable table = panel.getTable();
                 table.setModel(tableModel);
-                if (((UserPropertySet) o).isCurrentUser()) {
-                    tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree,(TableNode) value ));
-                }
                 table.setPreferredScrollableViewportSize(table.getPreferredSize());
                 
                 //panel.setSize(new Dimension(500, 500));
                 //table.setSize(panel.getSize());
                 
                 return panel.getPanel();
-
-            }
-            return null;
-        }
-        
+       }
+       
+       TableModel getTableModel(UserPropertySet s)
+       {
+           String userURI = s.getURI();
+           if (tableLookup.containsKey(userURI))
+           {
+               return tableLookup.get(userURI).getTable().getModel();
+           }
+           return null;
+       }
+       
+       
+       
         @Override
         public Object getCellEditorValue() {
             return null;//currentPanel

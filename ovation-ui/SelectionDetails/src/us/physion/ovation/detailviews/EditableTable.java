@@ -98,11 +98,10 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
             {
                 if (l instanceof PropertyTableModelListener)
                 {
-                    ((PropertyTableModelListener)l).deleteProperty(key);
+                    ((PropertyTableModelListener)l).deleteProperty(key, (DefaultTableModel)table.getModel(), row);
                     break;
                 }
             }
-            ((DefaultTableModel)table.getModel()).removeRow(row);
         }
     }//GEN-LAST:event_deleteButtonActionPerformed
 

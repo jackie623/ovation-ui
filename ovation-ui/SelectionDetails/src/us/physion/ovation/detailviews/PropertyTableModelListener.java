@@ -77,7 +77,7 @@ class PropertyTableModelListener implements TableModelListener{
         }
     }
 
-    void deleteProperty(final String key) {
+    void deleteProperty(final String key, DefaultTableModel model, int rowToRemove) {
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             @Override
@@ -89,6 +89,7 @@ class PropertyTableModelListener implements TableModelListener{
                 }
             }
         });
+        model.removeRow(rowToRemove);
     }
 
     void parseAndAdd(IEntityBase eb, String key, Object value)

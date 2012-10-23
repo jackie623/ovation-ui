@@ -1,0 +1,115 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package us.physion.ovation.detailviews;
+
+/**
+ *
+ * @author jackie
+ */
+import java.awt.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.*;
+import org.openide.util.Lookup;
+import ovation.DataContext;
+import ovation.IEntityBase;
+import ovation.User;
+import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.IEntityWrapper;
+
+public class TreeWithTableRenderer extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JTree tree;
+
+    public TreeWithTableRenderer(Collection<? extends IEntityWrapper> entities) {
+        
+        DataContext c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Properties");
+       
+        Iterator<User> users = c.getUsersIterator();
+        while (users.hasNext()) {
+            User u = users.next();
+            Map<String, Object> userProps = new HashMap();
+            for (IEntityWrapper w : entities) {
+                IEntityBase e = w.getEntity();
+                userProps.putAll(e.getUserProperties(u));
+            }
+            if (!userProps.isEmpty()) {
+                DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(u);
+                userNode.add(new DefaultMutableTreeNode(userProps));
+                root.add(userNode);
+            }
+        }
+        tree = new JTree(root);
+        tree.setCellRenderer(new MyTableInTreeCellRenderer());
+        tree.setRowHeight(0);
+        JScrollPane jsp = new JScrollPane(tree);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(jsp, BorderLayout.CENTER);
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    class MyTableInTreeCellRenderer extends JPanel implements TreeCellRenderer {
+
+        private static final long serialVersionUID = 1L;
+        private JTable table;
+
+        public MyTableInTreeCellRenderer() {
+            super(new BorderLayout());
+            table = new JTable();
+            JScrollPane scrollPane = new JScrollPane(table);
+            add(scrollPane);
+        }
+
+        public Component getTreeCellRendererComponent(JTree tree, Object value,
+                boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) 
+        {
+            final Object o = ((DefaultMutableTreeNode) value).getUserObject();
+            if (o instanceof String)
+            {
+                return new JLabel((String) o);
+            }
+            if (o instanceof User)
+            {
+                return new JLabel(((User)o).getUsername());
+            }
+            table.setModel(new DefaultTableModel() {
+
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                public int getRowCount() {
+                    return 2;
+                }
+
+                @Override
+                public int getColumnCount() {
+                    return 2;
+                }
+
+                @Override
+                public Object getValueAt(int row, int column) {
+                    return "Map" + ":" + row + ":" + column;
+                }
+            });
+            table.setPreferredScrollableViewportSize(table.getPreferredSize());
+            return this;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                //new TreeWithTableRenderer().setVisible(true);
+            }
+        });
+    }
+}

@@ -67,6 +67,12 @@ public final class PropertiesViewTopComponent extends TopComponent {
         });
     }
     
+    public TreeWithTableRenderer getTreeRenderer()
+    {
+        return (TreeWithTableRenderer)jScrollPane1;
+    }        
+            
+    
     public void update(Collection<? extends IEntityWrapper> entities)
     {
         ((TreeWithTableRenderer)jScrollPane1).setEntities(entities);

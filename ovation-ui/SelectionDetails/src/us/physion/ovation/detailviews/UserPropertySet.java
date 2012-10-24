@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import org.openide.util.Lookup;
 import ovation.DataContext;
+import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import ovation.User;
 import us.physion.ovation.interfaces.ConnectionProvider;
@@ -35,8 +36,8 @@ class UserPropertySet {
         userURI = u.getURIString();
     }
     
-    void refresh() {
-        DataContext c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+    void refresh(IAuthenticatedDataStoreCoordinator dsc) {
+        DataContext c = dsc.getContext();
         User u = (User)c.objectWithURI(userURI);
         
         boolean owner = false;

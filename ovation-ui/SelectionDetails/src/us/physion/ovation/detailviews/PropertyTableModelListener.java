@@ -71,7 +71,7 @@ class PropertyTableModelListener implements TableModelListener{
                             parseAndAdd(eb, key, props.get(key));
                         }
                     }
-                    node.resetProperties();
+                    node.resetProperties(dsc);
                 }
             });
         }

@@ -7,6 +7,7 @@ package us.physion.ovation.detailviews;
 import javax.swing.tree.DefaultMutableTreeNode;
 import org.openide.util.Lookup;
 import ovation.DataContext;
+import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import ovation.User;
 import us.physion.ovation.interfaces.ConnectionProvider;
@@ -26,10 +27,10 @@ public class TableNode extends DefaultMutableTreeNode{
         return (UserPropertySet)getUserObject();
     }
     
-    public void resetProperties()
+    public void resetProperties(IAuthenticatedDataStoreCoordinator dsc)
     {
         //regrab properties from the database
         UserPropertySet p = (UserPropertySet)getUserObject();
-        p.refresh();
+        p.refresh(dsc);
     }
 }

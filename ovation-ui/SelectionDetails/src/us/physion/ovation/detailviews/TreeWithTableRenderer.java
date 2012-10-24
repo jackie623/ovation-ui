@@ -109,7 +109,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         tree.setRowHeight(0);
         tree.setEditable(true);
         tree.setCellEditor(r);
-        
+        tree.setUI(new PropertiesTreeUI(this));
         uris = new HashSet<String>();
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);

@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.Dimension;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 
@@ -59,4 +60,8 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
         return this;
     }
     
+    /*@Override
+    public Dimension getPreferredSize(){  
+        return table.getSize(); 
+    }*/
 }

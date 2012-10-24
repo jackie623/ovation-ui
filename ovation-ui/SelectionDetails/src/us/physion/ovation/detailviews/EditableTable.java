@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.Dimension;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
@@ -118,4 +119,13 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
     public JPanel getPanel() {
         return this;
     }
+
+    /*@Override
+    public Dimension getPreferredSize(){  
+        System.out.println(getParent().getClass());
+        System.out.println(getParent().getSize());
+        System.out.println(table.getSize());
+        
+        return table.getSize();  
+    }*/
 }

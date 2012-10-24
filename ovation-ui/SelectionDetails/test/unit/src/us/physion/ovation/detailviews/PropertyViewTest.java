@@ -5,6 +5,7 @@
 package us.physion.ovation.detailviews;
 
 import java.util.*;
+import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -15,12 +16,12 @@ import javax.swing.tree.TreeNode;
 import org.joda.time.DateTime;
 import org.junit.*;
 import static org.junit.Assert.*;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import ovation.*;
 import ovation.test.TestManager;
 import us.physion.ovation.detailviews.TreeWithTableRenderer.TableInTreeCellRenderer;
-import us.physion.ovation.interfaces.IEntityWrapper;
-import us.physion.ovation.interfaces.OvationTestCase;
-import us.physion.ovation.interfaces.TestEntityWrapper;
+import us.physion.ovation.interfaces.*;
 
 /**
  *
@@ -103,6 +104,7 @@ public class PropertyViewTest extends OvationTestCase{
         assertTrue( t.getEntities() == null ||t.getEntities().isEmpty());
         t.update(entitySet, dsc.getContext());
         
+        TableTree tt = new TableTree(t.getTreeRenderer(), userURIs);
         JTree tree = t.getTreeRenderer().getTree();
         DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
         assertEquals(n.getChildCount(), 2);
@@ -130,14 +132,14 @@ public class PropertyViewTest extends OvationTestCase{
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         //user1 properties
-        Map<String, Object> props = t.getProperties(user1.getURI());
-        Map<String, Object> databaseProps = getAggregateUserProperties(((User)user1.getEntity()), entitySet);
-        assertMapsEqual(props, databaseProps);
+        Set<TestProperty> props = t.getProperties(user1.getURI());
+        Set<TestProperty> databaseProps = getAggregateUserProperties(((User)user1.getEntity()), entitySet);
+        assertSetsEqual(props, databaseProps);
         
         //user2 properties
         props = t.getProperties(user1.getURI());
         databaseProps = getAggregateUserProperties(((User)user1.getEntity()), entitySet);
-        assertMapsEqual(props, databaseProps);
+        assertSetsEqual(props, databaseProps);
         
     }
     
@@ -156,14 +158,19 @@ public class PropertyViewTest extends OvationTestCase{
         
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Map<String, Object> props = t.getProperties(userURI);
-        String key = props.keySet().iterator().next();
+        Set<TestProperty> props = t.getProperties(userURI);
+        String key = props.iterator().next().getKey();
         
         String newValue = "something else";
         t.editProperty(userURI, key, newValue);        
-        Map<String, Object> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
-        assertEquals(t.getProperties(userURI).get(key), newValue);
-        assertEquals(databaseProps.get(key), newValue);
+        Set<TestProperty> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
+        Set<TestProperty> matching = getPropertiesByKey(key, databaseProps);
+        assertEquals(matching.size(), 1);
+        assertEquals(matching.iterator().next().getValue(), newValue);
+        
+        matching = getPropertiesByKey(key, t.getProperties(userURI));
+        assertEquals(matching.size(), 1);
+        assertEquals(matching.iterator().next().getValue(), newValue);
     }  
     
     @Test
@@ -180,15 +187,13 @@ public class PropertyViewTest extends OvationTestCase{
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user2.getURI();
-        Map<String, Object> props = t.getProperties(userURI);
-        String key = props.keySet().iterator().next();
+        //get the table for user2 and check that it's a NonEditableTable
+        UserPropertySet s = t.getUserPropertySet(userURI);
         
-        //this should fail
-        String newValue = "something else";
-        t.editProperty(userURI, key, newValue);        
-        Map<String, Object> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
-        assertEquals(t.getProperties(userURI).get(key), newValue);
-        assertEquals(databaseProps.get(key), newValue);
+        TableInTreeCellRenderer r = (TableInTreeCellRenderer)t.renderer.getTree().getCellRenderer();
+        JPanel p = r.getPanelFromPropertySet(s, (TableNode)t.getUserNode(userURI).getChildAt(0), dsc);
+        
+        assertTrue(p instanceof NonEditableTable);
     }
    
     @Test
@@ -199,22 +204,28 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        assertTrue( tc.getEntities().isEmpty());
+        assertTrue( tc.getEntities() ==null || tc.getEntities().isEmpty());
         tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user1.getURI();
-        Map<String, Object> props = t.getProperties(userURI);
+        Set<TestProperty> props = t.getProperties(userURI);
         String key = "a brand new key";
-        assertFalse(props.containsKey(key));
+        Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
+        assertTrue(matchingKey.isEmpty());
         
         String newValue = "something else";
-        t.addProperty(userURI, key, newValue);        
-        Map<String, Object> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
-        assertEquals(t.getProperties(userURI).get(key), newValue);
-        assertEquals(databaseProps.get(key), newValue);
+        t.addProperty(userURI, key, newValue);
+        
+        
+        Set<TestProperty> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
+        matchingKey = getPropertiesByKey(key, databaseProps);
+        assertEquals(matchingKey.iterator().next().getValue(), newValue);
+        
+        matchingKey = getPropertiesByKey(key, t.getProperties(userURI));
+        assertEquals(matchingKey.iterator().next().getValue(), newValue);
     } 
     
     @Test
@@ -225,16 +236,17 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        assertTrue( tc.getEntities().isEmpty());
+        assertTrue( tc.getEntities() == null || tc.getEntities().isEmpty());
         tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user1.getURI();
-        Map<String, Object> props = t.getProperties(userURI);
+        Set<TestProperty> props = t.getProperties(userURI);
         String key = "a brand new key";
-        assertFalse(props.containsKey(key));
+        Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
+        assertTrue(matchingKey.isEmpty());
                 
         String newValue = "something else";
         t.addProperty(userURI, key, newValue);        
@@ -252,16 +264,17 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        assertTrue( tc.getEntities().isEmpty());
+        assertTrue( tc.getEntities() == null || tc.getEntities().isEmpty());
         tc.update(entitySet, dsc.getContext());
         
         DataContext c = dsc.getContext();
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = user1.getURI();
-        Map<String, Object> props = t.getProperties(userURI);
+        Set<TestProperty> props = t.getProperties(userURI);
         String key = "a brand new key";
-        assertFalse(props.containsKey(key));
+        Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
+        assertTrue(matchingKey.isEmpty());
         
         project.getEntity().addProperty(key, 25.7); //now project contains a property with key, but source does not
         
@@ -287,14 +300,17 @@ public class PropertyViewTest extends OvationTestCase{
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Map<String, Object> props = t.getProperties(userURI);
-        String key = props.keySet().iterator().next();
+        Set<TestProperty> props = t.getProperties(userURI);
+        String key = props.iterator().next().getKey();
         
         t.removeProperty(userURI, key);
         
-        Map<String, Object> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
-        assertFalse(t.getProperties(userURI).containsKey(key));
-        assertFalse(databaseProps.containsKey(key));
+        Set<TestProperty> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
+        Set<TestProperty> matchingKey = getPropertiesByKey(key, databaseProps);
+        assertTrue(matchingKey.isEmpty());
+        
+        matchingKey = getPropertiesByKey(key, t.getProperties(userURI));
+        assertTrue(matchingKey.isEmpty());
     } 
     
     @Test
@@ -311,16 +327,20 @@ public class PropertyViewTest extends OvationTestCase{
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Map<String, Object> props = t.getProperties(userURI);
+        Set<TestProperty> props = t.getProperties(userURI);
         String key = "a brand new key";
-        assertFalse(props.containsKey(key));
+        Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
+        assertTrue(matchingKey.isEmpty());
         
         project.getEntity().addProperty(key, 27.8);
         source.getEntity().addProperty(key, 27.8);
+        ((TableNode)t.getUserNode(userURI).getChildAt(0)).resetProperties(dsc);
+        
+        assertTrue(project.getEntity().getMyProperties().containsKey(key));
+        assertTrue(source.getEntity().getMyProperties().containsKey(key));
         
         t.removeProperty(userURI, key);
         
-        Map<String, Object> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
         assertFalse(project.getEntity().getMyProperties().containsKey(key));
         assertFalse(source.getEntity().getMyProperties().containsKey(key));
     } 
@@ -339,227 +359,293 @@ public class PropertyViewTest extends OvationTestCase{
         TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Map<String, Object> props = t.getProperties(userURI);
-        String key = "a brand new key";
-        assertFalse(props.containsKey(key));
+        Set<TestProperty> props = t.getProperties(userURI);
         
+        String key = "a brand new key";
+        Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
+        assertTrue(matchingKey.isEmpty());
+
         project.getEntity().addProperty(key, 27.8);
+        ((TableNode)t.getUserNode(userURI).getChildAt(0)).resetProperties(dsc);
+        
         
         t.removeProperty(userURI, key);
-        
-        Map<String, Object> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
+
         assertFalse(project.getEntity().getMyProperties().containsKey(key));
         assertFalse(source.getEntity().getMyProperties().containsKey(key));
-    } 
-    
-    @Test
-    public void testRemoveOnlySelectedKeyValuePairIfKeyExistsOnAnotherObject()
-    {
-        assertFalse(true);
     }
 
-    static Map<String, Object> getAggregateUserProperties(User u, Set<IEntityWrapper> entities)
-    {
-        Map<String, Object> databaseProps = new HashMap<String, Object>();
-        for (IEntityWrapper ew : entities)
-        {
-            databaseProps.putAll(ew.getEntity().getUserProperties(u));
+    @Test
+    public void testRemoveOnlySelectedKeyValuePairIfKeyExistsOnAnotherObject() {
+        
+        //this is the case where one object has a property key, value1
+        // and another object has a property key, value2
+        // and the user chooses to delete one of these pairs
+        Set<IEntityWrapper> entitySet = new HashSet<IEntityWrapper>();
+       
+        entitySet.add(project);
+        entitySet.add(source);
+        PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
+        tc.update(entitySet, dsc.getContext());
+        
+        DataContext c = dsc.getContext();
+        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        
+        String userURI = c.currentAuthenticatedUser().getURIString();
+        Set<TestProperty> props = t.getProperties(userURI);
+        
+        String key = "a brand new key";
+        Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
+        assertTrue(matchingKey.isEmpty());
+
+        project.getEntity().addProperty(key, "thing1");
+        source.getEntity().addProperty(key, "thing2");
+        ((TableNode)t.getUserNode(userURI).getChildAt(0)).resetProperties(dsc);
+
+        t.removeProperty(userURI, key, "thing2");
+
+        assertTrue(project.getEntity().getMyProperties().containsKey(key));
+        assertFalse(source.getEntity().getMyProperties().containsKey(key));
+    }
+
+    static Set<TestProperty> getAggregateUserProperties(User u, Set<IEntityWrapper> entities) {
+        
+        Set<TestProperty> databaseProps = new HashSet<TestProperty>();
+        for (IEntityWrapper ew : entities) {
+            Map<String, Object> props = ew.getEntity().getUserProperties(u);
+            for (String key : props.keySet())
+            {
+                databaseProps.add(new TestProperty(key, props.get(key)));
+            }
         }
         return databaseProps;
     }
-    
-    void assertMapsEqual(Map<String, Object> m1, Map<String, Object> m2)
-    {
-        assertEquals(m1.size(), m2.size());
-        for (String key : m1.keySet())
+
+    void assertSetsEqual(Set s1, Set s2) {
+        assertEquals(s1.size(), s2.size());
+        for (Object t1 : s1)
         {
-            assertEquals(m2.get(key), m1.get(key));
+            for (Object t2 : s2)
+            {
+                if (t1.equals(t2))
+                {
+                    s2.remove(t2);
+                    break;
+                }
+            }    
+                
         }
+        assertTrue(s2.isEmpty());
+        //assertTrue(s1.containsAll(s2));
     }
     
-    class TableTree{
-        TreeWithTableRenderer renderer;
-        TableTree(TreeWithTableRenderer t, Set<String> userURIs)
+    Set<TestProperty> getPropertiesByKey(String key, Set<TestProperty> props)
+    {
+        Set<TestProperty> result = new HashSet<TestProperty>();
+        for (TestProperty p : props)
         {
-            renderer = t;
-            int i =1;
-            for (String userURI :userURIs)
+            if (p.getKey().equals(key))
             {
-                TableNode node = ((TableNode)((DefaultMutableTreeNode)getUserNode(userURI)).getChildAt(0));
-                ((TableInTreeCellRenderer)renderer.getTree().getCellRenderer()).getPanelFromPropertySet(getUserPropertySet(userURI), node, dsc);
+                result.add(p);
             }
         }
-        
-        DefaultMutableTreeNode getUserNode(String userURI)
-        {
-            JTree tree = renderer.getTree();
-            DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
+        return result;
+    }
 
-            if (userURI == null)
-            {
+    class TableTree {
+
+        TreeWithTableRenderer renderer;
+
+        TableTree(TreeWithTableRenderer t, Set<String> userURIs) {
+            renderer = t;
+            int i = 1;
+            for (String userURI : userURIs) {
+                TableNode node = ((TableNode) ((DefaultMutableTreeNode) getUserNode(userURI)).getChildAt(0));
+                ((TableInTreeCellRenderer) renderer.getTree().getCellRenderer()).getPanelFromPropertySet(getUserPropertySet(userURI), node, dsc);
+            }
+        }
+
+        DefaultMutableTreeNode getUserNode(String userURI) {
+            JTree tree = renderer.getTree();
+            DefaultMutableTreeNode n = (DefaultMutableTreeNode) ((DefaultTreeModel) tree.getModel()).getRoot();
+
+            if (userURI == null) {
                 return n;
             }
-            for (int i =0; i< n.getChildCount(); i++)
-            {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)n.getChildAt(i);
-                UserPropertySet s = ((UserPropertySet)((DefaultMutableTreeNode)node.getChildAt(0)).getUserObject());
-                if (s.getURI().equals(userURI))
-                {
+            for (int i = 0; i < n.getChildCount(); i++) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) n.getChildAt(i);
+                UserPropertySet s = ((UserPropertySet) ((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject());
+                if (s.getURI().equals(userURI)) {
                     return node;
                 }
             }
             return null;
         }
-        
-        UserPropertySet getUserPropertySet(String userURI)
-        {
-            JTree tree = renderer.getTree();
-            DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
 
-            if (userURI == null)
-            {
+        UserPropertySet getUserPropertySet(String userURI) {
+            JTree tree = renderer.getTree();
+            DefaultMutableTreeNode n = (DefaultMutableTreeNode) ((DefaultTreeModel) tree.getModel()).getRoot();
+
+            if (userURI == null) {
                 return null;
             }
-            for (int i =0; i< n.getChildCount(); i++)
-            {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)n.getChildAt(i);
-                UserPropertySet s = ((UserPropertySet)((DefaultMutableTreeNode)node.getChildAt(0)).getUserObject());
-                if (s.getURI().equals(userURI))
-                {
+            for (int i = 0; i < n.getChildCount(); i++) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) n.getChildAt(i);
+                UserPropertySet s = ((UserPropertySet) ((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject());
+                if (s.getURI().equals(userURI)) {
                     return s;
                 }
             }
             return null;
         }
-        
-        //These methods are used by the tests
-        public Map<String, Object> getProperties(String userURI)
-        {
-            JTree tree = renderer.getTree();
-            DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
 
-            for (int i =0; i< n.getChildCount(); i++)
-            {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)n.getChildAt(i);
-                UserPropertySet s = ((UserPropertySet)((DefaultMutableTreeNode)node.getChildAt(0)).getUserObject());
-                if (s.getURI().equals(userURI))
-                {
-                    return s.getProperties();
+        public Set<TestProperty> getProperties(String userURI) {
+            JTree tree = renderer.getTree();
+            DefaultMutableTreeNode n = (DefaultMutableTreeNode) ((DefaultTreeModel) tree.getModel()).getRoot();
+
+            for (int i = 0; i < n.getChildCount(); i++) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) n.getChildAt(i);
+                UserPropertySet s = ((UserPropertySet) ((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject());
+                
+                if (s.getURI().equals(userURI)) {
+                    Set<TestProperty> properties = new HashSet<TestProperty>();
+                    DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(s));
+                    for (int j=0; j< m.getRowCount(); j++)
+                    {
+                        properties.add(new TestProperty((String)m.getValueAt(j, 0), m.getValueAt(j, 1)) );
+                    }
+                    return properties;
                 }
             }
             return null;
         }
-        
-        public void editProperty(String userURI, String key, Object value)
-        {
+
+        public void editProperty(String userURI, final String key, final Object value)  {
             JTree tree = renderer.getTree();
             UserPropertySet s = getUserPropertySet(userURI);
-            DefaultTableModel m = ((DefaultTableModel)((TableInTreeCellRenderer)tree.getCellRenderer()).getTableModel(s));
-            int firstRow = -1;
-            for (int i =0; i< m.getRowCount(); i++)
-            {
-                if (m.getValueAt(i, 0).equals(key))
-                {
-                    firstRow = i;
-                    m.setValueAt(value, i, 1);
-                }
-            }
-            if (firstRow < 0)
-            {
-                throw new RuntimeException("Property to edit doesn't exist, call 'addProperties' instead");
-            }
-            
-            boolean noListener = true;
-            for (TableModelListener l : m.getListeners(TableModelListener.class))
-            {
-                if (l instanceof PropertyTableModelListener)
-                {
-                    noListener = false;
-                    
-                    TableModelEvent t = new TableModelEvent(m, firstRow, firstRow, 1, TableModelEvent.UPDATE);
-                    l.tableChanged(t);
-                    break;
-                }
-            }
-            if (noListener)
-            {
-                throw new RuntimeException("No listener available for the TableModel");
-            }
-            
+            final DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(s));
+                EventQueueUtilities.runOffEDT(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        int firstRow = -1;
+                        for (int i = 0; i < m.getRowCount(); i++) {
+                            if (m.getValueAt(i, 0).equals(key)) {
+                                firstRow = i;
+                                m.setValueAt(value, i, 1);
+                            }
+                        }
+                        if (firstRow < 0) {
+                            Ovation.getLogger().debug("Property to edit doesn't exist, call 'addProperty' instead");
+                            //throw new RuntimeException("Property to edit doesn't exist, call 'addProperty' instead");
+                        }
+
+                        boolean noListener = true;
+                        for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                            if (l instanceof PropertyTableModelListener) {
+                                noListener = false;
+
+                                TableModelEvent t = new TableModelEvent(m, firstRow, firstRow, 1, TableModelEvent.UPDATE);
+                                l.tableChanged(t);
+                                break;
+                            }
+                        }
+                        if (noListener) {
+                            Ovation.getLogger().debug("Property to edit doesn't exist, call 'addProperty' instead");
+                            //throw new RuntimeException("No listener available for the TableModel");
+                        }
+                    }
+                });
         }
         
-        public void addProperty(String userURI, String key, Object value)
+        public void addProperty(String userURI, final String key, final Object value) 
         {
             JTree tree = renderer.getTree();
             UserPropertySet s = getUserPropertySet(userURI);
-            DefaultTableModel m = ((DefaultTableModel)((TableInTreeCellRenderer)tree.getCellRenderer()).getTableModel(s));
-            
-            boolean noListener = true;
-            for (TableModelListener l : m.getListeners(TableModelListener.class))
-            {
-                if (l instanceof PropertyTableModelListener)
-                {
-                    noListener = false;
+            final DefaultTableModel m = ((DefaultTableModel)((TableInTreeCellRenderer)tree.getCellRenderer()).getTableModel(s));
+                EventQueueUtilities.runOffEDT(new Runnable(){
 
-                    TableModelEvent t0 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 0, TableModelEvent.INSERT);
-                    TableModelEvent t1 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 1, TableModelEvent.INSERT);
+                    @Override
+                    public void run() {
+                        m.addRow(new Object[]{"", ""});
+                        int row = m.getRowCount() - 1;
+                        m.setValueAt(key, row, 0);
+                        m.setValueAt(value, row, 1);
 
-                    TableModelEvent t2 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 1, TableModelEvent.UPDATE);
-                    TableModelEvent t3 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 0, TableModelEvent.UPDATE);
-                    
-                    l.tableChanged(t0);
-                    l.tableChanged(t1);
-                    l.tableChanged(t2);
-                    l.tableChanged(t3);
-                    break;
-                }
-            }
-            if (noListener)
-            {
-                throw new RuntimeException("No listener available for the TableModel");
-            }
+                        boolean noListener = true;
+                        for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                            if (l instanceof PropertyTableModelListener) {
+                                noListener = false;
+
+                                TableModelEvent t1 = new TableModelEvent(m, row, row, 0, TableModelEvent.UPDATE);
+                                TableModelEvent t2 = new TableModelEvent(m, row, row, 1, TableModelEvent.UPDATE);
+                                l.tableChanged(t1);
+                                l.tableChanged(t2);
+                                break;
+                            }
+                        }
+                        if (noListener) {
+                            Ovation.getLogger().debug("No listener available for the TableModel");
+                            //throw new RuntimeException("No listener available for the TableModel");
+                        }
+                    }
+                });
         }
         
         public void removeProperty(String userURI, String key)
         {
+            removeProperty(userURI, key, null);
+        }
+        
+        public void removeProperty(String userURI, final String key, final Object value)
+        {
             JTree tree = renderer.getTree();
             UserPropertySet s = getUserPropertySet(userURI);
-            DefaultTableModel m = ((DefaultTableModel)((TableInTreeCellRenderer)tree.getCellRenderer()).getTableModel(s));
             
-            int row = -1;
-            for (int i =0; i< m.getRowCount(); i++)
-            {
-                if (m.getValueAt(i, 0).equals(key))
-                {
-                    row = i;
-                }
-            }
-            
-            boolean noListener = true;
-            for (TableModelListener l : m.getListeners(TableModelListener.class))
-            {
-                if (l instanceof PropertyTableModelListener)
-                {
-                    noListener = false;
+            TableNode node = (TableNode)getUserNode(s.getURI()).getChildAt(0);
+            node.resetProperties(dsc);
+            ((TableInTreeCellRenderer)tree.getCellRenderer()).getPanelFromPropertySet(s, node, dsc);
+            final DefaultTableModel m = ((DefaultTableModel)((TableInTreeCellRenderer)tree.getCellRenderer()).getTableModel(s));
+                EventQueueUtilities.runOffEDT(new Runnable(){
 
-                    ((PropertyTableModelListener)l).deleteProperty(key, m, row);
-                    TableModelEvent t0 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 0, TableModelEvent.INSERT);
-                    TableModelEvent t1 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 1, TableModelEvent.INSERT);
+                    @Override
+                    public void run() {
+                        int row = -1;
+                        for (int i = 0; i < m.getRowCount(); i++) {
+                            if (m.getValueAt(i, 0).equals(key)) {
+                                if (value != null)
+                                {
+                                    if (m.getValueAt(i, 1).equals(value) )
+                                    {
+                                        row = i;
+                                        break;
+                                    }
+                                }
+                                else{
+                                    row = i;
+                                    break;
+                                }
+                            }
+                        }
+                        if (row <0)
+                            return;//no row to delete 
+                        
+                        boolean noListener = true;
+                        for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                            if (l instanceof PropertyTableModelListener) {
+                                noListener = false;
 
-                    TableModelEvent t2 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 1, TableModelEvent.UPDATE);
-                    TableModelEvent t3 = new TableModelEvent(m, m.getRowCount(), m.getRowCount(), 0, TableModelEvent.UPDATE);
-                    
-                    l.tableChanged(t0);
-                    l.tableChanged(t1);
-                    l.tableChanged(t2);
-                    l.tableChanged(t3);
-                    break;
-                }
-            }
-            if (noListener)
-            {
-                throw new RuntimeException("No listener available for the TableModel");
-            }
+                                ((PropertyTableModelListener) l).deleteProperty(m, row);
+                                break;
+                            }
+                        }
+                        if (noListener) {
+                             Ovation.getLogger().debug("No listener available for the TableModel");
+                            //throw new RuntimeException("No listener available for the TableModel");
+                        }
+                    }
+                });
+           
         }
     }
 }

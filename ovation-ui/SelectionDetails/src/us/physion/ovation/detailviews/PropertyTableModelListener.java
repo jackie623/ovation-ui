@@ -55,8 +55,8 @@ class PropertyTableModelListener implements TableModelListener{
                     continue;
                 Object value = t.getValueAt(i, 1);
                 newProperties.put(key, value);
-                
             }
+            
             final Map<String, Object> props = newProperties;
             EventQueueUtilities.runOffEDT(new Runnable() {
 
@@ -77,7 +77,10 @@ class PropertyTableModelListener implements TableModelListener{
         }
     }
 
-    void deleteProperty(final String key, DefaultTableModel model, int rowToRemove) {
+    void deleteProperty(final DefaultTableModel model, final int rowToRemove) {
+        
+        final String key = (String)model.getValueAt(rowToRemove, 0);
+        final Object value = model.getValueAt(rowToRemove, 1);
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             @Override
@@ -85,11 +88,21 @@ class PropertyTableModelListener implements TableModelListener{
                 for (String uri : uris) {
                     DataContext c = dsc.getContext();
                     IEntityBase eb = c.objectWithURI(uri);
-                    eb.removeProperty(key);
+                    Map<String, Object> properties = eb.getMyProperties();
+                    if (properties.containsKey(key) && properties.get(key).equals(value))
+                        eb.removeProperty(key);
                 }
             }
         });
-        model.removeRow(rowToRemove);
+        
+        EventQueueUtilities.runOnEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                model.removeRow(rowToRemove);
+            }
+        });
+        
     }
 
     void parseAndAdd(IEntityBase eb, String key, Object value)

@@ -91,14 +91,12 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
         for (int row : table.getSelectedRows())
         {
-            //UGLY
-            String key = (String)((DefaultTableModel)table.getModel()).getValueAt(row, 0);
             TableModelListener[] listeners = ((DefaultTableModel)table.getModel()).getListeners(TableModelListener.class);
             for (TableModelListener l : listeners)
             {
                 if (l instanceof PropertyTableModelListener)
                 {
-                    ((PropertyTableModelListener)l).deleteProperty(key, (DefaultTableModel)table.getModel(), row);
+                    ((PropertyTableModelListener)l).deleteProperty((DefaultTableModel)table.getModel(), row);
                     break;
                 }
             }

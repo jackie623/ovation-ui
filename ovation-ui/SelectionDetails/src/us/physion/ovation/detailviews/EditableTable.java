@@ -5,10 +5,12 @@
 package us.physion.ovation.detailviews;
 
 import java.awt.Dimension;
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -23,7 +25,10 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
     public EditableTable(JTable table) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
+        jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
+        table.setPreferredScrollableViewportSize(table.getPreferredSize());    
+        //this.setBorder(BorderFactory.createEtchedBorder());
     }
 
     /**
@@ -69,12 +74,12 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 36, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(deleteButton)
                     .add(addButton))
-                .add(0, 8, Short.MAX_VALUE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -122,10 +127,12 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     /*@Override
     public Dimension getPreferredSize(){  
-        System.out.println(getParent().getClass());
-        System.out.println(getParent().getSize());
-        System.out.println(table.getSize());
-        
-        return table.getSize();  
+        Dimension d = table.getPreferredScrollableViewportSize();
+        if (d ==null )
+        {
+            return super.getPreferredSize();
+        }
+        Dimension actual = new Dimension((int)d.getWidth(), (int)d.getHeight() + 20);
+        return actual;  
     }*/
 }

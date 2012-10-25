@@ -5,8 +5,10 @@
 package us.physion.ovation.detailviews;
 
 import java.awt.Dimension;
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -21,6 +23,7 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
     public NonEditableTable(JTable table) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
+        //jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
     }
 
@@ -43,7 +46,9 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 44, Short.MAX_VALUE)
+            .add(layout.createSequentialGroup()
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 83, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(0, 0, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables

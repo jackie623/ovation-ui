@@ -18,7 +18,7 @@ import us.physion.ovation.interfaces.ConnectionProvider;
  *
  * @author huecotanks
  */
-class UserPropertySet {
+class UserPropertySet implements Comparable{
     String username;
     String userURI;
     boolean isOwner;
@@ -83,6 +83,20 @@ class UserPropertySet {
     String getUsername()
     {
         return username;
+    }
+
+    @Override
+    public int compareTo(Object t) {
+        if (t instanceof UserPropertySet)
+        {
+            UserPropertySet s = (UserPropertySet)t;
+            if (s.isCurrentUser())
+                return -1;
+            return this.getUsername().compareTo(s.getUsername());
+        }
+        else{
+            throw new UnsupportedOperationException("Object type '" + t.getClass() + "' cannot be compared with object type " + this.getClass());
+        }
     }
     
 }

@@ -36,8 +36,8 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 preferredID = "PropertiesViewTopComponent")
 @Messages({
     "CTL_PropertiesViewAction=PropertiesView",
-    "CTL_PropertiesViewTopComponent=PropertiesView Window",
-    "HINT_PropertiesViewTopComponent=This is a PropertiesView window"
+    "CTL_PropertiesViewTopComponent=Properties",
+    "HINT_PropertiesViewTopComponent=Displays the properties of the selected entites"
 })
 public final class PropertiesViewTopComponent extends TopComponent {
 
@@ -74,17 +74,27 @@ public final class PropertiesViewTopComponent extends TopComponent {
     }        
             
     
-    public void update(Collection<? extends IEntityWrapper> entities, DataContext c)
+    public void update(final Collection<? extends IEntityWrapper> entities, DataContext c)
     {
         ((TreeWithTableRenderer)jScrollPane1).setEntities(entities, c);
         this.entities = entities;
+        if (entities.size() > 1)
+        {
+         EventQueueUtilities.runOnEDT(new Runnable() {
+            @Override
+            public void run() {
+                    
+                setName(Bundle.CTL_PropertiesViewTopComponent() + " - " + entities.size() + " entities");
+            }
+         });
+        }
     }
     
     public PropertiesViewTopComponent() {
         initComponents();
         setName(Bundle.CTL_PropertiesViewTopComponent());
         setToolTipText(Bundle.HINT_PropertiesViewTopComponent());
-
+        
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
     }

@@ -16,6 +16,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.tree.*;
 import org.openide.util.Lookup;
 import ovation.*;
@@ -25,7 +26,6 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 
 public class TreeWithTableRenderer extends JScrollPane {
 
-    private static final long serialVersionUID = 1L;
     private ExpandableJTree tree;
     Set<String> uris;
     private Map<String, DefaultMutableTreeNode> userNodes;
@@ -40,7 +40,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         {
             c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
         }
-        Set<UserPropertySet> properties = new HashSet<UserPropertySet>();
+        ArrayList<UserPropertySet> properties = new ArrayList<UserPropertySet>();
         uris.clear();
         Set<IEntityBase> entitybases = new HashSet();
         Set<String> owners = new HashSet();
@@ -64,15 +64,16 @@ public class TreeWithTableRenderer extends JScrollPane {
                 properties.add(propertySet);
             }
           }
-
         
-        final Set<UserPropertySet> propertySets = properties;
+        final ArrayList<UserPropertySet> propertySets = properties;
         EventQueueUtilities.runOnEDT(new Runnable(){
 
             @Override
             public void run() {
                 final DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
                 Set<DefaultMutableTreeNode> nodesToExpand = new HashSet<DefaultMutableTreeNode>();
+                
+                Collections.sort(propertySets);
                 for (UserPropertySet propertySet : propertySets)
                 {
                     boolean shouldExpand = shouldExpand(propertySet);
@@ -170,7 +171,6 @@ public class TreeWithTableRenderer extends JScrollPane {
 
     class TableInTreeCellRenderer extends AbstractCellEditor implements TreeCellEditor, TreeCellRenderer {
 
-        TablePanel currentPanel;
         boolean trueFalse = true;
         
         boolean isCurrentUser;
@@ -187,21 +187,6 @@ public class TreeWithTableRenderer extends JScrollPane {
                 boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             final Object o = ((DefaultMutableTreeNode) value).getUserObject();
             if (o instanceof String) {
-                
-                /*if (expanded)
-                {
-                    Object[] thePath = ((DefaultMutableTreeNode) value).getPath();
-                    Object[] childPath = new Object[thePath.length];
-                    for (int i=0; i< thePath.length; ++i)
-                    {
-                        childPath[i] = thePath[i];
-                    }
-                    childPath[thePath.length -1] = ((DefaultMutableTreeNode) value).getChildAt(0);
-                    TreePath path = new TreePath(childPath);
-                    //TreePath path = tree.getPathForRow(row+1);
-                    tree.expandPath(path);
-                } */   
-                    
                 return new JLabel((String) o);
             }
 
@@ -227,6 +212,9 @@ public class TreeWithTableRenderer extends JScrollPane {
                     panel = tableLookup.get(user);
                 }else{
                     JTable table = new JTable();
+                    table.setGridColor(new Color(211, 211, 211, 180));
+                    table.setBorder(BorderFactory.createEmptyBorder());
+                    //table.setRowSorter(new TableRowSorter());
                     table.getTableHeader().setVisible(false);
                     table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
                     if (p.isCurrentUser())
@@ -234,6 +222,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                         panel = new EditableTable(table);
                     }else{
                         panel = new NonEditableTable(table);
+                        
                     }
                    
                     tableLookup.put(user, panel);
@@ -253,10 +242,8 @@ public class TreeWithTableRenderer extends JScrollPane {
 
                 JTable table = panel.getTable();
                 table.setModel(tableModel);
-                table.setPreferredScrollableViewportSize(table.getPreferredSize());
-                
-                //panel.setSize(new Dimension(500, 500));
-                //table.setSize(panel.getSize());
+                //((TableRowSorter)table.getRowSorter()).setModel(tableModel);
+                table.setPreferredScrollableViewportSize(panel.getPanel().getPreferredSize());
                 
                 if (p.isCurrentUser()) {
                     tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree, node, dsc));
@@ -314,17 +301,16 @@ public class TreeWithTableRenderer extends JScrollPane {
                 final boolean expanded,
                 final boolean leaf,
                 final int row) {
-            tree.setRowHeight(0);
             Object o = ((DefaultMutableTreeNode) value).getUserObject();
             if (o instanceof UserPropertySet)
             {
-                currentPanel = tableLookup.get(((UserPropertySet)o).getURI());
-                return currentPanel.getPanel();
+                JPanel panel = tableLookup.get(((UserPropertySet)o).getURI()).getPanel();
+                System.out.println(panel.getSize().getWidth() + ", " +  panel.getSize().getHeight());
+                return panel;
             }
             else{
                 Component editor = getTreeCellRendererComponent(tree,
                     value, true, expanded, leaf, row, true);
-                currentPanel = null;
                 return editor;
             }
         }

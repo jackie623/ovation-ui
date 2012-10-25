@@ -7,6 +7,8 @@ package us.physion.ovation.detailviews;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.plaf.basic.BasicTreeUI;
@@ -37,9 +39,19 @@ public class PropertiesTreeUI extends BasicTreeUI{
                         depth, expanded, size);
                 dimensions.width =
                         window.getWidth() - getRowX(row, depth);
+                //dimensions.height = window.getHeight();
                 return dimensions;
             }
         };
+    }
+    
+    @Override
+    protected int getRowX(int row, int depth)
+    {
+        if (depth ==2)
+            return 2;
+        
+        return super.getRowX(row, depth);
     }
 
     @Override
@@ -52,5 +64,32 @@ public class PropertiesTreeUI extends BasicTreeUI{
     protected void paintVerticalPartOfLeg(Graphics g, Rectangle clipBounds,
             Insets insets, TreePath path) {
         // do nothing.
+    }
+    
+    class RepaintOnResize implements ComponentListener
+    {
+
+        BasicTreeUI panelToRepaint;
+        
+        @Override
+        public void componentResized(ComponentEvent ce) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void componentMoved(ComponentEvent ce) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void componentShown(ComponentEvent ce) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void componentHidden(ComponentEvent ce) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        
     }
 }

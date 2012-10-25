@@ -23,5 +23,4 @@ public class ExpandableJTree extends JTree{
     {
         setExpandedState(new TreePath(node.getPath()), true);
     }
-    
 }

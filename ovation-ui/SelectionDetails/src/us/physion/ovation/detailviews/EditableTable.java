@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -19,14 +20,16 @@ import javax.swing.table.TableRowSorter;
 public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
+    private PropertiesTreeUI treeUI;
     /**
      * Creates new form EditableTable
      */
-    public EditableTable(JTable table) {
+    public EditableTable(JTable table, PropertiesTreeUI treeUI) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
+        this.treeUI = treeUI;
         table.setPreferredScrollableViewportSize(table.getPreferredSize());    
         //this.setBorder(BorderFactory.createEtchedBorder());
     }
@@ -107,6 +110,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 }
             }
         }
+        
     }//GEN-LAST:event_deleteButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -125,14 +129,18 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         return this;
     }
 
-    /*@Override
+    @Override
     public Dimension getPreferredSize(){  
-        Dimension d = table.getPreferredScrollableViewportSize();
-        if (d ==null )
+        int height; 
+        if (table.getHeight() ==0)
         {
-            return super.getPreferredSize();
+            height = (int)super.getPreferredSize().getHeight();
         }
-        Dimension actual = new Dimension((int)d.getWidth(), (int)d.getHeight() + 20);
+        else
+        {
+            height = (table.getRowCount()+1)*table.getRowHeight() + 56;
+        }
+        Dimension actual = new Dimension(treeUI.getCellWidth(), height);
         return actual;  
-    }*/
+    }
 }

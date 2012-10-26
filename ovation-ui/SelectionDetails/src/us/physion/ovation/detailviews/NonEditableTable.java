@@ -4,10 +4,12 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.table.TableRowSorter;
 
 /**
@@ -17,14 +19,16 @@ import javax.swing.table.TableRowSorter;
 public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
+    private PropertiesTreeUI treeUI;
     /**
      * Creates new form NonEditableTable
      */
-    public NonEditableTable(JTable table) {
+    public NonEditableTable(JTable table, PropertiesTreeUI treeUI) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
-        //jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
+        jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
+        this.treeUI = treeUI;
     }
 
     /**
@@ -65,8 +69,18 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
         return this;
     }
     
-    /*@Override
+    @Override
     public Dimension getPreferredSize(){  
-        return table.getSize(); 
-    }*/
+        int height; 
+        if (table.getHeight() ==0)
+        {
+            height = (int)super.getPreferredSize().getHeight();
+        }
+        else
+        {
+            height = (table.getRowCount()+1)*table.getRowHeight() + 5;
+        }
+        Dimension actual = new Dimension(treeUI.getCellWidth(), height);
+        return actual;  
+    }
 }

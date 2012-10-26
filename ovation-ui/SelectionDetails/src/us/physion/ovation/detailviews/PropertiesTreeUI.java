@@ -27,6 +27,11 @@ public class PropertiesTreeUI extends BasicTreeUI{
         this.window = window;
     }
 
+    public int getCellWidth()
+    {
+        return window.getWidth() - 2*getRowX(1, 2);
+    }
+    
     @Override
     protected AbstractLayoutCache.NodeDimensions createNodeDimensions() {
         return new NodeDimensionsHandler() {
@@ -38,7 +43,7 @@ public class PropertiesTreeUI extends BasicTreeUI{
                 Rectangle dimensions = super.getNodeDimensions(value, row,
                         depth, expanded, size);
                 dimensions.width =
-                        window.getWidth() - getRowX(row, depth);
+                        window.getWidth() - 2*getRowX(row, depth);
                 //dimensions.height = window.getHeight();
                 return dimensions;
             }
@@ -49,7 +54,7 @@ public class PropertiesTreeUI extends BasicTreeUI{
     protected int getRowX(int row, int depth)
     {
         if (depth ==2)
-            return 2;
+            return getRowX(row, 1);
         
         return super.getRowX(row, depth);
     }
@@ -64,32 +69,5 @@ public class PropertiesTreeUI extends BasicTreeUI{
     protected void paintVerticalPartOfLeg(Graphics g, Rectangle clipBounds,
             Insets insets, TreePath path) {
         // do nothing.
-    }
-    
-    class RepaintOnResize implements ComponentListener
-    {
-
-        BasicTreeUI panelToRepaint;
-        
-        @Override
-        public void componentResized(ComponentEvent ce) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public void componentMoved(ComponentEvent ce) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public void componentShown(ComponentEvent ce) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public void componentHidden(ComponentEvent ce) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
     }
 }

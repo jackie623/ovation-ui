@@ -106,11 +106,12 @@ public class TreeWithTableRenderer extends JScrollPane {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
         tree = new ExpandableJTree(root);
         TableInTreeCellRenderer r = new TableInTreeCellRenderer();
+        tree.setUI(new PropertiesTreeUI(this));
+        addComponentListener(new RepaintOnResize(tree));
         tree.setCellRenderer(r);
         tree.setRowHeight(0);
         tree.setEditable(true);
         tree.setCellEditor(r);
-        tree.setUI(new PropertiesTreeUI(this));
         uris = new HashSet<String>();
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);
@@ -215,13 +216,13 @@ public class TreeWithTableRenderer extends JScrollPane {
                     table.setGridColor(new Color(211, 211, 211, 180));
                     table.setBorder(BorderFactory.createEmptyBorder());
                     //table.setRowSorter(new TableRowSorter());
-                    table.getTableHeader().setVisible(false);
-                    table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
+                    //table.getTableHeader().setVisible(false);
+                    //table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
                     if (p.isCurrentUser())
                     {
-                        panel = new EditableTable(table);
+                        panel = new EditableTable(table, ((PropertiesTreeUI)tree.getUI()));
                     }else{
-                        panel = new NonEditableTable(table);
+                        panel = new NonEditableTable(table, ((PropertiesTreeUI)tree.getUI()));
                         
                     }
                    
@@ -236,7 +237,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                     dataVector[i][1] = entry.getValue();
                     i++;
                 }
-                String[] columnNames = {"property", "value"};
+                String[] columnNames = {"Name", "Value"};
                 DefaultTableModel tableModel = new DefaultTableModel(columnNames, props.size());
                 tableModel.setDataVector(dataVector, columnNames);
 
@@ -305,7 +306,6 @@ public class TreeWithTableRenderer extends JScrollPane {
             if (o instanceof UserPropertySet)
             {
                 JPanel panel = tableLookup.get(((UserPropertySet)o).getURI()).getPanel();
-                System.out.println(panel.getSize().getWidth() + ", " +  panel.getSize().getHeight());
                 return panel;
             }
             else{

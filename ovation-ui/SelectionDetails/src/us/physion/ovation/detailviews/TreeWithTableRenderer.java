@@ -214,6 +214,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                 }else{
                     JTable table = new JTable();
                     table.setGridColor(new Color(211, 211, 211, 180));
+                    
                     table.setBorder(BorderFactory.createEmptyBorder());
                     //table.setRowSorter(new TableRowSorter());
                     //table.getTableHeader().setVisible(false);

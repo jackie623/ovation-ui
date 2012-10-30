@@ -151,14 +151,40 @@ public class UpgradeTool implements IUpgradeDB {
         System.out.println("Running on platform " + platform);
         update(-1, "Initializing");
         int totalUpdates = updates.size();
+        Map<UpdateStep, File> fileMap = new HashMap<UpdateStep, File>();
         try {
             for (UpdateInfo update : updates) {
                 List<UpdateStep> steps = update.getUpdateSteps();
                 for (UpdateStep step : steps) {
-
+                    File f = downloadFile(step.getStepDescriptor());
+                    if (!f.exists())
+                    {
+                        throw new Exception(step.getStepDescriptor());
+                    }
+                    fileMap.put(step, f);
+                }
+            }
+        }
+        catch (Exception e){
+            DataStoreCoordinator dsc;
+            try {
+                dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile, "UPGRADE");
+                dsc.upgradeFinished();
+                dsc.close();
+            } catch (DatabaseOpenException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (DatabaseNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            throw new RuntimeException("Couldn't download upgrade file. " + e.getMessage());
+            
+        }
+        try{
+            for (UpdateInfo update : updates) {
+                List<UpdateStep> steps = update.getUpdateSteps();
+                for (UpdateStep step : steps) {
+                    File file = fileMap.get(step);
                     if (step instanceof UpdateJarStep) {
-
-                        File file = downloadFile(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
                         try {
                             ProcessBuilder pb = new ProcessBuilder("java",
                                     "-Djava.security.policy=security.txt",
@@ -178,7 +204,6 @@ public class UpgradeTool implements IUpgradeDB {
                         }
                     } else if (step instanceof UpdateSchemaStep) {
                         
-                        File file = downloadFile(step.getStepDescriptor());//grab from jar if resource, download from s3 is another possibility
                         try {
                             ProcessBuilder pb = new ProcessBuilder(new File(objyBin, "ooschemaupgrade").getPath(),
                                     "-infile",

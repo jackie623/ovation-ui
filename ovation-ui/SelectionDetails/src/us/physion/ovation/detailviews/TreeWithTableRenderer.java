@@ -14,6 +14,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -40,6 +42,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         {
             c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
         }
+        
         ArrayList<UserPropertySet> properties = new ArrayList<UserPropertySet>();
         uris.clear();
         Set<IEntityBase> entitybases = new HashSet();
@@ -51,7 +54,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                 owners.add(e.getOwner().getUuid());
         }
         Set<DefaultMutableTreeNode> nodesToExpand = new HashSet();
-        Iterator<User> users = c.getUsersIterator();
+        Iterator<User> users = c.query(User.class, "true");//c.getUsersIterator();
         while (users.hasNext()) {
             User u = users.next();
             Map<String, Object> userProps = new HashMap();
@@ -181,6 +184,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         {
             super();
             tableLookup = new HashMap<String, TablePanel>();
+                    
             //this.addCellEditorListener(new PropertyTableModelListener(new HashSet<String>()));
         }
         
@@ -188,7 +192,10 @@ public class TreeWithTableRenderer extends JScrollPane {
                 boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             final Object o = ((DefaultMutableTreeNode) value).getUserObject();
             if (o instanceof String) {
-                return new JLabel((String) o);
+                //Component r = super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+                UserPropertyLabel l = new UserPropertyLabel((String) o);
+               
+                return l;
             }
 
                 // otherwise we expect it to be UserPropertySet object
@@ -200,8 +207,6 @@ public class TreeWithTableRenderer extends JScrollPane {
             }
             return null;
         }
-       
-       
         
        JPanel getPanelFromPropertySet(UserPropertySet p, TableNode node, IAuthenticatedDataStoreCoordinator dsc)
        {
@@ -214,8 +219,11 @@ public class TreeWithTableRenderer extends JScrollPane {
                 }else{
                     JTable table = new JTable();
                     table.setGridColor(new Color(211, 211, 211, 180));
+                    table.setBorder(new CompoundBorder(new EmptyBorder(new Insets(1,4,1,4)), table.getBorder()));
                     
                     table.setBorder(BorderFactory.createEmptyBorder());
+                    table.getTableHeader().setBackground(Color.WHITE);
+                    //table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
                     //table.setRowSorter(new TableRowSorter());
                     //table.getTableHeader().setVisible(false);
                     //table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
@@ -263,8 +271,6 @@ public class TreeWithTableRenderer extends JScrollPane {
            }
            return null;
        }
-       
-       
        
         @Override
         public Object getCellEditorValue() {

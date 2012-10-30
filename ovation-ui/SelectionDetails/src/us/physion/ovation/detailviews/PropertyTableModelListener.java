@@ -14,11 +14,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import org.openide.util.Lookup;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
+import ovation.Ovation;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 
@@ -45,7 +47,28 @@ class PropertyTableModelListener implements TableModelListener{
         int firstRow = tme.getFirstRow();
         int lastRow = tme.getLastRow();
         
-        if (tme.getType() == TableModelEvent.UPDATE || tme.getType() == TableModelEvent.INSERT)
+        if (tme.getType() == TableModelEvent.INSERT)
+        {
+            if (node != null)
+            {
+             EventQueueUtilities.runOnEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                        if (tree.isEditing()) {
+                            return;
+                        }
+                        DefaultMutableTreeNode root = ((DefaultMutableTreeNode) tree.getModel().getRoot());
+                        DefaultMutableTreeNode leaf = root.getFirstLeaf();
+                        for (int i = 0; i < root.getLeafCount(); i++) {
+                            ((DefaultTreeModel) tree.getModel()).nodeStructureChanged(leaf);
+                            leaf = leaf.getNextLeaf();
+                        }
+                    }
+                });
+            }
+        }
+        else if (tme.getType() == TableModelEvent.UPDATE)
         {
             Map<String, Object> newProperties = new HashMap<String, Object>();
             
@@ -92,9 +115,9 @@ class PropertyTableModelListener implements TableModelListener{
                     if (properties.containsKey(key) && properties.get(key).equals(value))
                         eb.removeProperty(key);
                 }
+                node.resetProperties(dsc);
             }
         });
-        
         EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
@@ -102,7 +125,6 @@ class PropertyTableModelListener implements TableModelListener{
                 model.removeRow(rowToRemove);
             }
         });
-        
     }
 
     void parseAndAdd(IEntityBase eb, String key, Object value)

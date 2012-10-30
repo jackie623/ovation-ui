@@ -39,10 +39,7 @@ class RepaintOnResize implements ComponentListener {
     }
 
     @Override
-    public void componentMoved(ComponentEvent ce) {
-        //component.revalidate();
-        //component.repaint();
-    }
+    public void componentMoved(ComponentEvent ce) {}
 
     @Override
     public void componentShown(ComponentEvent ce) {}

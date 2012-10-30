@@ -42,8 +42,11 @@ public class PropertiesTreeUI extends BasicTreeUI{
                     Rectangle size) {
                 Rectangle dimensions = super.getNodeDimensions(value, row,
                         depth, expanded, size);
-                dimensions.width =
-                        window.getWidth() - 2*getRowX(row, depth);
+                
+                dimensions.width = window.getWidth(); //- 2*getRowX(row, depth);
+
+                if (depth == 1)
+                    dimensions.width -= 10;
                 //dimensions.height = window.getHeight();
                 return dimensions;
             }
@@ -54,7 +57,7 @@ public class PropertiesTreeUI extends BasicTreeUI{
     protected int getRowX(int row, int depth)
     {
         if (depth ==2)
-            return getRowX(row, 1);
+            return 0;
         
         return super.getRowX(row, depth);
     }

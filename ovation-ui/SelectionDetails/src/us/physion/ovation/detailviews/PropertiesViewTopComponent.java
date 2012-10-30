@@ -88,6 +88,15 @@ public final class PropertiesViewTopComponent extends TopComponent {
             }
          });
         }
+        else{
+          EventQueueUtilities.runOnEDT(new Runnable() {
+            @Override
+            public void run() {
+                    
+                setName(Bundle.CTL_PropertiesViewTopComponent());
+            }
+         });
+        }
     }
     
     public PropertiesViewTopComponent() {

@@ -12,6 +12,10 @@ import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.tree.DefaultTreeModel;
+import org.openide.util.Exceptions;
+import ovation.Ovation;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 
 /**
  *
@@ -93,7 +97,26 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         String lastKey = (String)table.getValueAt(last, 0);
         if (lastKey != null && !lastKey.isEmpty())
         {
-            ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
+            try {
+                EventQueueUtilities.runAndWaitOnEDT(new Runnable()
+                {
+                    @Override
+                    public void run() {
+                        ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
+                        Ovation.getLogger().debug("Number of rows: " +((DefaultTableModel)table.getModel()).getRowCount()); 
+                        //Dimension newTableDim = new Dimension((int)table.getPreferredScrollableViewportSize().getWidth(), 
+                        //        (int)((((DefaultTableModel)table.getModel()).getRowCount() +1) * table.getRowHeight()));
+                        //table.getParent().setPreferredSize(newTableDim);
+                        //table.getParent().setSize(newTableDim);
+                        //table.setPreferredScrollableViewportSize(newTableDim);
+                        
+                    }
+                });
+            } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            Ovation.getLogger().debug("done adding row: " + ((DefaultTableModel)table.getModel()).getRowCount());
+            //((DefaultTableModel)table.getModel()).fireTableDataChanged();
         }
     }//GEN-LAST:event_addButtonActionPerformed
 
@@ -138,6 +161,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         }
         else
         {
+            System.out.println("We have this many rows: " + table.getRowCount());
             height = (table.getRowCount()+1)*table.getRowHeight() + 56;
         }
         Dimension actual = new Dimension(treeUI.getCellWidth(), height);

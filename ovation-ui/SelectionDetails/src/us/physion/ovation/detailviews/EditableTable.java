@@ -34,7 +34,6 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
         this.treeUI = treeUI;
-        table.setPreferredScrollableViewportSize(table.getPreferredSize());    
         //this.setBorder(BorderFactory.createEtchedBorder());
     }
 
@@ -73,19 +72,19 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jScrollPane1)
             .add(layout.createSequentialGroup()
-                .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 34, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 28, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 35, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(325, Short.MAX_VALUE))
+                .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 28, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(0, 386, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(deleteButton)
-                    .add(addButton))
+                    .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -162,8 +161,21 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         else
         {
             System.out.println("We have this many rows: " + table.getRowCount());
-            height = (table.getRowCount()+1)*table.getRowHeight() + 56;
+            height = (table.getRowCount()+1)*table.getRowHeight() + 5 + addButton.getHeight();
+            System.out.println("Add Button: (" + addButton.getBounds().getX() + ", " + addButton.getBounds().getY() + ")");
+            System.out.println("Delete Button: (" + deleteButton.getBounds().getX() + ", " + deleteButton.getBounds().getY() + ")");
+            addButton.setBounds(1, height, 25, 25);
+            deleteButton.setBounds(26, height, 25, 25);
+            addButton.revalidate();
+            addButton.repaint();
+            deleteButton.revalidate();
+            deleteButton.repaint();
+
+            System.out.println("New Add Button: (" + addButton.getBounds().getX() + ", " + addButton.getBounds().getY() + ")");
+            System.out.println("New Delete Button: (" + deleteButton.getBounds().getX() + ", " + deleteButton.getBounds().getY() + ")");
         }
+                
+       
         Dimension actual = new Dimension(treeUI.getCellWidth(), height);
         return actual;  
     }

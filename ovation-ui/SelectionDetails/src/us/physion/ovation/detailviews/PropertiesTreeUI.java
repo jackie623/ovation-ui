@@ -43,10 +43,10 @@ public class PropertiesTreeUI extends BasicTreeUI{
                 Rectangle dimensions = super.getNodeDimensions(value, row,
                         depth, expanded, size);
                 
-                dimensions.width = window.getWidth(); //- 2*getRowX(row, depth);
+                dimensions.width = window.getWidth();//- 2*getRowX(row, depth);
 
                 if (depth == 1)
-                    dimensions.width -= 10;
+                    dimensions.width -= (getRowX(row, depth) +4);
                 //dimensions.height = window.getHeight();
                 return dimensions;
             }

@@ -232,7 +232,6 @@ public class TreeWithTableRenderer extends JScrollPane {
                         panel = new EditableTable(table, ((PropertiesTreeUI)tree.getUI()));
                     }else{
                         panel = new NonEditableTable(table, ((PropertiesTreeUI)tree.getUI()));
-                        
                     }
                    
                     tableLookup.put(user, panel);
@@ -252,8 +251,9 @@ public class TreeWithTableRenderer extends JScrollPane {
 
                 JTable table = panel.getTable();
                 table.setModel(tableModel);
+                //table.setLocation(0, 0);
+                //table.setSize(((PropertiesTreeUI)tree.getUI()).getCellWidth(), tableModel.getRowCount()*table.getRowHeight());
                 //((TableRowSorter)table.getRowSorter()).setModel(tableModel);
-                table.setPreferredScrollableViewportSize(panel.getPanel().getPreferredSize());
                 
                 if (p.isCurrentUser()) {
                     tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree, node, dsc));

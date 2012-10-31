@@ -37,7 +37,6 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
         this.treeUI = treeUI;
-        table.setPreferredScrollableViewportSize(table.getPreferredSize());    
         //this.setBorder(BorderFactory.createEtchedBorder());
     }
 
@@ -174,7 +173,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         else
         {
             System.out.println("We have this many rows: " + table.getRowCount());
-            height = (table.getRowCount()+1)*table.getRowHeight() + 56;
+            height = (table.getRowCount()+1)*table.getRowHeight() + 5 + addButton.getHeight();
         }
         Dimension actual = new Dimension(treeUI.getCellWidth(), height);
         return actual;  

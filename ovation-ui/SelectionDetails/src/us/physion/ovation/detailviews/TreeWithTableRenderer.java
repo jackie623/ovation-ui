@@ -194,6 +194,7 @@ public class TreeWithTableRenderer extends JScrollPane {
             if (o instanceof String) {
                 //Component r = super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
                 UserPropertyLabel l = new UserPropertyLabel((String) o);
+                l.setSize(((PropertiesTreeUI)tree.getUI()).getCellWidth(), l.getHeight());
                
                 return l;
             }
@@ -217,7 +218,12 @@ public class TreeWithTableRenderer extends JScrollPane {
                 {
                     panel = tableLookup.get(user);
                 }else{
-                    JTable table = new JTable();
+                    JTable table = new JTable(){
+                        public boolean getScrollableTrackViewportWidth()
+                        {
+                            return getPreferredSize().width < getParent().getWidth();
+                        }
+                    };
                     table.setGridColor(new Color(211, 211, 211, 180));
                     table.setBorder(new CompoundBorder(new EmptyBorder(new Insets(1,4,1,4)), table.getBorder()));
                     

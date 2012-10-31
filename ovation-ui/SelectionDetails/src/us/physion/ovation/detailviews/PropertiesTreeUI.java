@@ -46,7 +46,7 @@ public class PropertiesTreeUI extends BasicTreeUI{
                 dimensions.width = window.getWidth(); //- 2*getRowX(row, depth);
 
                 if (depth == 1)
-                    dimensions.width -= 10;
+                    dimensions.width -= (getRowX(1, 1) + 4);
                 //dimensions.height = window.getHeight();
                 return dimensions;
             }

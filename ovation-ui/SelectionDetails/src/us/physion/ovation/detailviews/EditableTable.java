@@ -6,9 +6,12 @@ package us.physion.ovation.detailviews;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTree;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -97,12 +100,21 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         String lastKey = (String)table.getValueAt(last, 0);
         if (lastKey != null && !lastKey.isEmpty())
         {
-            try {
-                EventQueueUtilities.runAndWaitOnEDT(new Runnable()
+            //try {
+                EventQueueUtilities.runOffEDT(new Runnable()
                 {
                     @Override
                     public void run() {
                         ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
+                        /*Component p = table;
+                        while (!((p = p.getParent()) instanceof TreeWithTableRenderer));
+
+                        ComponentListener[] ls = p.getListeners(RepaintOnResize.class);
+                        for (ComponentListener cl : ls)
+                        {
+                            System.out.println("Found component " + cl);
+                            cl.componentResized(new ComponentEvent(table, ComponentEvent.COMPONENT_RESIZED));
+                        }*/
                         Ovation.getLogger().debug("Number of rows: " +((DefaultTableModel)table.getModel()).getRowCount()); 
                         //Dimension newTableDim = new Dimension((int)table.getPreferredScrollableViewportSize().getWidth(), 
                         //        (int)((((DefaultTableModel)table.getModel()).getRowCount() +1) * table.getRowHeight()));
@@ -112,9 +124,9 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                         
                     }
                 });
-            } catch (InterruptedException ex) {
+            /*} catch (InterruptedException ex) {
                 Exceptions.printStackTrace(ex);
-            }
+            }*/
             Ovation.getLogger().debug("done adding row: " + ((DefaultTableModel)table.getModel()).getRowCount());
             //((DefaultTableModel)table.getModel()).fireTableDataChanged();
         }

@@ -27,14 +27,10 @@ class RepaintOnResize implements ComponentListener {
 
     @Override
     public void componentResized(ComponentEvent ce) {
-        if (tree.isEditing())
-            return;
-        DefaultMutableTreeNode root = ((DefaultMutableTreeNode)tree.getModel().getRoot());
-        DefaultMutableTreeNode leaf = root.getFirstLeaf();
-        for (int i =0; i< root.getLeafCount(); i++)
+        DefaultMutableTreeNode node = ((DefaultMutableTreeNode)tree.getModel().getRoot());
+        while((node = node.getNextNode())!= null)
         {
-            ((DefaultTreeModel)tree.getModel()).nodeStructureChanged(leaf);
-            leaf = leaf.getNextLeaf();
+            ((DefaultTreeModel)tree.getModel()).nodeStructureChanged(node);
         }
     }
 

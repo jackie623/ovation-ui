@@ -4,6 +4,9 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.Component;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,24 +52,17 @@ class PropertyTableModelListener implements TableModelListener{
         
         if (tme.getType() == TableModelEvent.INSERT)
         {
-            if (node != null)
+            Component c = tree;
+            while (!((c = c.getParent()) instanceof TreeWithTableRenderer));
+            ComponentListener[] ls = c.getListeners(ComponentListener.class);
+            for (ComponentListener cl : ls)
             {
-             EventQueueUtilities.runOnEDT(new Runnable() {
+                System.out.println("resize " + cl);
+               // cl.componentResized(new ComponentEvent(c, ComponentEvent.COMPONENT_RESIZED));
+                System.out.println("resized " + cl);
 
-                @Override
-                public void run() {
-                        if (tree.isEditing()) {
-                            return;
-                        }
-                        DefaultMutableTreeNode root = ((DefaultMutableTreeNode) tree.getModel().getRoot());
-                        DefaultMutableTreeNode leaf = root.getFirstLeaf();
-                        for (int i = 0; i < root.getLeafCount(); i++) {
-                            ((DefaultTreeModel) tree.getModel()).nodeStructureChanged(leaf);
-                            leaf = leaf.getNextLeaf();
-                        }
-                    }
-                });
             }
+            System.out.println("here");
         }
         else if (tme.getType() == TableModelEvent.UPDATE)
         {

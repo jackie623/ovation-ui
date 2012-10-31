@@ -23,7 +23,7 @@ public class UserPropertyLabel extends JLabel{
  
                 GradientPaint gp = new GradientPaint(0, 0,
                         getBackground().brighter(), 0, getHeight(),
-                        getBackground().darker());
+                        getBackground());
  
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());

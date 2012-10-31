@@ -31,27 +31,25 @@ public class TreeWithTableRenderer extends JScrollPane {
     private ExpandableJTree tree;
     Set<String> uris;
     private Map<String, DefaultMutableTreeNode> userNodes;
-    
-    JTree getTree()
-    {
+
+    JTree getTree() {
         return tree;
     }
 
     public void setEntities(Collection<? extends IEntityWrapper> entities, DataContext c) {
-        if (c == null)
-        {
+        if (c == null) {
             c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
         }
-        
+
         ArrayList<UserPropertySet> properties = new ArrayList<UserPropertySet>();
         uris.clear();
         Set<IEntityBase> entitybases = new HashSet();
         Set<String> owners = new HashSet();
         for (IEntityWrapper w : entities) {
-                IEntityBase e = w.getEntity();
-                entitybases.add(e);
-                uris.add(e.getURIString());
-                owners.add(e.getOwner().getUuid());
+            IEntityBase e = w.getEntity();
+            entitybases.add(e);
+            uris.add(e.getURIString());
+            owners.add(e.getOwner().getUuid());
         }
         Set<DefaultMutableTreeNode> nodesToExpand = new HashSet();
         Iterator<User> users = c.query(User.class, "true");//c.getUsersIterator();
@@ -66,19 +64,18 @@ public class TreeWithTableRenderer extends JScrollPane {
                 UserPropertySet propertySet = new UserPropertySet(u, owners.contains(uuid), c.currentAuthenticatedUser().getUuid().equals(uuid), userProps, uris);
                 properties.add(propertySet);
             }
-          }
-        
+        }
+
         final ArrayList<UserPropertySet> propertySets = properties;
-        EventQueueUtilities.runOnEDT(new Runnable(){
+        EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {
                 final DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
                 Set<DefaultMutableTreeNode> nodesToExpand = new HashSet<DefaultMutableTreeNode>();
-                
+
                 Collections.sort(propertySets);
-                for (UserPropertySet propertySet : propertySets)
-                {
+                for (UserPropertySet propertySet : propertySets) {
                     boolean shouldExpand = shouldExpand(propertySet);
                     DefaultMutableTreeNode userNode = getNode(propertySet);
 
@@ -101,7 +98,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                 }
             }
         });
-        
+
     }
 
     public TreeWithTableRenderer() {
@@ -109,7 +106,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
         tree = new ExpandableJTree(root);
         TableInTreeCellRenderer r = new TableInTreeCellRenderer();
-        tree.setUI(new PropertiesTreeUI(this));
+        tree.setUI(new PropertiesTreeUI(this.getViewport()));
         addComponentListener(new RepaintOnResize(tree));
         tree.setCellRenderer(r);
         tree.setRowHeight(0);
@@ -130,29 +127,32 @@ public class TreeWithTableRenderer extends JScrollPane {
                     return;
                 }
                 TreePath parent = path.getParentPath();
-                if (parent == null)
-                {
+                if (parent == null) {
                     tree.setCursor(Cursor.getDefaultCursor());
                     return;
                 }
-                if (parent.getParentPath() == null)
-                {
+                if (parent.getParentPath() == null) {
                     //if path is a user node
                     tree.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                     return;
                 }
-                
+
                 tree.setCursor(Cursor.getDefaultCursor());
             }
         });
-        getViewport().add(tree, null);
+        this.setViewportView(tree);
         userNodes = new HashMap<String, DefaultMutableTreeNode>();
+
+
     }
-    
-    private boolean shouldExpand(UserPropertySet propertySet)
-    {
-        if (userNodes.containsKey(propertySet.getURI()))
-        {
+
+    public Dimension getPreferredSize() {
+        System.out.println("Main window size (" + getParent().getPreferredSize().width + ", " + getParent().getPreferredSize().height + ")");
+        return getParent().getPreferredSize();
+    }
+
+    private boolean shouldExpand(UserPropertySet propertySet) {
+        if (userNodes.containsKey(propertySet.getURI())) {
             DefaultMutableTreeNode n = userNodes.get(propertySet.getURI());
             return (!tree.isCollapsed(new TreePath(n.getPath())));
         }
@@ -160,14 +160,13 @@ public class TreeWithTableRenderer extends JScrollPane {
     }
 
     private DefaultMutableTreeNode getNode(UserPropertySet propertySet) {
-        if (userNodes.containsKey(propertySet.getURI()))
-        {
+        if (userNodes.containsKey(propertySet.getURI())) {
             DefaultMutableTreeNode n = userNodes.get(propertySet.getURI());
             n.removeAllChildren();
             n.removeFromParent();
             return n;
         }
-        
+
         DefaultMutableTreeNode n = new DefaultMutableTreeNode(propertySet.getDisplayName());
         userNodes.put(propertySet.getURI(), n);
         return n;
@@ -176,102 +175,107 @@ public class TreeWithTableRenderer extends JScrollPane {
     class TableInTreeCellRenderer extends AbstractCellEditor implements TreeCellEditor, TreeCellRenderer {
 
         boolean trueFalse = true;
-        
         boolean isCurrentUser;
         Map<String, TablePanel> tableLookup;
-        
-        public TableInTreeCellRenderer()
-        {
+
+        public TableInTreeCellRenderer() {
             super();
             tableLookup = new HashMap<String, TablePanel>();
-                    
+
             //this.addCellEditorListener(new PropertyTableModelListener(new HashSet<String>()));
         }
-        
-       public Component getTreeCellRendererComponent(JTree tree, Object value,
+
+        public Component getTreeCellRendererComponent(JTree tree, Object value,
                 boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             final Object o = ((DefaultMutableTreeNode) value).getUserObject();
             if (o instanceof String) {
                 //Component r = super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
                 UserPropertyLabel l = new UserPropertyLabel((String) o);
-               
                 return l;
             }
 
-                // otherwise we expect it to be UserPropertySet object
-                //table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-            if (o instanceof UserPropertySet)
-            {   
-                JPanel panel = getPanelFromPropertySet((UserPropertySet)o, (TableNode)value, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+            // otherwise we expect it to be UserPropertySet object
+            //table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+            if (o instanceof UserPropertySet) {
+                JPanel panel = getPanelFromPropertySet((UserPropertySet) o, (TableNode) value, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+                panel.setSize(panel.getPreferredSize());
+                System.out.println("TreePanel '" + ((UserPropertySet) o).getUsername() + "' Preferred height: " + (((TablePanel)panel).getTable().getRowCount() +1)*((TablePanel)panel).getTable().getRowHeight());
+                System.out.println("TreePanel '" + ((UserPropertySet) o).getUsername() + "' Preferred size: (" + panel.getPreferredSize().width + ", " + panel.getPreferredSize().height + ")");
                 return panel;
             }
             return null;
         }
-        
-       JPanel getPanelFromPropertySet(UserPropertySet p, TableNode node, IAuthenticatedDataStoreCoordinator dsc)
-       {
-           String user = p.getURI();
-                //lookup tables
-                TablePanel panel;
-                if (tableLookup.containsKey(user))
-                {
-                    panel = tableLookup.get(user);
-                }else{
-                    JTable table = new JTable();
-                    table.setGridColor(new Color(211, 211, 211, 180));
-                    table.setBorder(new CompoundBorder(new EmptyBorder(new Insets(1,4,1,4)), table.getBorder()));
-                    
-                    table.setBorder(BorderFactory.createEmptyBorder());
-                    table.getTableHeader().setBackground(Color.WHITE);
-                    //table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
-                    //table.setRowSorter(new TableRowSorter());
-                    //table.getTableHeader().setVisible(false);
-                    //table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
-                    if (p.isCurrentUser())
-                    {
-                        panel = new EditableTable(table, ((PropertiesTreeUI)tree.getUI()));
-                    }else{
-                        panel = new NonEditableTable(table, ((PropertiesTreeUI)tree.getUI()));
+
+        JPanel getPanelFromPropertySet(UserPropertySet p, TableNode node, IAuthenticatedDataStoreCoordinator dsc) {
+            String user = p.getURI();
+            //lookup tables
+            TablePanel panel;
+            if (tableLookup.containsKey(user)) {
+                panel = tableLookup.get(user);
+            } else {
+                JTable table = new JTable() {
+
+                    public Dimension getPreferredSize() {
+                        return new Dimension(getWidth(), getRowCount() * getRowHeight());
                     }
-                   
-                    tableLookup.put(user, panel);
-                }
+                    
+                    public Dimension getPreferredScrollableViewportSize()
+                    {
+                        return getPreferredSize();
+                    }
+                };
+                table.setGridColor(new Color(211, 211, 211, 180));
+                table.setBorder(new CompoundBorder(new EmptyBorder(new Insets(1, 4, 1, 4)), table.getBorder()));
+                //table.setBorder(BorderFactory.createEmptyBorder());
+                table.getTableHeader().setBackground(Color.WHITE);
 
-                Map<String, Object> props = p.getProperties();
-                Object[][] dataVector = new Object[props.size()][2];
-                int i=0;
-                for (Map.Entry<String, Object> entry : props.entrySet()) {
-                    dataVector[i][0] = entry.getKey();
-                    dataVector[i][1] = entry.getValue();
-                    i++;
-                }
-                String[] columnNames = {"Name", "Value"};
-                DefaultTableModel tableModel = new DefaultTableModel(columnNames, props.size());
-                tableModel.setDataVector(dataVector, columnNames);
-
-                JTable table = panel.getTable();
-                table.setModel(tableModel);
-                //table.setLocation(0, 0);
-                //table.setSize(((PropertiesTreeUI)tree.getUI()).getCellWidth(), tableModel.getRowCount()*table.getRowHeight());
-                //((TableRowSorter)table.getRowSorter()).setModel(tableModel);
-                
+                //table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+                //table.setRowSorter(new TableRowSorter());
+                //table.getTableHeader().setVisible(false);
+                //table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
                 if (p.isCurrentUser()) {
-                    tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree, node, dsc));
+                    panel = new EditableTable(table, ((PropertiesTreeUI) tree.getUI()));
+                } else {
+                    panel = new NonEditableTable(table, ((PropertiesTreeUI) tree.getUI()));
                 }
-                
-                return panel.getPanel();
-       }
-       
-       TableModel getTableModel(UserPropertySet s)
-       {
-           String userURI = s.getURI();
-           if (tableLookup.containsKey(userURI))
-           {
-               return tableLookup.get(userURI).getTable().getModel();
-           }
-           return null;
-       }
-       
+
+                node.setPanel(panel);
+                tableLookup.put(user, panel);
+            }
+
+            Map<String, Object> props = p.getProperties();
+            Object[][] dataVector = new Object[props.size()][2];
+            int i = 0;
+            for (Map.Entry<String, Object> entry : props.entrySet()) {
+                dataVector[i][0] = entry.getKey();
+                dataVector[i][1] = entry.getValue();
+                i++;
+            }
+            String[] columnNames = {"Name", "Value"};
+            DefaultTableModel tableModel = new DefaultTableModel(columnNames, props.size());
+            tableModel.setDataVector(dataVector, columnNames);
+
+            JTable table = panel.getTable();
+            table.setModel(tableModel);
+            //table.setLocation(0, 0);
+            //table.setSize(((PropertiesTreeUI)tree.getUI()).getCellWidth(), tableModel.getRowCount()*table.getRowHeight());
+            //((TableRowSorter)table.getRowSorter()).setModel(tableModel);
+
+            if (p.isCurrentUser()) {
+                tableModel.addTableModelListener(new PropertyTableModelListener(uris, tree, node, dsc));
+            }
+
+            return panel.getPanel();
+        }
+
+        TableModel getTableModel(UserPropertySet s) {
+            String userURI = s.getURI();
+            if (tableLookup.containsKey(userURI)) {
+                return tableLookup.get(userURI).getTable().getModel();
+            }
+            return null;
+        }
+
         @Override
         public Object getCellEditorValue() {
             return null;//currentPanel
@@ -279,23 +283,20 @@ public class TreeWithTableRenderer extends JScrollPane {
 
         @Override
         public boolean isCellEditable(final EventObject event) {
-            
+
             Object node;
-            if (event instanceof MouseEvent)
-            {
-                TreePath p = tree.getPathForLocation(((MouseEvent)event).getX(), ((MouseEvent)event).getY());
+            if (event instanceof MouseEvent) {
+                TreePath p = tree.getPathForLocation(((MouseEvent) event).getX(), ((MouseEvent) event).getY());
                 node = p.getLastPathComponent();
-            }
-            else{
+            } else {
                 node = tree.getLastSelectedPathComponent();
             }
             if ((node != null) && (node instanceof DefaultMutableTreeNode)) {
                 DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
-                
+
                 Object p = treeNode.getUserObject();
-                if (p instanceof UserPropertySet)
-                {
-                    return ((UserPropertySet)p).isCurrentUser();
+                if (p instanceof UserPropertySet) {
+                    return ((UserPropertySet) p).isCurrentUser();
                 }
             }
             return false;
@@ -310,20 +311,17 @@ public class TreeWithTableRenderer extends JScrollPane {
                 final boolean leaf,
                 final int row) {
             Object o = ((DefaultMutableTreeNode) value).getUserObject();
-            if (o instanceof UserPropertySet)
-            {
-                JPanel panel = tableLookup.get(((UserPropertySet)o).getURI()).getPanel();
+            if (o instanceof UserPropertySet) {
+                JPanel panel = tableLookup.get(((UserPropertySet) o).getURI()).getPanel();
+                System.out.println("TreePanel '" + ((UserPropertySet) o).getUsername() + "' Editing Preferred size: (" + panel.getPreferredSize().width + ", " + panel.getPreferredSize().height + ")");
                 return panel;
-            }
-            else{
+            } else {
                 Component editor = getTreeCellRendererComponent(tree,
-                    value, true, expanded, leaf, row, true);
+                        value, true, expanded, leaf, row, true);
                 return editor;
             }
         }
-        
     }
-
 
     public static void main(String[] args) throws Exception {
         SwingUtilities.invokeLater(new Runnable() {

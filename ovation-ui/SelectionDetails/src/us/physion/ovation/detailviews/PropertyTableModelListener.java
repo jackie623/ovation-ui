@@ -4,6 +4,9 @@
  */
 package us.physion.ovation.detailviews;
 
+import java.awt.Component;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -46,29 +49,33 @@ class PropertyTableModelListener implements TableModelListener{
         DefaultTableModel t = (DefaultTableModel)tme.getSource();
         int firstRow = tme.getFirstRow();
         int lastRow = tme.getLastRow();
-        
+                         
+        System.out.println("Inserted. " + t.getRowCount() + " rows");
+        System.out.println("(table size, viewport size) : (" + node.getHeight() + ", " + node.getViewportHeight());
+
         if (tme.getType() == TableModelEvent.INSERT)
         {
-            if (node != null)
-            {
-             EventQueueUtilities.runOnEDT(new Runnable() {
+            EventQueueUtilities.runOffEDT(new Runnable(){
 
                 @Override
                 public void run() {
-                        if (tree.isEditing()) {
-                            return;
+                    ((DefaultTreeModel)tree.getModel()).nodeChanged(node);
+                    /*Component p = tree;
+                    while (!((p = p.getParent()) instanceof TreeWithTableRenderer));
+
+                    //same getListeners bug - it doesn't find listeners for user defined listener classes
+                    ComponentListener[] ls = p.getListeners(ComponentListener.class);
+                    for (ComponentListener r : ls) {
+                        if (r instanceof RepaintOnResize)
+                        {
+                            ComponentEvent c = new ComponentEvent(p, ComponentEvent.COMPONENT_RESIZED);
+                            r.componentResized(c);
                         }
-                        DefaultMutableTreeNode root = ((DefaultMutableTreeNode) tree.getModel().getRoot());
-                        DefaultMutableTreeNode leaf = root.getFirstLeaf();
-                        for (int i = 0; i < root.getLeafCount(); i++) {
-                            ((DefaultTreeModel) tree.getModel()).nodeStructureChanged(leaf);
-                            leaf = leaf.getNextLeaf();
-                        }
-                    }
-                });
-            }
-        }
-        else if (tme.getType() == TableModelEvent.UPDATE)
+                    }*/
+                }
+            });
+
+        } else if (tme.getType() == TableModelEvent.UPDATE)
         {
             Map<String, Object> newProperties = new HashMap<String, Object>();
             

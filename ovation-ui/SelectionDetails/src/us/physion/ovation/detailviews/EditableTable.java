@@ -6,9 +6,8 @@ package us.physion.ovation.detailviews;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JTable;
+import java.awt.event.ComponentEvent;
+import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -80,11 +79,11 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 445, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -96,13 +95,19 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         String lastKey = (String)table.getValueAt(last, 0);
         if (lastKey != null && !lastKey.isEmpty())
         {
-            try {
-                EventQueueUtilities.runAndWaitOnEDT(new Runnable()
+                EventQueueUtilities.runOffEDT(new Runnable()
                 {
                     @Override
                     public void run() {
                         ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
                         Ovation.getLogger().debug("Number of rows: " +((DefaultTableModel)table.getModel()).getRowCount()); 
+
+                        ((JViewport)table.getParent()).setViewSize(new Dimension(table.getPreferredSize().width, table.getPreferredSize().height + table.getRowHeight()));
+                        ((JScrollPane)table.getParent().getParent()).setPreferredSize(new Dimension(table.getPreferredSize().width, table.getPreferredSize().height + table.getRowHeight()));
+                        ((EditableTable)table.getParent().getParent().getParent().getParent()).revalidate();
+                        
+                        ///table.setPreferredScrollableViewportSize(table.getPreferredSize());
+                        
                         //Dimension newTableDim = new Dimension((int)table.getPreferredScrollableViewportSize().getWidth(), 
                         //        (int)((((DefaultTableModel)table.getModel()).getRowCount() +1) * table.getRowHeight()));
                         //table.getParent().setPreferredSize(newTableDim);
@@ -111,9 +116,9 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                         
                     }
                 });
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            }
+                
+                
+                 
             Ovation.getLogger().debug("done adding row: " + ((DefaultTableModel)table.getModel()).getRowCount());
             //((DefaultTableModel)table.getModel()).fireTableDataChanged();
         }
@@ -160,22 +165,9 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         }
         else
         {
-            System.out.println("We have this many rows: " + table.getRowCount());
-            height = (table.getRowCount()+1)*table.getRowHeight() + 5 + addButton.getHeight();
-            System.out.println("Add Button: (" + addButton.getBounds().getX() + ", " + addButton.getBounds().getY() + ")");
-            System.out.println("Delete Button: (" + deleteButton.getBounds().getX() + ", " + deleteButton.getBounds().getY() + ")");
-            addButton.setBounds(1, height, 25, 25);
-            deleteButton.setBounds(26, height, 25, 25);
-            addButton.revalidate();
-            addButton.repaint();
-            deleteButton.revalidate();
-            deleteButton.repaint();
-
-            System.out.println("New Add Button: (" + addButton.getBounds().getX() + ", " + addButton.getBounds().getY() + ")");
-            System.out.println("New Delete Button: (" + deleteButton.getBounds().getX() + ", " + deleteButton.getBounds().getY() + ")");
+            height = table.getPreferredSize().height + table.getRowHeight() + 24 + addButton.getHeight();
         }
                 
-       
         Dimension actual = new Dimension(treeUI.getCellWidth(), height);
         return actual;  
     }

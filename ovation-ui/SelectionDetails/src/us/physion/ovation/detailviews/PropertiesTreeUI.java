@@ -13,6 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.plaf.basic.BasicTreeUI;
 import javax.swing.tree.AbstractLayoutCache;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
@@ -29,7 +30,7 @@ public class PropertiesTreeUI extends BasicTreeUI{
 
     public int getCellWidth()
     {
-        return window.getWidth() - 2*getRowX(1, 2);
+        return window.getWidth() - 8;//2*getRowX(1, 2);
     }
     
     @Override
@@ -47,7 +48,11 @@ public class PropertiesTreeUI extends BasicTreeUI{
 
                 if (depth == 1)
                     dimensions.width -= (getRowX(row, depth) +4);
-                //dimensions.height = window.getHeight();
+                if (value instanceof TableNode)
+                {
+                     if (((TableNode)value).getHeight() >0)
+                         dimensions.height = ((TableNode)value).getHeight();
+                }
                 return dimensions;
             }
         };
@@ -57,7 +62,7 @@ public class PropertiesTreeUI extends BasicTreeUI{
     protected int getRowX(int row, int depth)
     {
         if (depth ==2)
-            return 0;
+            return 4;
         
         return super.getRowX(row, depth);
     }

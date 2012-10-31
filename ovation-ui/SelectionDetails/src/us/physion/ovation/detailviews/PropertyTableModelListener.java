@@ -49,22 +49,31 @@ class PropertyTableModelListener implements TableModelListener{
         DefaultTableModel t = (DefaultTableModel)tme.getSource();
         int firstRow = tme.getFirstRow();
         int lastRow = tme.getLastRow();
-        
+                         
+        System.out.println("Inserted. " + t.getRowCount() + " rows");
+        System.out.println("(table size, viewport size) : (" + node.getHeight() + ", " + node.getViewportHeight());
+
         if (tme.getType() == TableModelEvent.INSERT)
         {
-            Component c = tree;
-            while (!((c = c.getParent()) instanceof TreeWithTableRenderer));
-            ComponentListener[] ls = c.getListeners(ComponentListener.class);
-            for (ComponentListener cl : ls)
-            {
-                System.out.println("resize " + cl);
-               // cl.componentResized(new ComponentEvent(c, ComponentEvent.COMPONENT_RESIZED));
-                System.out.println("resized " + cl);
+                @Override
+                public void run() {
+                    ((DefaultTreeModel)tree.getModel()).nodeChanged(node);
+                    /*Component p = tree;
+                    while (!((p = p.getParent()) instanceof TreeWithTableRenderer));
 
-            }
-            System.out.println("here");
-        }
-        else if (tme.getType() == TableModelEvent.UPDATE)
+                    //same getListeners bug - it doesn't find listeners for user defined listener classes
+                    ComponentListener[] ls = p.getListeners(ComponentListener.class);
+                    for (ComponentListener r : ls) {
+                        if (r instanceof RepaintOnResize)
+                        {
+                            ComponentEvent c = new ComponentEvent(p, ComponentEvent.COMPONENT_RESIZED);
+                            r.componentResized(c);
+                        }
+                    }*/
+                }
+            });
+
+        } else if (tme.getType() == TableModelEvent.UPDATE)
         {
             Map<String, Object> newProperties = new HashMap<String, Object>();
             

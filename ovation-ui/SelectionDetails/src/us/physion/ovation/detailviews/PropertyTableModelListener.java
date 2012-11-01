@@ -7,9 +7,11 @@ package us.physion.ovation.detailviews;
 import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.event.CellEditorListener;
@@ -50,26 +52,13 @@ class PropertyTableModelListener implements TableModelListener{
         int firstRow = tme.getFirstRow();
         int lastRow = tme.getLastRow();
                          
-        System.out.println("Inserted. " + t.getRowCount() + " rows");
-        System.out.println("(table size, viewport size) : (" + node.getHeight() + ", " + node.getViewportHeight());
-
         if (tme.getType() == TableModelEvent.INSERT)
         {
+            EventQueueUtilities.runOnEDT(new Runnable()
+            {
                 @Override
                 public void run() {
-                    ((DefaultTreeModel)tree.getModel()).nodeChanged(node);
-                    /*Component p = tree;
-                    while (!((p = p.getParent()) instanceof TreeWithTableRenderer));
-
-                    //same getListeners bug - it doesn't find listeners for user defined listener classes
-                    ComponentListener[] ls = p.getListeners(ComponentListener.class);
-                    for (ComponentListener r : ls) {
-                        if (r instanceof RepaintOnResize)
-                        {
-                            ComponentEvent c = new ComponentEvent(p, ComponentEvent.COMPONENT_RESIZED);
-                            r.componentResized(c);
-                        }
-                    }*/
+                    ((DefaultTreeModel)tree.getModel()).nodeChanged(node);//this resizes the tree cell that contains the editable table that just added a row
                 }
             });
 
@@ -84,7 +73,7 @@ class PropertyTableModelListener implements TableModelListener{
                 Object value = t.getValueAt(i, 1);
                 newProperties.put(key, value);
             }
-            
+            node.getUserProperties().setBlankRow(false);
             final Map<String, Object> props = newProperties;
             EventQueueUtilities.runOffEDT(new Runnable() {
 
@@ -105,29 +94,43 @@ class PropertyTableModelListener implements TableModelListener{
         }
     }
 
-    void deleteProperty(final DefaultTableModel model, final int rowToRemove) {
+    void deleteProperty(final DefaultTableModel model, int[] rowsToRemove) {
         
-        final String key = (String)model.getValueAt(rowToRemove, 0);
-        final Object value = model.getValueAt(rowToRemove, 1);
+        Arrays.sort(rowsToRemove);
+        final int[] rows = rowsToRemove;
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             @Override
             public void run() {
-                for (String uri : uris) {
-                    DataContext c = dsc.getContext();
-                    IEntityBase eb = c.objectWithURI(uri);
-                    Map<String, Object> properties = eb.getMyProperties();
-                    if (properties.containsKey(key) && properties.get(key).equals(value))
-                        eb.removeProperty(key);
+                DataContext c = dsc.getContext();
+                for (int i = rows.length - 1; i >= 0; i--) {
+                    String key = (String) model.getValueAt(rows[i], 0);
+                    final Object value = model.getValueAt(rows[i], 1);
+
+                    for (String uri : uris) {
+                        IEntityBase eb = c.objectWithURI(uri);
+                        Map<String, Object> properties = eb.getMyProperties();
+                        if (properties.containsKey(key) && properties.get(key).equals(value)) {
+                            eb.removeProperty(key);
+                        }
+                    }
+
                 }
                 node.resetProperties(dsc);
-            }
-        });
-        EventQueueUtilities.runOnEDT(new Runnable() {
+                EventQueueUtilities.runOnEDT(new Runnable() {
 
-            @Override
-            public void run() {
-                model.removeRow(rowToRemove);
+                    @Override
+                    public void run() {
+                        for (int i = rows.length - 1; i >= 0; i--) {
+                            model.removeRow(rows[i]);
+                        }
+                        EditableTable p = (EditableTable)node.getPanel();
+                        JScrollPane sp = ((JScrollPane)p.getTable().getParent().getParent());
+                        sp.setSize(sp.getPreferredSize());
+                        p.setSize(p.getPreferredSize());
+                        ((DefaultTreeModel) tree.getModel()).nodeChanged(node);//this resizes the tree cell that contains the editable table that just deleted a row
+                    }
+                });
             }
         });
     }

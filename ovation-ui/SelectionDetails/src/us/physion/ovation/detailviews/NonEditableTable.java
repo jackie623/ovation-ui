@@ -19,16 +19,16 @@ import javax.swing.table.TableRowSorter;
 public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
-    private PropertiesTreeUI treeUI;
+    private TreeWithTableRenderer treeUtils;
     /**
      * Creates new form NonEditableTable
      */
-    public NonEditableTable(JTable table, PropertiesTreeUI treeUI) {
+    public NonEditableTable(JTable table, TreeWithTableRenderer t) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
-        this.treeUI = treeUI;
+        this.treeUtils = t;
     }
 
     /**
@@ -80,7 +80,7 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
         {
             height = (table.getRowCount()+1)*table.getRowHeight() + 5;
         }
-        Dimension actual = new Dimension(treeUI.getCellWidth(), height);
+        Dimension actual = new Dimension(treeUtils.getCellWidth(), height);
         return actual;  
     }
 }

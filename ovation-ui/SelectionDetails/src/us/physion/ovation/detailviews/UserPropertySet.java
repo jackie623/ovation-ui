@@ -23,6 +23,7 @@ class UserPropertySet implements Comparable{
     String userURI;
     boolean isOwner;
     boolean current;
+    boolean blankRow;
     Map<String, Object> properties;
     Set<String> uris;
 
@@ -84,13 +85,25 @@ class UserPropertySet implements Comparable{
     {
         return username;
     }
+    
+    void setBlankRow(boolean b)
+    {
+        blankRow = b;
+    }
 
     @Override
     public int compareTo(Object t) {
         if (t instanceof UserPropertySet)
         {
             UserPropertySet s = (UserPropertySet)t;
+            
             if (s.isCurrentUser())
+            {
+                if (this.isCurrentUser())
+                    return 0;
+                return 1;
+            }
+            if (this.isCurrentUser())
                 return -1;
             return this.getUsername().compareTo(s.getUsername());
         }

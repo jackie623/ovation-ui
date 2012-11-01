@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.Arrays;
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -24,16 +25,18 @@ import us.physion.ovation.interfaces.EventQueueUtilities;
 public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
-    private PropertiesTreeUI treeUI;
+    private TreeWithTableRenderer treeUtils;
+    private UserPropertySet propertySet;
     /**
      * Creates new form EditableTable
      */
-    public EditableTable(JTable table, PropertiesTreeUI treeUI) {
+    public EditableTable(JTable table, TreeWithTableRenderer t, UserPropertySet p) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
-        this.treeUI = treeUI;
+        this.treeUtils = t;
+        propertySet = p;
         //this.setBorder(BorderFactory.createEtchedBorder());
     }
 
@@ -93,59 +96,41 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         //add a blank row to the table, make sure tableChanged deals with it appropriately
         int last = ((DefaultTableModel)table.getModel()).getRowCount() -1;
         
-        String lastKey = (String)table.getValueAt(last, 0);
-        if (lastKey != null && !lastKey.isEmpty())
+        String lastKey;
+        if (last == -1)
+            lastKey = "not null";
+        else{
+            lastKey = (String)table.getValueAt(last, 0);
+        }
+        if ( (lastKey != null && !lastKey.isEmpty()))
         {
                 EventQueueUtilities.runOffEDT(new Runnable()
                 {
                     @Override
                     public void run() {
                         ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
-                        /*Component p = table;
-                        while (!((p = p.getParent()) instanceof TreeWithTableRenderer));
-
-                        ComponentListener[] ls = p.getListeners(RepaintOnResize.class);
-                        for (ComponentListener cl : ls)
-                        {
-                            System.out.println("Found component " + cl);
-                            cl.componentResized(new ComponentEvent(table, ComponentEvent.COMPONENT_RESIZED));
-                        }*/
-                        Ovation.getLogger().debug("Number of rows: " +((DefaultTableModel)table.getModel()).getRowCount()); 
-
-                        ((JViewport)table.getParent()).setViewSize(new Dimension(table.getPreferredSize().width, table.getPreferredSize().height + table.getRowHeight()));
-                        ((JScrollPane)table.getParent().getParent()).setPreferredSize(new Dimension(table.getPreferredSize().width, table.getPreferredSize().height + table.getRowHeight()));
-                        ((EditableTable)table.getParent().getParent().getParent().getParent()).revalidate();
-                        
-                        ///table.setPreferredScrollableViewportSize(table.getPreferredSize());
-                        
-                        //Dimension newTableDim = new Dimension((int)table.getPreferredScrollableViewportSize().getWidth(), 
-                        //        (int)((((DefaultTableModel)table.getModel()).getRowCount() +1) * table.getRowHeight()));
-                        //table.getParent().setPreferredSize(newTableDim);
-                        //table.getParent().setSize(newTableDim);
-                        //table.setPreferredScrollableViewportSize(newTableDim);
-                        
+                        //speeds up performance!
+                        JScrollPane sp = ((JScrollPane)table.getParent().getParent());
+                        sp.setSize(sp.getPreferredSize());
+                        //((JScrollPane)table.getParent().getParent()).setViewportView(table);
+                        EditableTable.this.setSize(EditableTable.this.getPreferredSize());
+                        table.getSelectionModel().setSelectionInterval(table.getRowCount()-1, table.getRowCount()-1);
+                        propertySet.setBlankRow(true);
                     }
                 });
-
-            Ovation.getLogger().debug("done adding row: " + ((DefaultTableModel)table.getModel()).getRowCount());
-            //((DefaultTableModel)table.getModel()).fireTableDataChanged();
         }
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        for (int row : table.getSelectedRows())
-        {
-            TableModelListener[] listeners = ((DefaultTableModel)table.getModel()).getListeners(TableModelListener.class);
-            for (TableModelListener l : listeners)
-            {
-                if (l instanceof PropertyTableModelListener)
-                {
-                    ((PropertyTableModelListener)l).deleteProperty((DefaultTableModel)table.getModel(), row);
-                    break;
-                }
+       
+         //There is a bug in getListeners - it doesnt find the PropertyTableModelListener if you pass is PropertyTableModelListener.class
+        TableModelListener[] listeners = ((DefaultTableModel) table.getModel()).getListeners(TableModelListener.class);
+        for (TableModelListener l : listeners) {
+            if (l instanceof PropertyTableModelListener) {
+                ((PropertyTableModelListener) l).deleteProperty((DefaultTableModel) table.getModel(), table.getSelectedRows());
+                break;
             }
         }
-        
     }//GEN-LAST:event_deleteButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -166,18 +151,9 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     @Override
     public Dimension getPreferredSize(){  
-        int height; 
-        if (table.getHeight() ==0)
-        {
-            height = (int)super.getPreferredSize().getHeight();
-        }
-        else
-        {
-            System.out.println("We have this many rows: " + table.getRowCount());
-            height = (table.getRowCount()+1)*table.getRowHeight() + 5 + addButton.getHeight();
-        }
+        int height = (table.getRowCount()+1)*table.getRowHeight() + 24 + addButton.getHeight();
                 
-        Dimension actual = new Dimension(treeUI.getCellWidth(), height);
+        Dimension actual = new Dimension(treeUtils.getCellWidth(), height);
         return actual;  
     }
 }

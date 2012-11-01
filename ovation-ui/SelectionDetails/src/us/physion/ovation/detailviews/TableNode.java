@@ -42,6 +42,11 @@ public class TableNode extends DefaultMutableTreeNode{
         tp = t;
     }
     
+    public TablePanel getPanel()
+    {
+        return tp;
+    }
+    
     public int getHeight()
     {
         if (tp == null)
@@ -51,6 +56,8 @@ public class TableNode extends DefaultMutableTreeNode{
     
     public int getViewportHeight()
     {
+        if (tp == null)
+            return -1;
         return tp.getTable().getPreferredScrollableViewportSize().height;
     }
 }

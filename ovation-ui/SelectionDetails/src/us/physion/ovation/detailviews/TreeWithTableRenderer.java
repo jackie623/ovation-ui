@@ -243,9 +243,12 @@ public class TreeWithTableRenderer extends JScrollPane {
             int extraRow = p.blankRow ? 1 : 0;
             Object[][] dataVector = new Object[props.size() + extraRow][2];
             int i = 0;
-            for (Map.Entry<String, Object> entry : props.entrySet()) {
-                dataVector[i][0] = entry.getKey();
-                dataVector[i][1] = entry.getValue();
+            ArrayList<String> keys = new ArrayList<String>();
+            keys.addAll(props.keySet());
+            Collections.sort(keys);
+            for (String key : keys) {
+                dataVector[i][0] = key;
+                dataVector[i][1] = props.get(key);
                 i++;
             }
             //Uncomment this when you need are you gonna deal with the issues brought on by 

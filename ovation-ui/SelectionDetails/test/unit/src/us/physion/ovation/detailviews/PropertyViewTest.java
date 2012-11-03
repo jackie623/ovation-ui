@@ -635,7 +635,7 @@ public class PropertyViewTest extends OvationTestCase{
                             if (l instanceof PropertyTableModelListener) {
                                 noListener = false;
 
-                                ((PropertyTableModelListener) l).deleteProperty(m, row);
+                                ((PropertyTableModelListener) l).deleteProperty(m, new int[]{row});
                                 break;
                             }
                         }

@@ -243,6 +243,10 @@ public class UpgradeTool implements IUpgradeDB {
                 Exceptions.printStackTrace(ex);
             }
 
+            for (UpdateStep s : fileMap.keySet())
+            {
+                fileMap.get(s).delete();
+            }
             update(100, "Done");
             
             
@@ -282,7 +286,7 @@ public class UpgradeTool implements IUpgradeDB {
                 String[] pathSegments = url.getPath().split("/");
                 String name = pathSegments[pathSegments.length-1];
                 File f = File.createTempFile(name.split("\\.")[0], name.split("\\.")[1]);
-                f.deleteOnExit();
+                //f.deleteOnExit();
                 FileOutputStream fos = new FileOutputStream(f);
                 InputStream input = new BufferedInputStream(url.openStream());
                 

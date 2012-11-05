@@ -55,6 +55,7 @@ public class UpgradeTool implements IUpgradeDB {
     public UpgradeTool(List<UpdateInfo> updates, String connectionFile, String username, String password, IUpdateUI ui) {
         this(updates, connectionFile, username, password);
         uiUpdater = ui;
+        Ovation.enableLogging(LogLevel.DEBUG);
     }
 
     public static boolean isWindows() {
@@ -159,8 +160,10 @@ public class UpgradeTool implements IUpgradeDB {
                     File f = downloadFile(step.getStepDescriptor());
                     if (!f.exists())
                     {
+                        Ovation.getLogger().debug("Downloaded file doesn't exist!");
                         throw new Exception(step.getStepDescriptor());
                     }
+                    Ovation.getLogger().debug("Downloaded file exists : " + f.getAbsolutePath());
                     fileMap.put(step, f);
                 }
             }

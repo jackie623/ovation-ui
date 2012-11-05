@@ -160,10 +160,8 @@ public class UpgradeTool implements IUpgradeDB {
                     File f = downloadFile(step.getStepDescriptor());
                     if (!f.exists())
                     {
-                        Ovation.getLogger().debug("Downloaded file doesn't exist!");
                         throw new Exception(step.getStepDescriptor());
                     }
-                    Ovation.getLogger().debug("Downloaded file exists : " + f.getAbsolutePath());
                     fileMap.put(step, f);
                 }
             }

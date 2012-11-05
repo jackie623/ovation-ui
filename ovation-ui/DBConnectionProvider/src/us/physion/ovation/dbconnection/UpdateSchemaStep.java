@@ -23,4 +23,19 @@ public class UpdateSchemaStep implements UpdateStep{
         return schemafile;
     }
     
+     @Override 
+     public int hashCode()
+    {
+        return getStepDescriptor().hashCode();
+    }
+    
+    @Override 
+    public boolean equals(Object o)
+    {
+        if (o instanceof UpdateSchemaStep)
+            return getStepDescriptor().equals(((UpdateJarStep)o).getStepDescriptor());
+        return false;
+    }
+    
+    
 }

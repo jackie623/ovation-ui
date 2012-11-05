@@ -31,4 +31,16 @@ public class UpdateJarStep implements UpdateStep{
         return jarfile;
     }
     
+    @Override public int hashCode()
+    {
+        return getStepDescriptor().hashCode();
+    }
+    
+    @Override public boolean equals(Object o)
+    {
+        if (o instanceof UpdateJarStep)
+            return getStepDescriptor().equals(((UpdateJarStep)o).getStepDescriptor());
+        return false;
+    }
+    
 }

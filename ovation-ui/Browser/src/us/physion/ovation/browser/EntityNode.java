@@ -51,7 +51,7 @@ public class EntityNode extends AbstractNode{
        actionList = new Action[] {CopyAction.get(CopyAction.class)};
    }
    
-   @Override
+   /*@Override
    public Sheet createSheet()
    {
        Sheet sheet = Sheet.createDefault();
@@ -108,7 +108,7 @@ public class EntityNode extends AbstractNode{
     @Override
     public Action[] getActions(boolean popup) {
         return actionList;
-    }
+    }*/
     //TODO: figure out how to make this work
     /*
     @Override

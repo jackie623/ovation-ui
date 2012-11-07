@@ -67,13 +67,10 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox();
         jScrollPane1 = new BeanTreeView();
         removeItemButton = new javax.swing.JButton();
         insertItemButton = new javax.swing.JButton();
-
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(SourceBrowserTopComponent.class, "SourceBrowserTopComponent.jButton1.text")); // NOI18N
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -106,7 +103,6 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton insertItemButton;
-    private javax.swing.JButton jButton1;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton removeItemButton;

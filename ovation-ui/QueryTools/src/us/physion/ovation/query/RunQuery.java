@@ -28,6 +28,7 @@ import org.openide.util.RequestProcessor;
 import org.openide.util.lookup.ServiceProvider;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.ExpressionTreeProvider;
 import us.physion.ovation.interfaces.QueryListener;
 
@@ -54,7 +55,7 @@ public final class RunQuery implements ActionListener {
     
     public void actionPerformed(ActionEvent e) {
         
-        ExpressionTreeProvider etp = Lookup.getDefault().lookup(ExpressionTreeProvider.class);
+        final ExpressionTreeProvider etp = Lookup.getDefault().lookup(ExpressionTreeProvider.class);
         ExpressionTree et = etp.getExpressionTree();
         
         IAuthenticatedDataStoreCoordinator dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
@@ -63,60 +64,37 @@ public final class RunQuery implements ActionListener {
         if (result == null)
             return;
         
-        ProgressHandle ph = null;
-        if (!EventQueue.isDispatchThread())
-        {
-            ph = ProgressHandleFactory.createHandle("Querying");
-            ph.setDisplayName("Querying");
-            ph.switchToIndeterminate();
-            ph.start();
-        }
-        
-        if (etp instanceof QueryProvider) {
-            QueryProvider qp = (QueryProvider)etp;
-            qp.setExpressionTree(result);
-            for (QueryListener listener : qp.getListeners()) {
-                FutureTask task = listener.run();
-                try {
-                    task.get();
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (ExecutionException ex) {
-                    Exceptions.printStackTrace(ex);
+        EventQueueUtilities.runOffEDT(new Runnable(){
+            @Override
+            public void run() {
+                ProgressHandle ph = null;
+                System.out.println("Starting query");
+                long start = System.currentTimeMillis();
+
+                ph = ProgressHandleFactory.createHandle("Querying");
+                ph.setDisplayName("Querying");
+                ph.switchToIndeterminate();
+                ph.start();
+
+                if (etp instanceof QueryProvider) {
+                    QueryProvider qp = (QueryProvider) etp;
+                    qp.setExpressionTree(result);
+                    for (QueryListener listener : qp.getListeners()) {
+                        FutureTask task = listener.run();
+                        try {
+                            task.get();
+                        } catch (InterruptedException ex) {
+                            Exceptions.printStackTrace(ex);
+                        } catch (ExecutionException ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+                    }
                 }
+
+                ph.finish();
+    
+                System.out.println("Finished query: " + (System.currentTimeMillis() - start)  + " ms");
             }
-        }
-        if (!EventQueue.isDispatchThread())
-        {
-            ph.finish();
-        }
+        });
     }
-    
-    private static Runnable createProgressHandle = new Runnable(){
-
-        @Override
-        public void run() {
-            ProgressHandle ph = ProgressHandleFactory.createHandle("Querying"); 
-            ph.setDisplayName("Querying");
-            ph.switchToIndeterminate();
-            ph.start();
-            try {
-                Thread.currentThread().sleep(10000);
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-        
-    };
-    
-    private static Runnable removeProgressHandle = new Runnable(){
-
-        @Override
-        public void run() {
-            ProgressHandle ph = ProgressHandleFactory.createHandle("Querying");
-            ph.finish();
-        }
-        
-    };
-       
 }

@@ -39,17 +39,18 @@ public class EntityWrapperUtilities {
 
             Stack<IEntityWrapper> p = new Stack();
             p.push(ew);
-            Set<Stack<IEntityWrapper>> paths = getParentsInTree(e, p);
+            Set<Stack<IEntityWrapper>> paths = getParentsInTree(e, p);// set of paths from this entity wrapper to a parent that has already been created in the tree
 
             for (Stack<IEntityWrapper> path : paths) {
                 Node parentInTree = treeMap.get(path.peek());
                 if (parentInTree == null) {
                     for (ExplorerManager mgr : mgrs) {
-                        Stack<IEntityWrapper> copiedPath = new Stack<IEntityWrapper>();
+                        Stack<IEntityWrapper> copiedPath;
                         //QueryChildren.addPath() modifies path
                         if (mgrs.size() == 1) {
                             copiedPath = path;
                         } else {
+                            copiedPath = new Stack<IEntityWrapper>();
                             for (int i = 0; i < path.size(); i++) {
                                 copiedPath.push(path.get(i));
                             }

@@ -7,6 +7,7 @@ package us.physion.ovation.detailviews;
 import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import org.joda.time.DateTime;
 import org.openide.util.Lookup;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
@@ -125,7 +127,7 @@ class PropertyTableModelListener implements TableModelListener{
                             model.removeRow(rows[i]);
                         }
                         EditableTable p = (EditableTable)node.getPanel();
-                        JScrollPane sp = ((JScrollPane)p.getTable().getParent().getParent());
+                        JScrollPane sp = p.getScrollPane();
                         sp.setSize(sp.getPreferredSize());
                         p.setSize(p.getPreferredSize());
                         ((DefaultTreeModel) tree.getModel()).nodeChanged(node);//this resizes the tree cell that contains the editable table that just deleted a row
@@ -173,12 +175,17 @@ class PropertyTableModelListener implements TableModelListener{
                 eb.addProperty(key, false);
                 return;
             }
-           
+            try{
+                DateTime dt = new DateTime(s);
+                eb.addProperty(key, new Timestamp(dt.getMillis()));
+            }catch (IllegalArgumentException e)
+            {
+                //pass
+            }
             //byte array
-            //Timestamp
             //NumericData
             //EntityBase
         }
-        eb.addProperty(key, value);
+        eb.addProperty(key, value);//string case
     }
 }

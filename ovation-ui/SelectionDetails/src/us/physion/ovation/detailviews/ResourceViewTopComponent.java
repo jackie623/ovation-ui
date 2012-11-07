@@ -26,6 +26,7 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
@@ -44,7 +45,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_ResourceViewAction",
 preferredID = "ResourceViewTopComponent")
 @Messages({
-    "CTL_ResourceViewAction=ResourceView",
+    "CTL_ResourceViewAction=Resources",
     "CTL_ResourceViewTopComponent=Resources",
     "HINT_ResourceViewTopComponent=This window displays the Resource objects associated with the selected Ovation entity"
 })
@@ -87,8 +88,14 @@ public final class ResourceViewTopComponent extends TopComponent {
                 int index = -1;
                 if (evt.getClickCount() == 2 || evt.getClickCount() == 3) {
                     index = list.locationToIndex(evt.getPoint());
-                    IResourceWrapper rw = (IResourceWrapper) listModel.getElementAt(index);
-                    editResource(rw);
+                    final IResourceWrapper rw = (IResourceWrapper) listModel.getElementAt(index);
+                    EventQueueUtilities.runOffEDT(new Runnable(){
+
+                        @Override
+                        public void run() {
+                            editResource(rw);
+                        }
+                    });
                 }
             }
         });
@@ -97,6 +104,7 @@ public final class ResourceViewTopComponent extends TopComponent {
 
             @Override
             public void valueChanged(ListSelectionEvent lse) {
+                
                 for (Object value: resourceList.getSelectedValues())
                 {
                     if (editedSet.contains(value))
@@ -124,7 +132,14 @@ public final class ResourceViewTopComponent extends TopComponent {
                 //pass, for now - this can be deleted with ovation version 1.4
             }
             editedSet.add(rw);
-            saveButton.setEnabled(true);
+            
+            EventQueueUtilities.runOnEDT(new Runnable(){
+
+                @Override
+                public void run() {
+                    saveButton.setEnabled(true);
+                }
+            });
         }
     }
     
@@ -141,9 +156,13 @@ public final class ResourceViewTopComponent extends TopComponent {
     protected void updateResources()
     {
         entities = global.allInstances();
-        ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
-        cp.getConnection().getContext(); //getContext
-        updateResources(entities);
+        EventQueueUtilities.runOffEDT(new Runnable(){
+
+            @Override
+            public void run() {
+                updateResources(entities);
+            }
+        });
     }
     
     protected void updateResources(Collection<? extends IEntityWrapper> entities)
@@ -173,12 +192,18 @@ public final class ResourceViewTopComponent extends TopComponent {
             rw.getEntity().releaseLocalFile();
         }
         
-        if (editedSet.isEmpty())
-        {
-            saveButton.setEnabled(false);
-        }
-            
         listModel.setResources(resources);
+
+        EventQueueUtilities.runOnEDT(new Runnable(){
+            
+            @Override
+            public void run() {
+                if (editedSet.isEmpty()) {
+                    saveButton.setEnabled(false);
+                }
+            }
+        });
+        
     }
     
 
@@ -266,18 +291,28 @@ public final class ResourceViewTopComponent extends TopComponent {
 
     private void removeResourceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeResourceButtonActionPerformed
         //Delete selected resources
-        removeResources(resourceList.getSelectedValues(), entities);
+        EventQueueUtilities.runOffEDT(new Runnable(){
+            public void run()
+            {
+                removeResources(resourceList.getSelectedValues(), entities);
+            }
+        });
     }//GEN-LAST:event_removeResourceButtonActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
-        for (Object rw : resourceList.getSelectedValues())
-        {
-            Resource r = ((IResourceWrapper)rw).getEntity();
-            if (r.canWrite())
-            {
-                r.sync();
+        final Object[] rws = resourceList.getSelectedValues();
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                for (Object rw : rws) {
+                    Resource r = ((IResourceWrapper) rw).getEntity();
+                    if (r.canWrite()) {
+                        r.sync();
+                    }
+                }
             }
-        }
+        });
     }//GEN-LAST:event_saveButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

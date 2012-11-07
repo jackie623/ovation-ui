@@ -41,7 +41,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_TagsViewAction",
 preferredID = "TagsViewTopComponent")
 @Messages({
-    "CTL_TagsViewAction=TagsView",
+    "CTL_TagsViewAction=Keyword Tags",
     "CTL_TagsViewTopComponent=Keyword Tags",
     "HINT_TagsViewTopComponent=This is a Keyword Tags window"
 })

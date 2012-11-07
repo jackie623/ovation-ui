@@ -22,7 +22,7 @@ public class QueryChildren extends Children.Keys<IEntityWrapper> {
     Set<IEntityWrapper> keys = new HashSet<IEntityWrapper>();
     Set<String> keyURIs = new HashSet<String>();
     private boolean projectView;
-    private HashMap<String, QueryChildren> childrenMap = new HashMap<String, QueryChildren>();
+    private HashMap<String, Children> childrenMap = new HashMap<String, Children>();
     private HashMap<String, Set<Stack<IEntityWrapper>>> pathMap = new HashMap<String, Set<Stack<IEntityWrapper>>>();
 
     protected QueryChildren(boolean pView) {
@@ -42,11 +42,16 @@ public class QueryChildren extends Children.Keys<IEntityWrapper> {
   
     @Override
     protected Node[] createNodes(IEntityWrapper key) {
-        QueryChildren children;
-        
-        children = new QueryChildren(pathMap.get(key.getURI()), projectView);
-        childrenMap.put(key.getURI(), children);
-
+        Children children = childrenMap.get(key.getURI());
+        if (children == null)
+        {
+            children = new QueryChildren(pathMap.get(key.getURI()), projectView);
+            childrenMap.put(key.getURI(), children);
+        } else if (children instanceof QueryChildren)
+        {
+            for (Stack<IEntityWrapper> path : pathMap.get(key.getURI()))
+                ((QueryChildren)children).addPath(path);
+        } 
         return new Node[]{EntityWrapperUtilities.createNode(key, children)};
     }
 
@@ -89,9 +94,13 @@ public class QueryChildren extends Children.Keys<IEntityWrapper> {
             }
             Set<Stack<IEntityWrapper>> paths = pathMap.get(e.getURI());
             paths.add(path);
-            QueryChildren children = childrenMap.get(e.getURI());
-            if (children != null) {
-                children.addPath(path);
+            Children children = childrenMap.get(e.getURI());
+            if (children != null)
+            {
+                if (children instanceof QueryChildren) 
+                    ((QueryChildren)children).addPath(path);
+            }else{
+                childrenMap.put(e.getURI(), new EntityChildren((EntityWrapper)e, projectView, null));
             }
         }
     }

@@ -67,6 +67,7 @@ public final class BrowserTopComponent extends TopComponent implements ExplorerM
         l = ExplorerUtils.createLookup(em, getActionMap());
         associateLookup(l);
         BrowserUtilities.initBrowser(em, true);
+        ((BeanTreeView)treeViewPane).setRootVisible(false);
         
         //TODO: extend existing CopyAction somehow
         /*

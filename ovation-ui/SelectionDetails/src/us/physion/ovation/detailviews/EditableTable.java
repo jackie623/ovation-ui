@@ -156,4 +156,9 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         Dimension actual = new Dimension(treeUtils.getCellWidth(), height);
         return actual;  
     }
+    
+    protected JScrollPane getScrollPane()
+    {
+       return jScrollPane1;
+    }
 }

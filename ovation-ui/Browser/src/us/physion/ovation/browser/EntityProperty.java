@@ -13,6 +13,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
  *
  * @author huecotanks
  */
+//DEPRICATED
 public class EntityProperty extends Property{
 
     boolean writable;

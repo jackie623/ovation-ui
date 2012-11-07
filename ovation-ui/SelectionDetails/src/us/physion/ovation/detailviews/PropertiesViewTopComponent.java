@@ -27,7 +27,7 @@ autostore = false)
 @TopComponent.Description(preferredID = "PropertiesViewTopComponent",
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "rightSlidingSide", openAtStartup = true)
+@TopComponent.Registration(mode = "properties", openAtStartup = true)
 @ActionID(category = "Window", id = "us.physion.ovation.detailviews.PropertiesViewTopComponent")
 @ActionReference(path = "Menu/Window" /*
  * , position = 333
@@ -35,7 +35,7 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_PropertiesViewAction",
 preferredID = "PropertiesViewTopComponent")
 @Messages({
-    "CTL_PropertiesViewAction=PropertiesView",
+    "CTL_PropertiesViewAction=Properties",
     "CTL_PropertiesViewTopComponent=Properties",
     "HINT_PropertiesViewTopComponent=Displays the properties of the selected entites"
 })
@@ -76,26 +76,26 @@ public final class PropertiesViewTopComponent extends TopComponent {
     
     public void update(final Collection<? extends IEntityWrapper> entities, DataContext c)
     {
-        ((TreeWithTableRenderer)jScrollPane1).setEntities(entities, c);
+        ((TreeWithTableRenderer) jScrollPane1).setEntities(entities, c);
         this.entities = entities;
-        if (entities.size() > 1)
-        {
-         EventQueueUtilities.runOnEDT(new Runnable() {
-            @Override
-            public void run() {
-                    
-                setName(Bundle.CTL_PropertiesViewTopComponent() + " - " + entities.size() + " entities");
-            }
-         });
-        }
-        else{
-          EventQueueUtilities.runOnEDT(new Runnable() {
-            @Override
-            public void run() {
-                    
-                setName(Bundle.CTL_PropertiesViewTopComponent());
-            }
-         });
+        if (entities.size() > 1) {
+            EventQueueUtilities.runOnEDT(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    setName(Bundle.CTL_PropertiesViewTopComponent() + " - " + entities.size() + " entities");
+                }
+            });
+        } else {
+            EventQueueUtilities.runOnEDT(new Runnable() {
+
+                @Override
+                public void run() {
+
+                    setName(Bundle.CTL_PropertiesViewTopComponent());
+                }
+            });
         }
     }
     

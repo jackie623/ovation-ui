@@ -26,17 +26,15 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
     private TreeWithTableRenderer treeUtils;
-    private UserPropertySet propertySet;
     /**
      * Creates new form EditableTable
      */
-    public EditableTable(JTable table, TreeWithTableRenderer t, UserPropertySet p) {
+    public EditableTable(JTable table, TreeWithTableRenderer t) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
         this.treeUtils = t;
-        propertySet = p;
         //this.setBorder(BorderFactory.createEtchedBorder());
     }
 
@@ -109,13 +107,11 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                     @Override
                     public void run() {
                         ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
-                        //speeds up performance!
+                        //speeds up performance! TODO: do I need this?
                         JScrollPane sp = ((JScrollPane)table.getParent().getParent());
                         sp.setSize(sp.getPreferredSize());
-                        //((JScrollPane)table.getParent().getParent()).setViewportView(table);
                         EditableTable.this.setSize(EditableTable.this.getPreferredSize());
                         table.getSelectionModel().setSelectionInterval(table.getRowCount()-1, table.getRowCount()-1);
-                        propertySet.setBlankRow(true);
                     }
                 });
         }

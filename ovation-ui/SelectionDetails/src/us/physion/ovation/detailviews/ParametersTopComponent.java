@@ -56,7 +56,6 @@ public final class ParametersTopComponent extends TopComponent {
                 update();
             }
         }
-
     };
     
     public void update()
@@ -126,8 +125,14 @@ public final class ParametersTopComponent extends TopComponent {
                 tables.put(paramName, params);
             }
         }
+        ArrayList<TableTreeKey> tableKeys = new ArrayList<TableTreeKey>();
+        for (String key: tables.keySet())
+        {
+            tableKeys.add(new ParameterSet(key, tables.get(key)));
+        }
+        ((TreeWithTableRenderer)jScrollPane2).setKeys(tableKeys);
         
-        ArrayList<String> keys = new ArrayList();
+        /*ArrayList<String> keys = new ArrayList();
         ArrayList<Object> values = new ArrayList();
         for (String tableName: tables.keySet())
         {
@@ -143,8 +148,8 @@ public final class ParametersTopComponent extends TopComponent {
         {
             v[i][0] = keys.get(i);
             v[i][1] = values.get(i);
-        }
-        jTable1.setModel(new DefaultTableModel(v, new String[]{"Name", "Parameter"}));
+        }*/
+        //jTable1.setModel(new DefaultTableModel(v, new String[]{"Name", "Parameter"}));
     }
     
     
@@ -167,36 +172,24 @@ public final class ParametersTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-
-        jTable1.setModel(tableModel);
-        jTable1.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
-            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                jTable1PropertyChange(evt);
-            }
-        });
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane2 = new TreeWithTableRenderer();
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 678, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 711, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTable1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jTable1PropertyChange
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTable1PropertyChange
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {

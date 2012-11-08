@@ -4,9 +4,7 @@
  */
 package us.physion.ovation.detailviews;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import org.openide.util.Lookup;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
@@ -18,12 +16,11 @@ import us.physion.ovation.interfaces.ConnectionProvider;
  *
  * @author huecotanks
  */
-class UserPropertySet implements Comparable{
+class UserPropertySet implements TableTreeKey{
     String username;
     String userURI;
     boolean isOwner;
     boolean current;
-    boolean blankRow;
     Map<String, Object> properties;
     Set<String> uris;
 
@@ -37,7 +34,7 @@ class UserPropertySet implements Comparable{
         userURI = u.getURIString();
     }
     
-    void refresh(IAuthenticatedDataStoreCoordinator dsc) {
+    public void refresh(IAuthenticatedDataStoreCoordinator dsc) {
         DataContext c = dsc.getContext();
         User u = (User)c.objectWithURI(userURI);
         
@@ -60,7 +57,7 @@ class UserPropertySet implements Comparable{
         this.current = c.currentAuthenticatedUser().getUuid().equals(u.getUuid());
     }
 
-    String getDisplayName() {
+    public String getDisplayName() {
         String s = username + "'s Properties";
         if (isOwner) {
             return s + " (owner)";
@@ -68,7 +65,7 @@ class UserPropertySet implements Comparable{
         return s;
     }
     
-    String getURI()
+    public String getID()
     {
         return userURI;
     }
@@ -77,6 +74,23 @@ class UserPropertySet implements Comparable{
         return current;
     }
 
+    public Object[][] getData()
+    {
+        ArrayList<String> keys = new ArrayList<String>();
+        keys.addAll(properties.keySet());
+        Collections.sort(keys);
+        
+        Object[][] data = new Object[keys.size()][2];
+        int i = 0;
+        for (String key : keys)
+        {
+            data[i][0] = key;
+            data[i++][1] = properties.get(key);
+        }
+        return data;
+    }
+    
+    //TODO: get rid of
     Map<String, Object> getProperties() {
         return properties;
     }
@@ -86,11 +100,6 @@ class UserPropertySet implements Comparable{
         return username;
     }
     
-    void setBlankRow(boolean b)
-    {
-        blankRow = b;
-    }
-
     @Override
     public int compareTo(Object t) {
         if (t instanceof UserPropertySet)
@@ -112,4 +121,12 @@ class UserPropertySet implements Comparable{
         }
     }
     
+    public boolean isEditable()
+    {
+        return isCurrentUser();
+    }
+    public boolean isExpandedByDefault()
+    {
+        return isCurrentUser();
+    }
 }

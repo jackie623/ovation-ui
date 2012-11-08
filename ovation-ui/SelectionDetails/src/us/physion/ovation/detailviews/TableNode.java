@@ -20,20 +20,15 @@ import us.physion.ovation.interfaces.ConnectionProvider;
  */
 public class TableNode extends DefaultMutableTreeNode{
     TablePanel tp;
-    TableNode(UserPropertySet p)
+    TableNode(TableTreeKey p)
     {
         super(p);
-    }
-    
-    public UserPropertySet getUserProperties()
-    {
-        return (UserPropertySet)getUserObject();
     }
     
     public void resetProperties(IAuthenticatedDataStoreCoordinator dsc)
     {
         //regrab properties from the database
-        UserPropertySet p = (UserPropertySet)getUserObject();
+        TableTreeKey p = (TableTreeKey)getUserObject();
         p.refresh(dsc);
     }
     

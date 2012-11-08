@@ -4,7 +4,9 @@
  */
 package us.physion.ovation.detailviews;
 
-import java.util.Collection;
+import java.util.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -16,6 +18,10 @@ import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 import ovation.DataContext;
+import ovation.IAuthenticatedDataStoreCoordinator;
+import ovation.IEntityBase;
+import ovation.User;
+import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
@@ -63,7 +69,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             public void run() {
-                update(global.allInstances(), null);
+                update(global.allInstances());
             }
         });
     }
@@ -74,10 +80,10 @@ public final class PropertiesViewTopComponent extends TopComponent {
     }        
             
     
-    public void update(final Collection<? extends IEntityWrapper> entities, DataContext c)
+    public void update(final Collection<? extends IEntityWrapper> entities)
     {
-        ((TreeWithTableRenderer) jScrollPane1).setEntities(entities, c);
-        this.entities = entities;
+        setEntities(entities, null);
+        
         if (entities.size() > 1) {
             EventQueueUtilities.runOnEDT(new Runnable() {
 
@@ -97,6 +103,58 @@ public final class PropertiesViewTopComponent extends TopComponent {
                 }
             });
         }
+    }
+    
+    protected void setEntities(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
+    {
+        DataContext c;
+        if (dsc == null) {
+            c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+        }else{
+            c = dsc.getContext();
+        }
+
+        ArrayList<TableTreeKey> properties = new ArrayList<TableTreeKey>();
+        Set<String> uris = new HashSet<String>();
+        Set<IEntityBase> entitybases = new HashSet();
+        Set<String> owners = new HashSet();
+        for (IEntityWrapper w : entities) {
+            IEntityBase e = w.getEntity();
+            entitybases.add(e);
+            uris.add(e.getURIString());
+            owners.add(e.getOwner().getUuid());
+        }
+
+        String currentUserUUID = c.currentAuthenticatedUser().getUuid();
+        Iterator<User> users = c.getUsersIterator();
+        boolean containsCurrentUser = false;//current user's property table should always exist, even if there are no properties
+        while (users.hasNext()) {
+            User u = users.next();
+            Map<String, Object> userProps = new HashMap();
+            for (IEntityBase e : entitybases) {
+                userProps.putAll(e.getUserProperties(u));
+            }
+            if (!userProps.isEmpty()) {
+                String uuid = u.getUuid();
+                UserPropertySet propertySet;
+                if (currentUserUUID.equals(uuid)) {
+                    containsCurrentUser = true;
+                    propertySet = new UserPropertySet(u, owners.contains(uuid), true, userProps, uris);
+                } else {
+                    propertySet = new UserPropertySet(u, owners.contains(uuid), false, userProps, uris);
+                }
+                properties.add(propertySet);
+            }
+        }
+        if (!containsCurrentUser) {
+            User current = c.currentAuthenticatedUser();
+            properties.add(new UserPropertySet(current, owners.contains(current.getUuid()), true, new HashMap<String, Object>(), uris));
+        }
+        Collections.sort(properties);
+        
+        ((TreeWithTableRenderer) jScrollPane1).setKeys(properties);
+        
+        this.entities = entities;
     }
     
     public PropertiesViewTopComponent() {

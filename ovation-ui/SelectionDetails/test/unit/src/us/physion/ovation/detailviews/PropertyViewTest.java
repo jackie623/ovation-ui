@@ -475,7 +475,7 @@ public class PropertyViewTest extends OvationTestCase{
             for (int i = 0; i < n.getChildCount(); i++) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) n.getChildAt(i);
                 UserPropertySet s = ((UserPropertySet) ((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject());
-                if (s.getURI().equals(userURI)) {
+                if (s.getID().equals(userURI)) {
                     return node;
                 }
             }
@@ -492,7 +492,7 @@ public class PropertyViewTest extends OvationTestCase{
             for (int i = 0; i < n.getChildCount(); i++) {
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) n.getChildAt(i);
                 UserPropertySet s = ((UserPropertySet) ((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject());
-                if (s.getURI().equals(userURI)) {
+                if (s.getID().equals(userURI)) {
                     return s;
                 }
             }
@@ -507,7 +507,7 @@ public class PropertyViewTest extends OvationTestCase{
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) n.getChildAt(i);
                 UserPropertySet s = ((UserPropertySet) ((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject());
                 
-                if (s.getURI().equals(userURI)) {
+                if (s.getID().equals(userURI)) {
                     Set<TestProperty> properties = new HashSet<TestProperty>();
                     DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(s));
                     for (int j=0; j< m.getRowCount(); j++)
@@ -602,9 +602,9 @@ public class PropertyViewTest extends OvationTestCase{
             JTree tree = renderer.getTree();
             UserPropertySet s = getUserPropertySet(userURI);
             
-            TableNode node = (TableNode)getUserNode(s.getURI()).getChildAt(0);
+            TableNode node = (TableNode)getUserNode(s.getID()).getChildAt(0);
             node.resetProperties(dsc);
-            ((TableInTreeCellRenderer)tree.getCellRenderer()).getPanelFromPropertySet(s, node, dsc);
+            ((TableInTreeCellRenderer)tree.getCellRenderer()).getPanel(s, node, dsc);
             final DefaultTableModel m = ((DefaultTableModel)((TableInTreeCellRenderer)tree.getCellRenderer()).getTableModel(s));
                 EventQueueUtilities.runOffEDT(new Runnable(){
 

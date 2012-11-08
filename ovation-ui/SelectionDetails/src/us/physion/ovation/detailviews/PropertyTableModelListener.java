@@ -75,7 +75,6 @@ class PropertyTableModelListener implements TableModelListener{
                 Object value = t.getValueAt(i, 1);
                 newProperties.put(key, value);
             }
-            node.getUserProperties().setBlankRow(false);
             final Map<String, Object> props = newProperties;
             EventQueueUtilities.runOffEDT(new Runnable() {
 
@@ -128,7 +127,8 @@ class PropertyTableModelListener implements TableModelListener{
                         }
                         EditableTable p = (EditableTable)node.getPanel();
                         JScrollPane sp = p.getScrollPane();
-                        sp.setSize(sp.getPreferredSize());
+                        if (sp != null)
+                            sp.setSize(sp.getPreferredSize());
                         p.setSize(p.getPreferredSize());
                         ((DefaultTreeModel) tree.getModel()).nodeChanged(node);//this resizes the tree cell that contains the editable table that just deleted a row
                     }

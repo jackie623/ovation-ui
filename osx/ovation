@@ -78,16 +78,17 @@ nbexec=`echo "$progdir"/../platform*/lib/nbexec`
 
 case "`uname`" in
     Darwin*)
-        eval exec sh '"$nbexec"' \
-            --jdkhome '"$jdkhome"' \
-            -J-Dcom.apple.mrj.application.apple.menu.about.name='"$APPNAME"' \
-            -J-Xdock:name='"$APPNAME"' \
-            '"-J-Xdock:icon=$progdir/../../$APPNAME.icns"' \
-            --clusters '"$clusters"' \
-            --userdir '"${userdir}"' \
-            ${default_options} \
-            "$args"
-        ;;
+		export JAVA6=`/usr/libexec/java_home -v 1.6`
+	    eval exec sh '"$nbexec"' \
+	        --jdkhome '"$JAVA6"' \
+	        -J-Dcom.apple.mrj.application.apple.menu.about.name='Ovation' \
+	        -J-Xdock:name='Ovation' \
+	        '"-J-Xdock:icon=$progdir/../../$APPNAME.icns"' \
+	        --clusters '"$clusters"' \
+	        --userdir '"${userdir}"' \
+	        ${default_options} \
+	        "$args"
+	    ;;
     *)  
        sh=sh
        # #73162: Ubuntu uses the ancient Bourne shell, which does not implement trap well.

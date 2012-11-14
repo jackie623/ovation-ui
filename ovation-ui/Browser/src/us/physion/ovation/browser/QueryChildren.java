@@ -20,9 +20,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class QueryChildren extends Children.Keys<IEntityWrapper> {
 
     Set<IEntityWrapper> keys = new HashSet<IEntityWrapper>();
-    Set<String> keyURIs = new HashSet<String>();
     private boolean projectView;
-    private HashMap<String, Children> childrenMap = new HashMap<String, Children>();
     private HashMap<String, Set<Stack<IEntityWrapper>>> pathMap = new HashMap<String, Set<Stack<IEntityWrapper>>>();
 
     protected QueryChildren(boolean pView) {
@@ -41,18 +39,16 @@ public class QueryChildren extends Children.Keys<IEntityWrapper> {
     }
   
     @Override
-    protected Node[] createNodes(IEntityWrapper key) {
-        Children children = childrenMap.get(key.getURI());
-        if (children == null)
+    protected Node[] createNodes(IEntityWrapper child) {
+        Children children;
+        Set<Stack<IEntityWrapper>> childPaths = pathMap.get(child.getURI());
+        if (childPaths == null || childPaths.isEmpty())
         {
-            children = new QueryChildren(pathMap.get(key.getURI()), projectView);
-            childrenMap.put(key.getURI(), children);
-        } else if (children instanceof QueryChildren)
-        {
-            for (Stack<IEntityWrapper> path : pathMap.get(key.getURI()))
-                ((QueryChildren)children).addPath(path);
-        } 
-        return new Node[]{EntityWrapperUtilities.createNode(key, children)};
+            children = new EntityChildren((EntityWrapper)child, projectView, null);
+        }else{
+            children = new QueryChildren(childPaths, projectView);
+        }
+        return new Node[]{EntityWrapperUtilities.createNode(child, children)};
     }
 
     @Override
@@ -82,25 +78,24 @@ public class QueryChildren extends Children.Keys<IEntityWrapper> {
         if (path == null || path.isEmpty()) {
             return;
         }
-        IEntityWrapper e = path.pop();
+        IEntityWrapper child = path.pop();
 
-        if (shouldAdd(e)) {
-            if (!keyURIs.contains(e.getURI())) {
-                keyURIs.add(e.getURI());
-                keys.add(e);
-                pathMap.put(e.getURI(), new HashSet<Stack<IEntityWrapper>>());
+        if (shouldAdd(child)) {// projects don't belong in source view, and vice versa
+            
+            Set<Stack<IEntityWrapper>> paths = pathMap.get(child.getURI());
+            boolean childIsNew = paths == null;
+            if (paths == null)
+            {
+                paths = new HashSet<Stack<IEntityWrapper>>();
+            }
+            
+            if (!path.isEmpty())
+                paths.add(path);
+            pathMap.put(child.getURI(), paths);
+            if (childIsNew){
+                keys.add(child);
                 addNotify();
                 refresh();//in case the node is already created
-            }
-            Set<Stack<IEntityWrapper>> paths = pathMap.get(e.getURI());
-            paths.add(path);
-            Children children = childrenMap.get(e.getURI());
-            if (children != null)
-            {
-                if (children instanceof QueryChildren) 
-                    ((QueryChildren)children).addPath(path);
-            }else{
-                childrenMap.put(e.getURI(), new EntityChildren((EntityWrapper)e, projectView, null));
             }
         }
     }

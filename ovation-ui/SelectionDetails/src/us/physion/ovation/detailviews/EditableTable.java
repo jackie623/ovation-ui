@@ -25,11 +25,11 @@ import us.physion.ovation.interfaces.EventQueueUtilities;
 public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
-    private TreeWithTableRenderer treeUtils;
+    private ScrollableTableTree treeUtils;
     /**
      * Creates new form EditableTable
      */
-    public EditableTable(JTable table, TreeWithTableRenderer t) {
+    public EditableTable(JTable table, ScrollableTableTree t) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());

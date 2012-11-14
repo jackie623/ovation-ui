@@ -18,16 +18,19 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ServiceProvider;
 import ovation.*;
 import ovation.test.TestManager;
-import us.physion.ovation.detailviews.TreeWithTableRenderer.TableInTreeCellRenderer;
+import us.physion.ovation.detailviews.ScrollableTableTree.TableInTreeCellRenderer;
 import us.physion.ovation.interfaces.*;
 
+@ServiceProvider(service = ConnectionProvider.class)
 /**
  *
  * @author huecotanks
  */
-public class PropertyViewTest extends OvationTestCase{
+public class PropertyViewTest extends OvationTestCase implements ConnectionProvider{
     
     private TestEntityWrapper project;
     private TestEntityWrapper source;
@@ -102,10 +105,9 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(source);
         PropertiesViewTopComponent t = new PropertiesViewTopComponent();
         assertTrue( t.getEntities() == null ||t.getEntities().isEmpty());
-        t.update(entitySet, dsc.getContext());
+        t.setEntities(entitySet, null);
         
-        TableTree tt = new TableTree(t.getTreeRenderer(), userURIs);
-        JTree tree = t.getTreeRenderer().getTree();
+        JTree tree = t.getTableTree().getTree();
         DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
         assertEquals(n.getChildCount(), 2);
 
@@ -126,18 +128,18 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        ScrollableTableTree t = tc.getTableTree();
         
         //user1 properties
-        Set<TestProperty> props = t.getProperties(user1.getURI());
+        Set<TestProperty> props = getProperties(t, user1.getURI());
         Set<TestProperty> databaseProps = getAggregateUserProperties(((User)user1.getEntity()), entitySet);
         assertSetsEqual(props, databaseProps);
         
         //user2 properties
-        props = t.getProperties(user1.getURI());
+        props = getProperties(t, user1.getURI());
         databaseProps = getAggregateUserProperties(((User)user1.getEntity()), entitySet);
         assertSetsEqual(props, databaseProps);
         
@@ -151,14 +153,14 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        ScrollableTableTree t = tc.getTableTree();
         
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         String key = props.iterator().next().getKey();
         
         String newValue = "something else";
@@ -168,7 +170,7 @@ public class PropertyViewTest extends OvationTestCase{
         assertEquals(matching.size(), 1);
         assertEquals(matching.iterator().next().getValue(), newValue);
         
-        matching = getPropertiesByKey(key, t.getProperties(userURI));
+        matching = getPropertiesByKey(key, getProperties(t, userURI));
         assertEquals(matching.size(), 1);
         assertEquals(matching.iterator().next().getValue(), newValue);
     }  
@@ -181,17 +183,14 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
-        
+        ScrollableTableTree t = tc.getTableTree();
+         
         String userURI = user2.getURI();
         //get the table for user2 and check that it's a NonEditableTable
-        UserPropertySet s = t.getUserPropertySet(userURI);
-        
-        TableInTreeCellRenderer r = (TableInTreeCellRenderer)t.renderer.getTree().getCellRenderer();
-        JPanel p = r.getPanelFromPropertySet(s, (TableNode)t.getUserNode(userURI).getChildAt(0), dsc);
+        JPanel p = TreeNodePanelFactory.getPanel(t, (TableNode)t.getCategoryNode(userURI).getChildAt(0), null);
         
         assertTrue(p instanceof NonEditableTable);
     }
@@ -205,13 +204,14 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
         assertTrue( tc.getEntities() ==null || tc.getEntities().isEmpty());
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+                
+        ScrollableTableTree t = tc.getTableTree();
         
         String userURI = user1.getURI();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         String key = "a brand new key";
         Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
         assertTrue(matchingKey.isEmpty());
@@ -224,7 +224,7 @@ public class PropertyViewTest extends OvationTestCase{
         matchingKey = getPropertiesByKey(key, databaseProps);
         assertEquals(matchingKey.iterator().next().getValue(), newValue);
         
-        matchingKey = getPropertiesByKey(key, t.getProperties(userURI));
+        matchingKey = getPropertiesByKey(key, getProperties(t, userURI));
         assertEquals(matchingKey.iterator().next().getValue(), newValue);
     } 
     
@@ -237,13 +237,13 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
         assertTrue( tc.getEntities() == null || tc.getEntities().isEmpty());
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        ScrollableTableTree t = tc.getTableTree();
         
         String userURI = user1.getURI();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         String key = "a brand new key";
         Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
         assertTrue(matchingKey.isEmpty());
@@ -265,13 +265,13 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
         assertTrue( tc.getEntities() == null || tc.getEntities().isEmpty());
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        ScrollableTableTree t = tc.getTableTree();
         
         String userURI = user1.getURI();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         String key = "a brand new key";
         Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
         assertTrue(matchingKey.isEmpty());
@@ -294,22 +294,22 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        ScrollableTableTree t = tc.getTableTree();
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         String key = props.iterator().next().getKey();
         
-        t.removeProperty(userURI, key);
+        t.removeProperty(userURI, key, dsc);
         
         Set<TestProperty> databaseProps = getAggregateUserProperties(c.currentAuthenticatedUser(), entitySet);
         Set<TestProperty> matchingKey = getPropertiesByKey(key, databaseProps);
         assertTrue(matchingKey.isEmpty());
         
-        matchingKey = getPropertiesByKey(key, t.getProperties(userURI));
+        matchingKey = getPropertiesByKey(key, getProperties(t, userURI));
         assertTrue(matchingKey.isEmpty());
     } 
     
@@ -321,25 +321,25 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        ScrollableTableTree t = tc.getTableTree();
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         String key = "a brand new key";
         Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
         assertTrue(matchingKey.isEmpty());
         
         project.getEntity().addProperty(key, 27.8);
         source.getEntity().addProperty(key, 27.8);
-        ((TableNode)t.getUserNode(userURI).getChildAt(0)).resetProperties(dsc);
+        ((TableNode)t.getCategoryNode(userURI).getChildAt(0)).resetProperties(dsc);
         
         assertTrue(project.getEntity().getMyProperties().containsKey(key));
         assertTrue(source.getEntity().getMyProperties().containsKey(key));
         
-        t.removeProperty(userURI, key);
+        t.removeProperty(userURI, key, dsc);
         
         assertFalse(project.getEntity().getMyProperties().containsKey(key));
         assertFalse(source.getEntity().getMyProperties().containsKey(key));
@@ -353,23 +353,23 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
+        ScrollableTableTree t = tc.getTableTree();
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         
         String key = "a brand new key";
         Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
         assertTrue(matchingKey.isEmpty());
 
         project.getEntity().addProperty(key, 27.8);
-        ((TableNode)t.getUserNode(userURI).getChildAt(0)).resetProperties(dsc);
+        ((TableNode)t.getCategoryNode(userURI).getChildAt(0)).resetProperties(dsc);
         
         
-        t.removeProperty(userURI, key);
+        t.removeProperty(userURI, key, dsc);
 
         assertFalse(project.getEntity().getMyProperties().containsKey(key));
         assertFalse(source.getEntity().getMyProperties().containsKey(key));
@@ -386,13 +386,13 @@ public class PropertyViewTest extends OvationTestCase{
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.update(entitySet, dsc.getContext());
+        tc.setEntities(entitySet, dsc);
+        ScrollableTableTree t = tc.getTableTree();
         
         DataContext c = dsc.getContext();
-        TableTree t = new TableTree(tc.getTreeRenderer(), userURIs);
         
         String userURI = c.currentAuthenticatedUser().getURIString();
-        Set<TestProperty> props = t.getProperties(userURI);
+        Set<TestProperty> props = getProperties(t, userURI);
         
         String key = "a brand new key";
         Set<TestProperty> matchingKey = getPropertiesByKey(key, props);
@@ -400,7 +400,7 @@ public class PropertyViewTest extends OvationTestCase{
 
         project.getEntity().addProperty(key, "thing1");
         source.getEntity().addProperty(key, "thing2");
-        ((TableNode)t.getUserNode(userURI).getChildAt(0)).resetProperties(dsc);
+        ((TableNode)t.getCategoryNode(userURI).getChildAt(0)).resetProperties(dsc);
 
         t.removeProperty(userURI, key, "thing2");
 
@@ -452,11 +452,12 @@ public class PropertyViewTest extends OvationTestCase{
         return result;
     }
 
-    class TableTree {
+    /*This should eventually be replaced in tests with the ScrollableTableTree
+    class PropertiesTableTree {
 
-        TreeWithTableRenderer renderer;
+        ScrollableTableTree renderer;
 
-        TableTree(TreeWithTableRenderer t, Set<String> userURIs) {
+        PropertiesTableTree(ScrollableTableTree t, Set<String> userURIs) {
             renderer = t;
             int i = 1;
             for (String userURI : userURIs) {
@@ -604,6 +605,7 @@ public class PropertyViewTest extends OvationTestCase{
             
             TableNode node = (TableNode)getUserNode(s.getID()).getChildAt(0);
             node.resetProperties(dsc);
+            TreeNodePanelFactory.getPanel(renderer, node, dsc);
             ((TableInTreeCellRenderer)tree.getCellRenderer()).getPanel(s, node, dsc);
             final DefaultTableModel m = ((DefaultTableModel)((TableInTreeCellRenderer)tree.getCellRenderer()).getTableModel(s));
                 EventQueueUtilities.runOffEDT(new Runnable(){
@@ -645,7 +647,42 @@ public class PropertyViewTest extends OvationTestCase{
                         }
                     }
                 });
-           
+                
         }
+    }*/
+
+    private Set<TestProperty> getProperties(ScrollableTableTree t, String userURI) {
+        Set<TestProperty> properties = new HashSet<TestProperty>();
+        TableTreeKey k = t.getTableKey(userURI);
+        if (k == null)
+        {
+            return properties;
+        }    
+            
+        DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) t.getTree().getCellRenderer()).getTableModel(k));
+        for (int j = 0; j < m.getRowCount(); j++) {
+            properties.add(new TestProperty((String) m.getValueAt(j, 0), m.getValueAt(j, 1)));
+        }
+        return properties;
+    }
+
+    @Override
+    public IAuthenticatedDataStoreCoordinator getConnection() {
+        return dsc;
+    }
+
+    @Override
+    public void addConnectionListener(ConnectionListener cl) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void removeConnectionListener(ConnectionListener cl) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void resetConnection() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

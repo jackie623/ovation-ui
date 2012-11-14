@@ -14,18 +14,19 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import ovation.IAuthenticatedDataStoreCoordinator;
-import us.physion.ovation.detailviews.TreeWithTableRenderer.TableInTreeCellRenderer;
+import us.physion.ovation.detailviews.ScrollableTableTree.TableInTreeCellRenderer;
 
 /**
  *
  * @author huecotanks
  */
-public class PanelFactory {
+public class TreeNodePanelFactory {
     
-    public static JPanel getPanel(TreeWithTableRenderer t, TableInTreeCellRenderer cr, TableNode node, TableModelListener l) {
+    public static JPanel getPanel(ScrollableTableTree t, TableNode node, TableModelListener l) {
         TableTreeKey k = (TableTreeKey) node.getUserObject();
         String id = k.getID();
         //TODO move table lookup?
+        TableInTreeCellRenderer cr = t.getCellRenderer();
         TablePanel panel;
         if (cr.tableLookup.containsKey(id)) {
             panel = cr.tableLookup.get(id);

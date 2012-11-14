@@ -74,9 +74,9 @@ public final class PropertiesViewTopComponent extends TopComponent {
         });
     }
     
-    public TreeWithTableRenderer getTreeRenderer()
+    public ScrollableTableTree getTableTree()
     {
-        return (TreeWithTableRenderer)jScrollPane1;
+        return (ScrollableTableTree)jScrollPane1;
     }        
             
     
@@ -152,7 +152,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
         }
         Collections.sort(properties);
         
-        ((TreeWithTableRenderer) jScrollPane1).setKeys(properties);
+        ((ScrollableTableTree) jScrollPane1).setKeys(properties);
         
         this.entities = entities;
     }
@@ -179,7 +179,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new TreeWithTableRenderer();
+        jScrollPane1 = new ScrollableTableTree();
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

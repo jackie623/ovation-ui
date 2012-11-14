@@ -7,13 +7,15 @@ package us.physion.ovation.detailviews;
 import java.io.File;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.test.TestManager;
+import us.physion.ovation.interfaces.ConnectionListener;
 
 /**
  *
  * @author huecotanks
  */
-public class SelectionViewTestManager extends TestManager {
+public class SelectionViewTestManager extends TestManager{
 
     @Override
     public String getLicenseText() {
@@ -39,10 +41,10 @@ public class SelectionViewTestManager extends TestManager {
                 return pwd;
             }
         });
-        /*if (pwd == null)
+        if (pwd == null)
         {
             pwd = "/Users/huecotanks/Ovation/ui/";
-        }*/
+        }
         String path = pwd + "data" + File.separator
                 + "selectionDetails" + File.separator
                 + "selection-details.connection";
@@ -58,4 +60,5 @@ public class SelectionViewTestManager extends TestManager {
     public String getFirstUserPassword() {
         return "password";
     }
+
 }

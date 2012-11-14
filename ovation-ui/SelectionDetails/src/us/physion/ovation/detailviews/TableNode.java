@@ -32,6 +32,13 @@ public class TableNode extends DefaultMutableTreeNode{
         p.refresh(dsc);
     }
     
+    public void resetProperties()
+    {
+        //regrab properties from the database
+        TableTreeKey p = (TableTreeKey)getUserObject();
+        p.refresh(Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+    }
+    
     public void setPanel(TablePanel t)
     {
         tp = t;

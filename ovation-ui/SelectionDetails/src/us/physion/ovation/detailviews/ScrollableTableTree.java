@@ -16,6 +16,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -27,7 +28,7 @@ import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
-public class TreeWithTableRenderer extends JScrollPane {
+public class ScrollableTableTree extends JScrollPane {
 
     private ExpandableJTree tree;
     private Map<String, DefaultMutableTreeNode> userNodes;
@@ -71,7 +72,7 @@ public class TreeWithTableRenderer extends JScrollPane {
         });
     }
 
-    public TreeWithTableRenderer() {
+    public ScrollableTableTree() {
         super();
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
         tree = new ExpandableJTree(root);
@@ -121,9 +122,15 @@ public class TreeWithTableRenderer extends JScrollPane {
     private boolean shouldExpand(TableTreeKey tableInfo) {
         if (userNodes.containsKey(tableInfo.getID())) {
             DefaultMutableTreeNode n = userNodes.get(tableInfo.getID());
-            return (!tree.isCollapsed(new TreePath(n.getPath())));
+            TreePath tp = new TreePath(n.getPath());
+            if (n.isNodeAncestor((TreeNode)((DefaultTreeModel)tree.getModel()).getRoot()))
+                return (tree.isExpanded(tp));
         } 
         return tableInfo.isExpandedByDefault();
+    }
+
+    TableInTreeCellRenderer getCellRenderer() {
+        return (TableInTreeCellRenderer)tree.getCellRenderer();
     }
 
     class TableInTreeCellRenderer extends AbstractCellEditor implements TreeCellEditor, TreeCellRenderer {
@@ -153,7 +160,7 @@ public class TreeWithTableRenderer extends JScrollPane {
                 if (o instanceof UserPropertySet && ((UserPropertySet)o).isEditable())
                     l = new PropertyTableModelListener(((UserPropertySet)o).uris, tree, (TableNode)value, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
                 
-                return PanelFactory.getPanel(TreeWithTableRenderer.this, this, ((TableNode)value), l);
+                return TreeNodePanelFactory.getPanel(ScrollableTableTree.this, ((TableNode)value), l);
             }
             
             return null;
@@ -217,12 +224,153 @@ public class TreeWithTableRenderer extends JScrollPane {
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
-                //new TreeWithTableRenderer().setVisible(true);
+                //new ScrollableTableTree().setVisible(true);
             }
         });
     }
 
     public int getCellWidth() {
         return ((PropertiesTreeUI) tree.getUI()).getCellWidth();
+    }
+
+    //Getters, currently used for tests
+    //The category is the top-level node in the tree - username for PropertiesView, protocol type for protocol parameters 
+    DefaultMutableTreeNode getCategoryNode(String category) {
+        DefaultMutableTreeNode n = (DefaultMutableTreeNode) ((DefaultTreeModel) tree.getModel()).getRoot();
+
+        if (category == null) {
+            return n;
+        }
+        for (int i = 0; i < n.getChildCount(); i++) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) n.getChildAt(i);
+            TableTreeKey s = (TableTreeKey) ((DefaultMutableTreeNode) node.getChildAt(0)).getUserObject();
+            if (s.getID().equals(category)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    TableTreeKey getTableKey(String category) {
+        DefaultMutableTreeNode n = getCategoryNode(category);
+        if (n == null) {
+            return null;
+        }
+        return ((TableTreeKey) ((DefaultMutableTreeNode) n.getChildAt(0)).getUserObject());
+    }
+
+    // Setters, currently used for tests
+    public void editProperty(String category, final String key, final Object value) {
+        final DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(getTableKey(category)));
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                int firstRow = -1;
+                for (int i = 0; i < m.getRowCount(); i++) {
+                    if (m.getValueAt(i, 0).equals(key)) {
+                        firstRow = i;
+                        m.setValueAt(value, i, 1);
+                    }
+                }
+                if (firstRow < 0) {
+                    Ovation.getLogger().debug("Property to edit doesn't exist, call 'addProperty' instead");
+                    //throw new RuntimeException("Property to edit doesn't exist, call 'addProperty' instead");
+                }
+
+                boolean noListener = true;
+                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                    if (l instanceof PropertyTableModelListener) {
+                        noListener = false;
+
+                        TableModelEvent t = new TableModelEvent(m, firstRow, firstRow, 1, TableModelEvent.UPDATE);
+                        l.tableChanged(t);
+                        break;
+                    }
+                }
+                if (noListener) {
+                    Ovation.getLogger().debug("Property to edit doesn't exist, call 'addProperty' instead");
+                    //throw new RuntimeException("No listener available for the TableModel");
+                }
+            }
+        });
+    }
+
+    public void addProperty(String category, final String key, final Object value) {
+        final DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(getTableKey(category)));
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                m.addRow(new Object[]{"", ""});
+                int row = m.getRowCount() - 1;
+                m.setValueAt(key, row, 0);
+                m.setValueAt(value, row, 1);
+
+                boolean noListener = true;
+                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                    if (l instanceof PropertyTableModelListener) {
+                        noListener = false;
+
+                        TableModelEvent t1 = new TableModelEvent(m, row, row, 0, TableModelEvent.UPDATE);
+                        TableModelEvent t2 = new TableModelEvent(m, row, row, 1, TableModelEvent.UPDATE);
+                        l.tableChanged(t1);
+                        l.tableChanged(t2);
+                        break;
+                    }
+                }
+                if (noListener) {
+                    Ovation.getLogger().debug("No listener available for the TableModel");
+                    //throw new RuntimeException("No listener available for the TableModel");
+                }
+            }
+        });
+    }
+
+    public void removeProperty(String category, String key) {
+        removeProperty(category, key, null);// for removing properties when it doesn't matter whether the values equal
+    }
+
+    public void removeProperty(String category, final String key, final Object value) {
+        TableTreeKey s = getTableKey(category);
+        TableNode node = (TableNode) getCategoryNode(s.getID()).getChildAt(0);
+        node.resetProperties(Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+        final DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(s));
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                int row = -1;
+                for (int i = 0; i < m.getRowCount(); i++) {
+                    if (m.getValueAt(i, 0).equals(key)) {
+                        if (value != null) {
+                            if (m.getValueAt(i, 1).equals(value)) {
+                                row = i;
+                                break;
+                            }
+                        } else {
+                            row = i;
+                            break;
+                        }
+                    }
+                }
+                if (row < 0) {
+                    return;//no row to delete 
+                }
+                boolean noListener = true;
+                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                    if (l instanceof PropertyTableModelListener) {
+                        noListener = false;
+
+                        ((PropertyTableModelListener) l).deleteProperty(m, new int[]{row});
+                        break;
+                    }
+                }
+                if (noListener) {
+                    Ovation.getLogger().debug("No listener available for the TableModel");
+                    //throw new RuntimeException("No listener available for the TableModel");
+                }
+            }
+        });
     }
 }

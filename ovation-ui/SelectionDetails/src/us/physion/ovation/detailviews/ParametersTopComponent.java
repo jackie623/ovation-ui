@@ -78,51 +78,19 @@ public final class ParametersTopComponent extends TopComponent {
             IEntityBase eb = ew.getEntity();
             if (eb instanceof Epoch)
             {
-                String paramName = "Protocol Parameters";
-                Map<String, Object> params = tables.get(paramName);
-                if (params == null)
-                {
-                    params = ((Epoch)eb).getProtocolParameters();
-                }else{
-                    params.putAll(((Epoch)eb).getProtocolParameters());
-                }
-                tables.put(paramName, params);
+                addParams(tables, "Protocol Parameters", ((Epoch)eb).getProtocolParameters());
             }
             if (eb instanceof Stimulus)
             {
-                String paramName = "Stimulus Parameters";
-                Map<String, Object> params = tables.get(paramName);
-                if (params == null)
-                {
-                    params = ((Stimulus)eb).getStimulusParameters();
-                }else{
-                    params.putAll(((Stimulus)eb).getStimulusParameters());
-                }
-                tables.put(paramName, params);
+               addParams(tables, "Stimulus Parameters", ((Stimulus)eb).getStimulusParameters());
             }
             if (eb instanceof IIOBase)
             {
-                String paramName = "Device Parameters";
-                Map<String, Object> params = tables.get(paramName);
-                if (params == null)
-                {
-                    params = ((IIOBase)eb).getDeviceParameters();
-                }else{
-                    params.putAll(((IIOBase)eb).getDeviceParameters());
-                }
-                tables.put(paramName, params);
+                addParams(tables, "Device Parameters", ((IIOBase)eb).getDeviceParameters());
             }
             if (eb instanceof AnalysisRecord)
             {
-                String paramName = "Analysis Parameters";
-                Map<String, Object> params = tables.get(paramName);
-                if (params == null)
-                {
-                    params = ((AnalysisRecord)eb).getAnalysisParameters();
-                }else{
-                    params.putAll(((AnalysisRecord)eb).getAnalysisParameters());
-                }
-                tables.put(paramName, params);
+                addParams(tables, "Analysis Parameters", ((AnalysisRecord)eb).getAnalysisParameters());
             }
         }
         ArrayList<TableTreeKey> tableKeys = new ArrayList<TableTreeKey>();
@@ -130,32 +98,11 @@ public final class ParametersTopComponent extends TopComponent {
         {
             tableKeys.add(new ParameterSet(key, tables.get(key)));
         }
-        ((TreeWithTableRenderer)jScrollPane2).setKeys(tableKeys);
-        
-        /*ArrayList<String> keys = new ArrayList();
-        ArrayList<Object> values = new ArrayList();
-        for (String tableName: tables.keySet())
-        {
-            Map<String, Object> m = tables.get(tableName);
-            for (String key : m.keySet())
-            {
-                keys.add(key);
-                values.add(m.get(key));
-            }
-        }
-        Object[][] v = new Object[keys.size()][2];
-        for (int i =0; i< keys.size(); i++)
-        {
-            v[i][0] = keys.get(i);
-            v[i][1] = values.get(i);
-        }*/
-        //jTable1.setModel(new DefaultTableModel(v, new String[]{"Name", "Parameter"}));
+        ((ScrollableTableTree)jScrollPane2).setKeys(tableKeys);
     }
     
     
-    private DefaultTableModel tableModel;
     public ParametersTopComponent() {
-        tableModel = new DefaultTableModel( new Object[0][0], new String[]{ "Name", "Parameter" });
         initComponents();
         setName(Bundle.CTL_ParametersTopComponent());
         setToolTipText(Bundle.HINT_ParametersTopComponent());
@@ -172,7 +119,7 @@ public final class ParametersTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane2 = new TreeWithTableRenderer();
+        jScrollPane2 = new ScrollableTableTree();
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -211,5 +158,57 @@ public final class ParametersTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
+    }
+
+    private void addParams(Map<String, Map<String, Object>> tables, String paramName, Map<String, Object> parametersToAdd) {
+        Map<String, Object> params = tables.get(paramName);
+        if (params == null) {
+            params = parametersToAdd;
+        } else {
+            //create a new map here, because the Ovation jar returns unmodifiable maps
+            params = new HashMap<String, Object>();
+            params.putAll(tables.get(paramName));
+            for (String paramKey : parametersToAdd.keySet() ) {
+                if (params.containsKey(paramKey))
+                {
+                    MultiUserParameter p = new MultiUserParameter(params.get(paramKey));
+                    p.add(parametersToAdd.get(paramKey));
+                    params.put(paramKey, p);
+                }else{
+                    params.put(paramKey, parametersToAdd.get(paramKey));
+                }
+            }
+        }
+        tables.put(paramName, params);
+    }
+    
+    class MultiUserParameter{
+        
+        ArrayList<Object> values;
+        MultiUserParameter(Object value)
+        {
+            values = new ArrayList();
+            values.add(value);
+        }
+        
+        public void add(Object value)
+        {
+            values.add(value);
+        }
+        
+        @Override
+        public String toString()
+        {
+            String s = "{";
+            for (Object value : values)
+            {
+                s += value + ", ";
+            }
+            if (s.length() == 1)
+            {
+                return "";
+            }
+            return s.substring(0, s.length() -2) + "}";
+        }
     }
 }

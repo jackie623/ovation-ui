@@ -10,6 +10,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.Arrays;
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -102,31 +103,13 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         }
         if ( (lastKey != null && !lastKey.isEmpty()))
         {
-                EventQueueUtilities.runOffEDT(new Runnable()
-                {
-                    @Override
-                    public void run() {
-                        ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
-                        //speeds up performance! TODO: do I need this?
-                        JScrollPane sp = ((JScrollPane)table.getParent().getParent());
-                        sp.setSize(sp.getPreferredSize());
-                        EditableTable.this.setSize(EditableTable.this.getPreferredSize());
-                        table.getSelectionModel().setSelectionInterval(table.getRowCount()-1, table.getRowCount()-1);
-                    }
-                });
+            addBlankRow();
         }
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
        
-         //There is a bug in getListeners - it doesnt find the PropertyTableModelListener if you pass is PropertyTableModelListener.class
-        TableModelListener[] listeners = ((DefaultTableModel) table.getModel()).getListeners(TableModelListener.class);
-        for (TableModelListener l : listeners) {
-            if (l instanceof PropertyTableModelListener) {
-                ((PropertyTableModelListener) l).deleteProperty((DefaultTableModel) table.getModel(), table.getSelectedRows());
-                break;
-            }
-        }
+        deleteRows(table.getSelectedRows());
     }//GEN-LAST:event_deleteButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -156,5 +139,76 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
     protected JScrollPane getScrollPane()
     {
        return jScrollPane1;
+    }
+
+    protected void addBlankRow() {
+        EventQueueUtilities.runOffEDT(new Runnable() {
+            @Override
+            public void run() {
+                DefaultTableModel m = ((DefaultTableModel) table.getModel());
+                int row = m.getRowCount();
+                m.addRow(new Object[]{"", ""});
+                
+                //speeds up performance! TODO: do I need this?
+                JScrollPane sp = ((JScrollPane) table.getParent().getParent());
+                sp.setSize(sp.getPreferredSize());
+                EditableTable.this.setSize(EditableTable.this.getPreferredSize());
+                table.getSelectionModel().setSelectionInterval(table.getRowCount() - 1, table.getRowCount() - 1);
+                
+                
+                boolean noListener = true;
+                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                    if (l instanceof PropertyTableModelListener) {
+                        noListener = false;
+
+                        TableModelEvent t = new TableModelEvent(m, row, row, 1, TableModelEvent.INSERT);
+                        l.tableChanged(t);
+                        break;
+                    }
+                }
+                if (noListener) {
+                    Ovation.getLogger().debug("No listener available for the TableModel");
+                }
+            }
+        });
+    }
+    
+    protected void editRow(final int row, final String key, final Object value)
+    {
+        final DefaultTableModel m = ((DefaultTableModel) table.getModel());
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                m.setValueAt(key, row, 0);
+                m.setValueAt(value, row, 1);
+
+                boolean noListener = true;
+                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                    if (l instanceof PropertyTableModelListener) {
+                        noListener = false;
+
+                        TableModelEvent t = new TableModelEvent(m, row, row, 1, TableModelEvent.UPDATE);
+                        l.tableChanged(t);
+                        break;
+                    }
+                }
+                if (noListener) {
+                    Ovation.getLogger().debug("No listener available for the TableModel");
+                }
+            }
+        });
+    }
+
+    protected void deleteRows(int[] rows) {
+        //There is a bug in getListeners - it doesnt find the PropertyTableModelListener if you pass is PropertyTableModelListener.class
+        TableModelListener[] listeners = ((DefaultTableModel) table.getModel()).getListeners(TableModelListener.class);
+        for (TableModelListener l : listeners) {
+            if (l instanceof PropertyTableModelListener) {
+                ((PropertyTableModelListener) l).deleteProperty((DefaultTableModel) table.getModel(), rows);
+                break;
+            }
+        }
     }
 }

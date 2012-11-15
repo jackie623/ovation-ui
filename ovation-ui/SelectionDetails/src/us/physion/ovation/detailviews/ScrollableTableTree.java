@@ -153,12 +153,11 @@ public class ScrollableTableTree extends JScrollPane {
             }
 
             // otherwise we expect it to be UserPropertySet object
-            //table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
             if (value instanceof TableNode)
             {
                 TableModelListener l = null;
                 if (o instanceof UserPropertySet && ((UserPropertySet)o).isEditable())
-                    l = new PropertyTableModelListener(((UserPropertySet)o).uris, tree, (TableNode)value, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+                    l = new PropertyTableModelListener(((UserPropertySet)o).uris, tree, (TableNode)value);
                 
                 return TreeNodePanelFactory.getPanel(ScrollableTableTree.this, ((TableNode)value), l);
             }
@@ -251,6 +250,10 @@ public class ScrollableTableTree extends JScrollPane {
         return null;
     }
 
+    TableNode getTableNode(String category) {
+        return (TableNode) getCategoryNode(category).getChildAt(0);
+    }
+    
     TableTreeKey getTableKey(String category) {
         DefaultMutableTreeNode n = getCategoryNode(category);
         if (n == null) {
@@ -260,43 +263,58 @@ public class ScrollableTableTree extends JScrollPane {
     }
 
     // Setters, currently used for tests
-    public void editProperty(String category, final String key, final Object value) {
-        final DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(getTableKey(category)));
-        EventQueueUtilities.runOffEDT(new Runnable() {
-
-            @Override
-            public void run() {
-                int firstRow = -1;
-                for (int i = 0; i < m.getRowCount(); i++) {
-                    if (m.getValueAt(i, 0).equals(key)) {
-                        firstRow = i;
-                        m.setValueAt(value, i, 1);
-                    }
-                }
-                if (firstRow < 0) {
-                    Ovation.getLogger().debug("Property to edit doesn't exist, call 'addProperty' instead");
-                    //throw new RuntimeException("Property to edit doesn't exist, call 'addProperty' instead");
-                }
-
-                boolean noListener = true;
-                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
-                    if (l instanceof PropertyTableModelListener) {
-                        noListener = false;
-
-                        TableModelEvent t = new TableModelEvent(m, firstRow, firstRow, 1, TableModelEvent.UPDATE);
-                        l.tableChanged(t);
-                        break;
-                    }
-                }
-                if (noListener) {
-                    Ovation.getLogger().debug("Property to edit doesn't exist, call 'addProperty' instead");
-                    //throw new RuntimeException("No listener available for the TableModel");
-                }
+    public void editProperty(String category, final String key, final Object oldValue, final Object value) {
+        EditableTable t = (EditableTable)getTableNode(category).getPanel();
+        DefaultTableModel m = (DefaultTableModel)t.getTable().getModel();
+        int row = -1;
+        for (int i=0; i< m.getRowCount(); ++i)
+        {
+            if (m.getValueAt(i, 0).equals(key) && m.getValueAt(i, 1).equals(oldValue))
+            {
+                row = i;
+                break;
             }
-        });
+        }
+        if (row < 0)
+        {
+            throw new RuntimeException("No row found for property");
+        }
+        t.editRow(row, key, value);
+    }
+    public void editProperty(String category, final String key, final Object value) {
+        EditableTable t = (EditableTable)getTableNode(category).getPanel();
+        DefaultTableModel m = (DefaultTableModel)t.getTable().getModel();
+        int row = -1;
+        for (int i=0; i< m.getRowCount(); ++i)
+        {
+            if (m.getValueAt(i, 0).equals(key))
+            {
+                row = i;
+                break;
+            }
+        }
+        if (row < 0)
+        {
+            throw new RuntimeException("No row found for property");
+        }
+        t.editRow(row, key, value);
+    }
+    
+    public void editProperty(String category, int row, final String key, final Object value) {
+        EditableTable t = (EditableTable)getTableNode(category).getPanel();
+        t.editRow(row, key, value);
     }
 
     public void addProperty(String category, final String key, final Object value) {
+        
+        EditableTable t = (EditableTable)getTableNode(category).getPanel();
+        int row = t.getTable().getModel().getRowCount();
+        t.addBlankRow();
+        t.editRow(row, key, value);
+        //get editableTable
+        //editableTable.addBlankRow
+        //editableTable.editBlankRow
+        
         final DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) tree.getCellRenderer()).getTableModel(getTableKey(category)));
         EventQueueUtilities.runOffEDT(new Runnable() {
 

@@ -18,6 +18,8 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ServiceProvider;
 import ovation.*;
@@ -25,13 +27,15 @@ import ovation.test.TestManager;
 import us.physion.ovation.detailviews.ScrollableTableTree.TableInTreeCellRenderer;
 import us.physion.ovation.interfaces.*;
 
-@ServiceProvider(service = ConnectionProvider.class)
+@ServiceProvider(service = Lookup.Provider.class)
 /**
  *
  * @author huecotanks
  */
-public class PropertyViewTest extends OvationTestCase implements ConnectionProvider{
+public class PropertyViewTest extends OvationTestCase implements Lookup.Provider, ConnectionProvider{
     
+    private Lookup l;
+    InstanceContent ic;
     private TestEntityWrapper project;
     private TestEntityWrapper source;
     private TestEntityWrapper user1;
@@ -41,6 +45,8 @@ public class PropertyViewTest extends OvationTestCase implements ConnectionProvi
     static TestManager mgr = new SelectionViewTestManager();
     public PropertyViewTest() {
 	setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
+        ic = new InstanceContent();
+        l = new AbstractLookup(ic);
     }
     
     @BeforeClass
@@ -80,6 +86,11 @@ public class PropertyViewTest extends OvationTestCase implements ConnectionProvi
         c.authenticateUser("newUser", "password");
         p.addProperty("color", "chartreuse");
         p.addProperty("interesting", true);
+        
+        ic.add(this);
+
+        Lookup.getDefault().lookup(ConnectionProvider.class);
+        
     }
     
     
@@ -94,8 +105,6 @@ public class PropertyViewTest extends OvationTestCase implements ConnectionProvi
         OvationTestCase.tearDownDatabase(mgr);
     }
 
-
-    
     @Test
     public void testGetsProperTreeNodeStructure()
     {
@@ -153,7 +162,7 @@ public class PropertyViewTest extends OvationTestCase implements ConnectionProvi
         entitySet.add(project);
         entitySet.add(source);
         PropertiesViewTopComponent tc = new PropertiesViewTopComponent();
-        tc.setEntities(entitySet, dsc);
+        tc.setEntities(entitySet, null);
         
         DataContext c = dsc.getContext();
         ScrollableTableTree t = tc.getTableTree();
@@ -684,5 +693,10 @@ public class PropertyViewTest extends OvationTestCase implements ConnectionProvi
     @Override
     public void resetConnection() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Lookup getLookup() {
+        return l;
     }
 }

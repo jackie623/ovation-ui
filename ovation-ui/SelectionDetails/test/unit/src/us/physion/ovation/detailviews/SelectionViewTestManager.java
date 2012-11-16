@@ -43,7 +43,7 @@ public class SelectionViewTestManager extends TestManager{
         });
         if (pwd == null)
         {
-            pwd = "/Users/jackie/Ovation/ovation-ui/";
+            pwd = "/Users/huecotanks/Ovation/ui/";
         }
         String path = pwd + "data" + File.separator
                 + "selectionDetails" + File.separator

@@ -49,7 +49,7 @@ public final class ParametersTopComponent extends TopComponent {
         @Override
         public void resultChanged(LookupEvent le) {
 
-            //TODO: we should have some other Interface for things that can update the tags view
+            //TODO: we should have some other Interface for things that can setEntities the tags view
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
             {
@@ -63,12 +63,12 @@ public final class ParametersTopComponent extends TopComponent {
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             public void run() {
-                update(global.allInstances());
+                setEntities(global.allInstances());
             }
         });
     }
     
-    public void update(final Collection<? extends IEntityWrapper> entities)
+    public void setEntities(final Collection<? extends IEntityWrapper> entities)
     {
         this.entities = entities;
 
@@ -101,6 +101,15 @@ public final class ParametersTopComponent extends TopComponent {
         ((ScrollableTableTree)jScrollPane2).setKeys(tableKeys);
     }
     
+    public Collection<? extends IEntityWrapper> getEntities()
+    {
+        return entities;
+    }
+    
+    public ScrollableTableTree getTableTree()
+    {
+        return ((ScrollableTableTree)jScrollPane2);
+    }
     
     public ParametersTopComponent() {
         initComponents();
@@ -188,12 +197,17 @@ public final class ParametersTopComponent extends TopComponent {
         MultiUserParameter(Object value)
         {
             values = new ArrayList();
-            values.add(value);
+            add(value);
         }
         
         public void add(Object value)
         {
-            values.add(value);
+            if (value instanceof MultiUserParameter)
+            {
+                values.addAll(((MultiUserParameter)value).values);
+            }else{
+                values.add(value);
+            }
         }
         
         @Override

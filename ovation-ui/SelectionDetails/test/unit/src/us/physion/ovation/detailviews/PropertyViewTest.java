@@ -90,7 +90,6 @@ public class PropertyViewTest extends OvationTestCase implements Lookup.Provider
         ic.add(this);
 
         Lookup.getDefault().lookup(ConnectionProvider.class);
-        
     }
     
     

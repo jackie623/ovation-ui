@@ -131,8 +131,8 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
     @Override
     public Dimension getPreferredSize(){  
         int height = (table.getRowCount()+1)*table.getRowHeight() + 24 + addButton.getHeight();
-                
-        Dimension actual = new Dimension(treeUtils.getCellWidth(), height);
+        int width = treeUtils == null ? getWidth() : treeUtils.getCellWidth();
+        Dimension actual = new Dimension(width, height);
         return actual;  
     }
     
@@ -150,11 +150,11 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 m.addRow(new Object[]{"", ""});
                 
                 //speeds up performance! TODO: do I need this?
-                JScrollPane sp = ((JScrollPane) table.getParent().getParent());
+                /*JScrollPane sp = ((JScrollPane) table.getParent().getParent());
                 sp.setSize(sp.getPreferredSize());
                 EditableTable.this.setSize(EditableTable.this.getPreferredSize());
                 table.getSelectionModel().setSelectionInterval(table.getRowCount() - 1, table.getRowCount() - 1);
-                
+                */
                 
                 boolean noListener = true;
                 for (TableModelListener l : m.getListeners(TableModelListener.class)) {

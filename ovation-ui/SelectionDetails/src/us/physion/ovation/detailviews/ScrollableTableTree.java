@@ -157,7 +157,7 @@ public class ScrollableTableTree extends JScrollPane {
             {
                 TableModelListener l = null;
                 if (o instanceof UserPropertySet && ((UserPropertySet)o).isEditable())
-                    l = new PropertyTableModelListener(((UserPropertySet)o).uris, tree, (TableNode)value);
+                    l = new PropertyTableModelListener(((UserPropertySet)o).uris, (ExpandableJTree)tree, (TableNode)value);
                 
                 return TreeNodePanelFactory.getPanel(ScrollableTableTree.this, ((TableNode)value), l);
             }

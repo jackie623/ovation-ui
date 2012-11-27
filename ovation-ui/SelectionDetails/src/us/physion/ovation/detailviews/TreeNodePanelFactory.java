@@ -31,7 +31,7 @@ public class TreeNodePanelFactory {
         if (cr.tableLookup.containsKey(id)) {
             panel = cr.tableLookup.get(id);
         } else {
-            JTable table = new JTable() {
+            JTable table = new ZebraTable() {
 
                 public Dimension getPreferredSize() {
                     //gets the width of the TreeCellRenderer, which is set in the BasicTreeUI classs
@@ -50,8 +50,8 @@ public class TreeNodePanelFactory {
 
             //table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
             //table.setRowSorter(new TableRowSorter());
-            //table.getTableHeader().setVisible(false);
-            //table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
+            table.getTableHeader().setVisible(false);
+            table.getTableHeader().setPreferredSize(new Dimension(-1, 0));
             if (k.isEditable()) {
                 panel = new EditableTable(table, t);
             } else {

@@ -10,8 +10,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Scanner;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import ovation.Response;
 import ovation.URLResponse;
 
@@ -28,79 +31,50 @@ public class TabularDataWrapper implements Visualization {
         } else {
             in = new ByteArrayInputStream(r.getDataBytes());
         }
-        
-        /*
-        DicomInputStream in = null;
-        try {
-            if (r instanceof URLResponse)
-                in = new DicomInputStream(r.getDataStream());
-            else{
-                in = new DicomInputStream(new ByteArrayInputStream(r.getDataBytes()));
-            }
-            src = new SourceImage(in);
-            this.name = r.getExternalDevice().getName();
-        } catch (DicomException ex) {
-            Exceptions.printStackTrace(ex);
-            throw new RuntimeException(ex.getLocalizedMessage());
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-            throw new RuntimeException(ex.getLocalizedMessage());
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                    throw new RuntimeException(ex.getLocalizedMessage());
-                }
-            }
-        }*/
-    }
-
-    void parseCSVData(InputStream in) {
-        /*
-        FileInputStream s = new FileInputStream(in);
-        while (in.read) {
-        String line = acq_scan.nextLine();
-        if (line.charAt(0) == '#') {
-            continue;
+        Scanner s = new Scanner(in, "UTF-8");
+        if (!s.hasNextLine())
+        {
+            throw new RuntimeException("Empty response data!");
         }
-        String[] split = line.split(",");
-
-        itemName = split[0];
-        quantity = Integer.parseInt(split[1]);
-        cost = Double.parseDouble(split[2]);
-        price = Double.parseDouble(split[3]);
-
-
-        while(invscan.hasNext()) {
-            String line2 = invscan.nextLine();
-            if (line2.charAt(0) == '#') {
+        String line = s.nextLine();
+        columnNames = line.split(",");
+        int lineCount=0; 
+        while (s.hasNextLine())
+        {
+            line = s.nextLine();
+            if (line.charAt(0) == '#') {
                 continue;
             }
-            String[] split2 = line2.split(",");
-
-            itemNameInv = split2[0];
-            quantityInv = Integer.parseInt(split2[1]);
-            costInv = Double.parseDouble(split2[2]);
-            priceInv = Double.parseDouble(split2[3]);
-
-
-            if(itemName == itemNameInv) {
-                //update quantity
-
-            }
+            lineCount++;
         }
-        //add new entry into csv file
-
-     }*/
+        
+        tabularData = new String[lineCount][columnNames.length];
+        if (r instanceof URLResponse) {
+            in = r.getDataStream();
+        } else {
+            in = new ByteArrayInputStream(r.getDataBytes());
+        }
+        s = new Scanner(in, "UTF-8");
+        s.nextLine();
+        lineCount = 0;
+        while (s.hasNextLine())
+        {
+            line = s.nextLine();
+            if (line.charAt(0) == '#') {
+                continue;
+            }
+            String[] values = line.split(",");
+            for (int i=0; i<columnNames.length; ++i)
+            {
+                tabularData[lineCount][i] = values[i];
+            }
+            lineCount++;
+        }
     }
 
     @Override
     public Component generatePanel() {
-	JScrollPane pane = new JScrollPane();
-	pane.add(new JTable(tabularData, columnNames));
-	return pane;
+        return new TabularDataPanel(tabularData, columnNames);
     }
 
     @Override
@@ -112,5 +86,4 @@ public class TabularDataWrapper implements Visualization {
     public void add(Response r) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
 }

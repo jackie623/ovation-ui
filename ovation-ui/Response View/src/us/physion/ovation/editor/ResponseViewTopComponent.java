@@ -177,46 +177,29 @@ public final class ResponseViewTopComponent extends TopComponent {
         EventQueueUtilities.runOffEDT(r);
     }
 
-    protected List<ResponseGroupWrapper> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
+    protected List<Visualization> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
         
-        LinkedList<ResponseWrapper> responseList = new LinkedList<ResponseWrapper>();
+        Collection<? extends VisualizationFactory> factories = Lookup.getDefault().lookupAll(VisualizationFactory.class);
+
+        LinkedList<Response> responseList = new LinkedList<Response>();
 
         for (IEntityWrapper ew : entities) {
             if (ew.getType().isAssignableFrom(Epoch.class)) {
                 Epoch epoch = (Epoch) (ew.getEntity());//getEntity gets the context for the given thread
                 for (String name : epoch.getResponseNames()) {
-                    ResponseWrapper entity = null;
-                    try
-                    {
-                        entity = ResponseWrapperFactory.create(epoch.getResponse(name));
-                    } catch (OvationException e)
-                    {
-                        //pass - dont create display response if an error gets thrown reading from the response
-                    }
-                    if (entity != null) {
-                        responseList.add(entity);
-                    }
-
+                    responseList.add(epoch.getResponse(name));
                 }
 
             } else if (ew.getType().isAssignableFrom(Response.class) || ew.getType().isAssignableFrom(URLResponse.class)) {
-                ResponseWrapper entity = null;
-                try {
-                    entity = ResponseWrapperFactory.create((Response)ew.getEntity());
-                } catch (OvationException e) {
-                    //pass - dont create display response if an error gets thrown reading from the response
-                }
-                if (entity != null) {
-                    responseList.add(entity);
-                }
+                responseList.add((Response)ew.getEntity());
             }
         }
 
-        List<ResponseGroupWrapper> responseGroups = new LinkedList<ResponseGroupWrapper>();
+        List<Visualization> responseGroups = new LinkedList<Visualization>();
 
-        for (ResponseWrapper rw : responseList) {
+        for (Response rw : responseList) {
             boolean added = false;
-            for (ResponseGroupWrapper group : responseGroups) {
+            for (Visualization group : responseGroups) {
                 if (group.shouldAdd(rw)) {
                     group.add(rw);
                     added = true;
@@ -225,7 +208,7 @@ public final class ResponseViewTopComponent extends TopComponent {
 
             }
             if (!added) {
-                responseGroups.add(rw.createGroup());
+                responseGroups.add(ResponseWrapperFactory.create(rw).createVisualization(rw));
             }
         }
         EventQueueUtilities.runOnEDT(updateChartRunnable(responseGroups));
@@ -245,7 +228,7 @@ public final class ResponseViewTopComponent extends TopComponent {
         
     }
 
-    private Runnable updateChartRunnable(final List<ResponseGroupWrapper> responseGroups) {
+    private Runnable updateChartRunnable(final List<Visualization> responseGroups) {
         final int height = this.getHeight();
         return new Runnable() {
 
@@ -265,7 +248,7 @@ public final class ResponseViewTopComponent extends TopComponent {
                     if (rowheight >= 1) {
                         jTable1.setRowHeight(rowheight);
                     }
-                    for (ResponseGroupWrapper c : responseGroups) {
+                    for (Visualization c : responseGroups) {
                         Component p = c.generatePanel();
 
                         responsePanels.add(new ResponsePanel(p));

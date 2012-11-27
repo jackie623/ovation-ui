@@ -77,7 +77,7 @@ public class ScrollableTableTree extends JScrollPane {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("");
         tree = new ExpandableJTree(root);
         TableInTreeCellRenderer r = new TableInTreeCellRenderer();
-        tree.setUI(new PropertiesTreeUI(this.getViewport()));
+        tree.setUI(new PropertiesTreeUI(this));
         addComponentListener(new RepaintOnResize(tree));
         tree.setCellRenderer(r);
         tree.setRowHeight(0);

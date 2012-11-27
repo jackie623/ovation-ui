@@ -5,16 +5,16 @@
 package us.physion.ovation.editor;
 
 import java.io.InputStream;
-import org.jfree.data.xy.DefaultXYDataset;
 import ovation.NumericData;
 import ovation.Response;
 import ovation.URLResponse;
+
 
 /**
  *
  * @author huecotanks
  */
-public class ChartWrapper implements ResponseWrapper{
+public class ChartWrapper {
     NumericData data;
     InputStream dataStream;
     String name;
@@ -44,16 +44,6 @@ public class ChartWrapper implements ResponseWrapper{
            return "Time (in " + prefix + "Seconds)";
        }
        else return ("1 / " + samplingRateUnits);
-    }
-    
-    
-
-    @Override
-    public ResponseGroupWrapper createGroup() {
-        ChartGroupWrapper g = new ChartGroupWrapper(new DefaultXYDataset(), xunits, yunits);
-        g.setTitle(getName());
-        g.addXYDataset(this);
-        return g;
     }
     
     public String getXUnits()

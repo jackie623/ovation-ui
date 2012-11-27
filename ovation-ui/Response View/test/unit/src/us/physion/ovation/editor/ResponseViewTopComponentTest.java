@@ -103,11 +103,11 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         Response r = epoch.insertResponse(dev, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
         entities.add(new TestEntityWrapper(dsc, r));
         
-        Collection<ResponseGroupWrapper> chartWrappers= t.updateEntitySelection(entities);
+        Collection<Visualization> chartWrappers= t.updateEntitySelection(entities);
         
         assertEquals(chartWrappers.size(), entities.size());
         
-        for (ResponseGroupWrapper w : chartWrappers)
+        for (Visualization w : chartWrappers)
         {
             if (w instanceof ChartGroupWrapper) {
                 ChartGroupWrapper p = (ChartGroupWrapper) w;
@@ -144,7 +144,7 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         
         ChartWrapper rw = (ChartWrapper)ResponseWrapperFactory.create(r);
         
-        ChartGroupWrapper cw = (ChartGroupWrapper)rw.createGroup();
+        ChartGroupWrapper cw = (ChartGroupWrapper)ResponseWrapperFactory.create(r).createVisualization(r);
         DefaultXYDataset ds = cw.getDataset();
         ChartPanel p = cw.generateChartPanel();
         XYPlot plot = p.getChart().getXYPlot();
@@ -183,12 +183,12 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
 
         entities.add(new TestEntityWrapper(dsc, epoch));
         
-        Collection<ResponseGroupWrapper> chartWrappers= t.updateEntitySelection(entities);
+        Collection<Visualization> chartWrappers= t.updateEntitySelection(entities);
         
         assertEquals(1, chartWrappers.size());
         
         Set<String> series = new HashSet();
-        for (ResponseGroupWrapper w : chartWrappers)
+        for (Visualization w : chartWrappers)
         {
             if (w instanceof ChartGroupWrapper) {
                 ChartGroupWrapper p = (ChartGroupWrapper) w;
@@ -229,12 +229,12 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         entities.add(new TestEntityWrapper(dsc, r1));
         entities.add(new TestEntityWrapper(dsc, r2));
         
-        Collection<ResponseGroupWrapper> chartWrappers= t.updateEntitySelection(entities);
+        Collection<Visualization> chartWrappers= t.updateEntitySelection(entities);
         
         assertEquals(chartWrappers.size(), entities.size());
         
         Set<String> series = new HashSet();
-        for (ResponseGroupWrapper w : chartWrappers)
+        for (Visualization w : chartWrappers)
         {
             if (w instanceof ChartGroupWrapper) {
                 ChartGroupWrapper p = (ChartGroupWrapper) w;

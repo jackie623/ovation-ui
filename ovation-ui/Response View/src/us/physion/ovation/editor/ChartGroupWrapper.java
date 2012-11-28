@@ -20,20 +20,19 @@ import org.jfree.ui.RectangleInsets;
 import ovation.NumericData;
 import ovation.NumericDataFormat;
 import ovation.Ovation;
+import ovation.Response;
 
 /**
  *
  * @author huecotanks
  */
-class ChartGroupWrapper implements ResponseGroupWrapper
+class ChartGroupWrapper implements Visualization
 {
     DefaultXYDataset _ds;
     String _xAxis;
     String _yAxis;
     String _title;
     Map<String, Integer> dsCardinality;
-    
-
     
     ChartGroupWrapper(DefaultXYDataset ds, String xAxis, String yAxis)
     {
@@ -71,16 +70,17 @@ class ChartGroupWrapper implements ResponseGroupWrapper
         return generateChartPanel();
     }
     
-     protected void addXYDataset(ChartWrapper cw)
+    protected void addXYDataset(ChartWrapper cw)
     {
-        NumericData d = cw.getNumericData();
-        
+        addXYDataset(cw.getNumericData(), cw.getSamplingRate(), cw.getName());
+    }
+     protected void addXYDataset(NumericData d, double samplingRate, String datasetName)
+    {
         if (d == null)
         {
             return; //TODO: handle URLResponses of numericData
         }
         long[] shape = d.getShape(); 
-        double samplingRate = cw.getSamplingRate();
         long size = 1;
         for (int dimension = 0; dimension<shape.length; dimension++)
         {
@@ -89,13 +89,13 @@ class ChartGroupWrapper implements ResponseGroupWrapper
         
         if (shape.length == 1)
         {
-            int existingSeries = _ds.indexOf(cw.getName());
+            int existingSeries = _ds.indexOf(datasetName);
             int scale = 0;
-            if (dsCardinality.containsKey(cw.getName()))
+            if (dsCardinality.containsKey(datasetName))
             {
-                scale = dsCardinality.get(cw.getName());
+                scale = dsCardinality.get(datasetName);
             }
-            String newName = cw.getName() + "-" + String.valueOf(scale+1);
+            String newName = datasetName + "-" + String.valueOf(scale+1);
 
             if (d.getDataFormat() == NumericDataFormat.FloatingPointDataType)
             {
@@ -116,13 +116,13 @@ class ChartGroupWrapper implements ResponseGroupWrapper
                     } 
                 }
                 
-                dsCardinality.put(cw.getName(), scale + 1);
+                dsCardinality.put(datasetName, scale + 1);
 
                 if (existingSeries >= 0) {
                     _ds.addSeries(newName, data);
             
                 } else {
-                    _ds.addSeries(cw.getName(), data);
+                    _ds.addSeries(datasetName, data);
                 }
 
             }
@@ -143,13 +143,13 @@ class ChartGroupWrapper implements ResponseGroupWrapper
                     data[0][i] = i / samplingRate;
                     } 
                 }
-                dsCardinality.put(cw.getName(), scale + 1);
+                dsCardinality.put(datasetName, scale + 1);
 
                 if (existingSeries >= 0) {
                     _ds.addSeries(newName, data);
             
                 } else {
-                    _ds.addSeries(cw.getName(), data);
+                    _ds.addSeries(datasetName, data);
                 }
             }
             else if (d.getDataFormat() == NumericDataFormat.UnsignedFixedPointDataType)
@@ -169,16 +169,16 @@ class ChartGroupWrapper implements ResponseGroupWrapper
                     data[0][i] = i / samplingRate;
                     } 
                 }
-                dsCardinality.put(cw.getName(), scale + 1);
+                dsCardinality.put(datasetName, scale + 1);
 
                 if (existingSeries >= 0) {
                     _ds.addSeries(newName, data);
             
                 } else {
-                    _ds.addSeries(cw.getName(), data);
+                    _ds.addSeries(datasetName, data);
                 }
                 
-                _ds.addSeries(cw.getName(), data);
+                _ds.addSeries(datasetName, data);
             }
             
             else{
@@ -188,31 +188,26 @@ class ChartGroupWrapper implements ResponseGroupWrapper
     }
 
     @Override
-    public boolean shouldAdd(ResponseWrapper r) {
-        if (r instanceof ChartWrapper)
-        {
-            //if units match
-            ChartWrapper cw = (ChartWrapper) r;
-            if (cw.getXUnits().equals(_xAxis) && cw.getYUnits().equals(_yAxis))
-                return true;
+    public boolean shouldAdd(Response r) {
+        ChartWrapper cw = new ChartWrapper(r);
+        //if units match
+        if (cw.xunits.equals(_xAxis) && cw.yunits.equals(_yAxis)) {
+            return true;
         }
         return false;
     }
 
     @Override
-    public void add(ResponseWrapper r) {
-        if (r instanceof ChartWrapper)
-        {
-            String preface = "Aggregate responses: ";
-            addXYDataset((ChartWrapper)r);
-            String name = "";
-            if (getTitle().startsWith(preface))
-            {
-                name = getTitle().substring(preface.length());
-            } else{
-                name = getTitle();
-            }
-            setTitle(preface + name + ", " + ((ChartWrapper)r).getName());
+    public void add(Response r) {
+        ChartWrapper cw = new ChartWrapper(r);
+        String preface = "Aggregate responses: ";
+        addXYDataset(cw);
+        String name = "";
+        if (getTitle().startsWith(preface)) {
+            name = getTitle().substring(preface.length());
+        } else {
+            name = getTitle();
         }
+        setTitle(preface + name + ", " + cw.getName());
     }
 }

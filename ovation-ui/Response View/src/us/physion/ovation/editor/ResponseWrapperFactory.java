@@ -4,7 +4,9 @@
  */
 package us.physion.ovation.editor;
 
+import java.util.Collection;
 import javax.imageio.ImageIO;
+import org.openide.util.Lookup;
 import ovation.Response;
 
 /**
@@ -12,30 +14,20 @@ import ovation.Response;
  * @author huecotanks
  */
 public class ResponseWrapperFactory {
-    public static ResponseWrapper create(Response r)
+    public static VisualizationFactory create(Response r)
     {
-        String uti = r.getUTI();
-        if (uti.equals(Response.NUMERIC_DATA_UTI) && r.getShape().length == 1)
+        Collection<? extends VisualizationFactory> factories = Lookup.getDefault().lookupAll(VisualizationFactory.class);
+        int preference = 0;
+        VisualizationFactory vis = null;
+        for (VisualizationFactory f : factories)
         {
-            ChartWrapper cw = new ChartWrapper(r);
-            return cw;
-            
-        } else if (uti.equals("org.nema.dicom"))
-        {
-            DicomWrapper d = new DicomWrapper(r);
-            return d;
-          
-        }else {
-            String lowercaseUTI = uti.toLowerCase();
-            for (String name : ImageIO.getReaderFormatNames())
+            int factoryPref = f.getPreferenceForDataContainer(r);
+            if (factoryPref > preference)
             {
-                if (lowercaseUTI.contains(name.toLowerCase()))
-                {
-                    DefaultImageWrapper d = new DefaultImageWrapper(r);
-                    return d;
-                }
+                preference = factoryPref;
+                vis = f;
             }
         }
-        return null;
+        return vis;
     }
 }

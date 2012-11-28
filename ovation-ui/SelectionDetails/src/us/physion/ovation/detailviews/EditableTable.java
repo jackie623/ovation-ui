@@ -130,7 +130,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     @Override
     public Dimension getPreferredSize(){  
-        int height = (table.getRowCount()+1)*table.getRowHeight() + 24 + addButton.getHeight();
+        int height = (table.getRowCount())*table.getRowHeight() + 24 + addButton.getHeight();
         int width = treeUtils == null ? getWidth() : treeUtils.getCellWidth();
         Dimension actual = new Dimension(width, height);
         return actual;  

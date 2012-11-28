@@ -19,7 +19,7 @@ import ovation.URLResponse;
  *
  * @author huecotanks
  */
-public class DicomWrapper implements ResponseWrapper,ResponseGroupWrapper {
+public class DicomWrapper implements Visualization {
 
     String name;
     SourceImage src;
@@ -59,17 +59,12 @@ public class DicomWrapper implements ResponseWrapper,ResponseGroupWrapper {
     }
 
     @Override
-    public ResponseGroupWrapper createGroup() {
-        return this;
-    }
-
-    @Override
-    public boolean shouldAdd(ResponseWrapper r) {
+    public boolean shouldAdd(Response r) {
         return false;
     }
 
     @Override
-    public void add(ResponseWrapper r) {
+    public void add(Response r) {
         throw new UnsupportedOperationException("Dicoms are not displayed in groups");
     }
     

@@ -5,15 +5,16 @@
 package us.physion.ovation.editor;
 
 import java.awt.Component;
+import ovation.Response;
 
 /**
  *
  * @author huecotanks
  */
-public interface ResponseGroupWrapper {
+public interface Visualization {
     public Component generatePanel();
     
-    public boolean shouldAdd(ResponseWrapper r);
+    public boolean shouldAdd(Response r);
     
-    public void add(ResponseWrapper r);
+    public void add(Response r);
 }

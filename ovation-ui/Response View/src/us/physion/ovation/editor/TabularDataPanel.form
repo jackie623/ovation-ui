@@ -41,6 +41,9 @@
               </Table>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ZebraTable()"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

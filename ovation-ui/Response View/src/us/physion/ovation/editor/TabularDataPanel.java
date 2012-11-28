@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package us.physion.ovation.editor;
+import us.physion.ovation.interfaces.ZebraTable;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -30,7 +31,7 @@ public class TabularDataPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTable1 = new ZebraTable();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {

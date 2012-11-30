@@ -50,21 +50,22 @@ public class PropertiesTreeUI extends BasicTreeUI{
                     dimensions.width -= (getRowX(row, depth) -4);
                 if (value instanceof TableNode)
                 {
-                     if (((TableNode)value).getHeight() >0)
-                         dimensions.height = ((TableNode)value).getHeight();
+                    int height = ((TableNode)value).getHeight();
+                    if (height > 0)
+                        dimensions.height = height;
                 }
                 return dimensions;
             }
+
+            @Override
+            protected int getRowX(int row, int depth) {
+                if (depth == 2) {
+                    return 4;
+                }
+
+                return super.getRowX(row, depth);
+            }
         };
-    }
-    
-    @Override
-    protected int getRowX(int row, int depth)
-    {
-        if (depth ==2)
-            return 4;
-        
-        return super.getRowX(row, depth);
     }
 
     @Override

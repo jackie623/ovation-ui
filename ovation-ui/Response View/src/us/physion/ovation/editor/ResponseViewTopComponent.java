@@ -179,8 +179,6 @@ public final class ResponseViewTopComponent extends TopComponent {
 
     protected List<Visualization> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {
         
-        Collection<? extends VisualizationFactory> factories = Lookup.getDefault().lookupAll(VisualizationFactory.class);
-
         LinkedList<Response> responseList = new LinkedList<Response>();
 
         for (IEntityWrapper ew : entities) {
@@ -243,16 +241,50 @@ public final class ResponseViewTopComponent extends TopComponent {
                 if (responseGroups.size() < initialSize) {
                     chartModel.fireTableRowsDeleted(responseGroups.size(), initialSize - 1);
                 }
-                if (responseGroups.size() != 0) {
-                    int rowheight = (height / responseGroups.size());
-                    if (rowheight >= 1) {
-                        jTable1.setRowHeight(rowheight);
-                    }
+                if (responseGroups.size() != 0) 
+                {
+                    int[] rowHeights = new int[responseGroups.size()];//highest allowable height for each row
+                    ArrayList<Integer> strictHeights = new ArrayList<Integer>();
+                    
                     for (Visualization c : responseGroups) {
                         Component p = c.generatePanel();
 
+                        int row = responsePanels.size();
+                        if (p instanceof StrictSizePanel)
+                        {
+                            int strictHeight = ((StrictSizePanel)p).getStrictSize().height;
+                            strictHeights.add(strictHeight);
+                            rowHeights[row] = strictHeight;
+                        }  else{
+                            rowHeights[row] = Integer.MAX_VALUE;
+                        }  
+                            
                         responsePanels.add(new ResponsePanel(p));
-
+                    }
+                    Collections.sort(strictHeights);
+                    int totalStrictHeight = 0;
+                    int strictPanels = 0;
+                    int defaultHeight = height/responseGroups.size();
+                    while (strictHeights.size() > 0)
+                    {      
+                        //find the threshold for the default height
+                        int h = strictHeights.remove(0);
+                        if (responseGroups.size() - strictPanels == 0)
+                        {   
+                            break;
+                        }
+                        defaultHeight = (height - totalStrictHeight)/(responseGroups.size() - strictPanels);
+                        if (h > defaultHeight)
+                        {
+                            break;
+                        }
+                        totalStrictHeight += h;
+                        strictPanels ++;
+                    }
+                    jTable1.setRowHeight(defaultHeight);
+                    for (int i=0; i<rowHeights.length; ++i)
+                    {
+                        jTable1.setRowHeight(i, Math.min(defaultHeight, rowHeights[i]));
                     }
                 }
                 chartModel.fireTableDataChanged();

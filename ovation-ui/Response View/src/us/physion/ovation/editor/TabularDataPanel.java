@@ -3,6 +3,8 @@
  * and open the template in the editor.
  */
 package us.physion.ovation.editor;
+import java.awt.Color;
+import javax.swing.border.LineBorder;
 import us.physion.ovation.interfaces.ZebraTable;
 
 import javax.swing.table.DefaultTableModel;
@@ -11,7 +13,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author huecotanks
  */
-public class TabularDataPanel extends javax.swing.JPanel {
+public class TabularDataPanel extends javax.swing.JPanel implements StrictSizePanel{
 
     /**
      * Creates new form TabularDataPanel
@@ -19,6 +21,7 @@ public class TabularDataPanel extends javax.swing.JPanel {
     public TabularDataPanel(Object[][] data, Object[] columnNames) {
         initComponents();
         jTable1.setModel(new DefaultTableModel(data, columnNames));
+        jTable1.getTableHeader().setBorder(new LineBorder(Color.GRAY));
     }
 
     /**
@@ -31,8 +34,11 @@ public class TabularDataPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new ZebraTable();
+        jTable1 = new javax.swing.JTable();
 
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(25, 25, 25, 25));
+
+        jTable1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -44,21 +50,27 @@ public class TabularDataPanel extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        jTable1.setGridColor(new java.awt.Color(204, 204, 204));
         jScrollPane1.setViewportView(jTable1);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public Dimension getStrictSize() {
+        return new Dimension(getWidth(), jTable1.getSize().height + 10);
+    }
 }

@@ -71,14 +71,26 @@ public final class RunQuery implements ActionListener {
                 System.out.println("Starting query");
                 long start = System.currentTimeMillis();
 
-                ph = ProgressHandleFactory.createHandle("Querying");
-                ph.setDisplayName("Querying");
-                ph.switchToIndeterminate();
-                ph.start();
-
                 if (etp instanceof QueryProvider) {
-                    QueryProvider qp = (QueryProvider) etp;
+                    final QueryProvider qp = (QueryProvider) etp;
                     qp.setExpressionTree(result);
+
+                    ph = ProgressHandleFactory.createHandle("Querying", new Cancellable() {
+
+                        @Override
+                        public boolean cancel() {
+                            for (QueryListener listener : qp.getListeners()) {
+                                System.out.println("About to cancel");
+                                listener.cancel();
+                                System.out.println("Cancelling");
+                            }
+                            return true;
+                        }
+                    });
+                    ph.setDisplayName("Querying");
+                    ph.switchToIndeterminate();
+                    ph.start();
+
                     for (QueryListener listener : qp.getListeners()) {
                         FutureTask task = listener.run();
                         try {
@@ -87,11 +99,13 @@ public final class RunQuery implements ActionListener {
                             Exceptions.printStackTrace(ex);
                         } catch (ExecutionException ex) {
                             Exceptions.printStackTrace(ex);
+                        } catch (Exception ex){
+                            Exceptions.printStackTrace(ex);
                         }
                     }
+                    
+                    ph.finish();
                 }
-
-                ph.finish();
     
                 System.out.println("Finished query: " + (System.currentTimeMillis() - start)  + " ms");
             }

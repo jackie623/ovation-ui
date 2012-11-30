@@ -150,6 +150,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
             User current = c.currentAuthenticatedUser();
             properties.add(new UserPropertySet(current, owners.contains(current.getUuid()), true, new HashMap<String, Object>(), uris));
         }
+        
         Collections.sort(properties);
         
         ((ScrollableTableTree) jScrollPane1).setKeys(properties);

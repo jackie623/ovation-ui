@@ -69,15 +69,7 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
     
     @Override
     public Dimension getPreferredSize(){  
-        int height; 
-        if (table.getHeight() ==0)
-        {
-            height = (int)super.getPreferredSize().getHeight();
-        }
-        else
-        {
-            height = (table.getRowCount())*table.getRowHeight() + 5;
-        }
+        int height = table.getHeight() == 0 ? 0 : (table.getRowCount())*table.getRowHeight() + 5; 
         Dimension actual = new Dimension(treeUtils.getCellWidth(), height);
         return actual;  
     }

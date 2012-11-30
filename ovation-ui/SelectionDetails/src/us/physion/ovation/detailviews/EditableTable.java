@@ -77,14 +77,14 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 28, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 28, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(0, 386, Short.MAX_VALUE))
+                .add(0, 360, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 445, Short.MAX_VALUE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
@@ -130,10 +130,20 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     @Override
     public Dimension getPreferredSize(){  
-        int height = (table.getRowCount())*table.getRowHeight() + 24 + addButton.getHeight();
+        int height = 0;
+        //this is voodoo magic, DO NOT CHANGE
+        if (table.getHeight() ==0)
+         {
+            height = (int)super.getPreferredSize().getHeight();//this gets the height from the EditableTable default, so modify the 
+         }
+        else
+        {
+            height = (table.getRowCount())*table.getRowHeight() + 8 + addButton.getHeight();
+        }
         int width = treeUtils == null ? getWidth() : treeUtils.getCellWidth();
         Dimension actual = new Dimension(width, height);
-        return actual;  
+         return actual;  
+       
     }
     
     protected JScrollPane getScrollPane()
@@ -150,11 +160,11 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 m.addRow(new Object[]{"", ""});
                 
                 //speeds up performance! TODO: do I need this?
-                /*JScrollPane sp = ((JScrollPane) table.getParent().getParent());
+                JScrollPane sp = ((JScrollPane) table.getParent().getParent());
                 sp.setSize(sp.getPreferredSize());
                 EditableTable.this.setSize(EditableTable.this.getPreferredSize());
                 table.getSelectionModel().setSelectionInterval(table.getRowCount() - 1, table.getRowCount() - 1);
-                */
+                
                 
                 boolean noListener = true;
                 for (TableModelListener l : m.getListeners(TableModelListener.class)) {

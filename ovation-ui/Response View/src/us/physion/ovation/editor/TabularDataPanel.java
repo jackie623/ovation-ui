@@ -13,7 +13,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author huecotanks
  */
-public class TabularDataPanel extends javax.swing.JPanel {
+public class TabularDataPanel extends javax.swing.JPanel implements StrictSizePanel{
 
     /**
      * Creates new form TabularDataPanel
@@ -68,4 +68,9 @@ public class TabularDataPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public Dimension getStrictSize() {
+        return new Dimension(getWidth(), jTable1.getSize().height + 10);
+    }
 }

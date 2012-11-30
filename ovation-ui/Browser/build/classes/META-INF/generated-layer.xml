@@ -2,7 +2,67 @@
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
                             "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
+    <folder name="Actions">
+        <folder name="Edit">
+            <file name="us-physion-ovation-browser-BrowserCopyAction.instance">
+                <!--us.physion.ovation.browser.BrowserCopyAction-->
+                <attr
+                    bundlevalue="us.physion.ovation.browser.Bundle#CTL_BrowserCopyAction" name="displayName"/>
+                <attr
+                    methodvalue="org.openide.awt.Actions.alwaysEnabled" name="instanceCreate"/>
+                <attr name="delegate" newvalue="us.physion.ovation.browser.BrowserCopyAction"/>
+                <attr boolvalue="false" name="noIconInMenu"/>
+            </file>
+            <file name="us-physion-ovation-browser-ResetQueryAction.instance">
+                <!--us.physion.ovation.browser.ResetQueryAction-->
+                <attr
+                    bundlevalue="us.physion.ovation.browser.Bundle#CTL_ResetQueryAction" name="displayName"/>
+                <attr
+                    methodvalue="org.openide.awt.Actions.alwaysEnabled" name="instanceCreate"/>
+                <attr name="delegate" newvalue="us.physion.ovation.browser.ResetQueryAction"/>
+                <attr name="iconBase" stringvalue="us/physion/ovation/browser/reset-query.png"/>
+                <attr boolvalue="false" name="noIconInMenu"/>
+            </file>
+        </folder>
+        <folder name="Window">
+            <file name="us-physion-ovation-browser-BrowserTopComponent.instance">
+                <!--us.physion.ovation.browser.BrowserTopComponent-->
+                <attr
+                    methodvalue="org.openide.windows.TopComponent.openAction" name="instanceCreate"/>
+                <attr name="component" newvalue="us.physion.ovation.browser.BrowserTopComponent"/>
+                <attr name="preferredID" stringvalue="BrowserTopComponent"/>
+                <attr
+                    bundlevalue="us.physion.ovation.browser.Bundle#CTL_BrowserAction" name="displayName"/>
+            </file>
+            <file name="us-physion-ovation-browser-SourceBrowserTopComponent.instance">
+                <!--us.physion.ovation.browser.SourceBrowserTopComponent-->
+                <attr
+                    methodvalue="org.openide.windows.TopComponent.openAction" name="instanceCreate"/>
+                <attr name="component" newvalue="us.physion.ovation.browser.SourceBrowserTopComponent"/>
+                <attr name="preferredID" stringvalue="SourceBrowserTopComponent"/>
+                <attr
+                    bundlevalue="us.physion.ovation.browser.Bundle#CTL_SourceBrowserAction" name="displayName"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Shortcuts">
+        <file name="M-C.shadow">
+            <!--us.physion.ovation.browser.BrowserCopyAction-->
+            <attr name="originalFile" stringvalue="Actions/Edit/us-physion-ovation-browser-BrowserCopyAction.instance"/>
+        </file>
+        <file name="SM-R.shadow">
+            <!--us.physion.ovation.browser.ResetQueryAction-->
+            <attr name="originalFile" stringvalue="Actions/Edit/us-physion-ovation-browser-ResetQueryAction.instance"/>
+        </file>
+    </folder>
     <folder name="Menu">
+        <folder name="Tools">
+            <file name="us-physion-ovation-browser-ResetQueryAction.shadow">
+                <!--us.physion.ovation.browser.ResetQueryAction-->
+                <attr name="originalFile" stringvalue="Actions/Edit/us-physion-ovation-browser-ResetQueryAction.instance"/>
+                <attr intvalue="1200" name="position"/>
+            </file>
+        </folder>
         <folder name="Window">
             <file name="us-physion-ovation-browser-BrowserTopComponent.shadow">
                 <!--us.physion.ovation.browser.BrowserTopComponent-->
@@ -11,6 +71,15 @@
             <file name="us-physion-ovation-browser-SourceBrowserTopComponent.shadow">
                 <!--us.physion.ovation.browser.SourceBrowserTopComponent-->
                 <attr name="originalFile" stringvalue="Actions/Window/us-physion-ovation-browser-SourceBrowserTopComponent.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Toolbars">
+        <folder name="Find">
+            <file name="us-physion-ovation-browser-ResetQueryAction.shadow">
+                <!--us.physion.ovation.browser.ResetQueryAction-->
+                <attr name="originalFile" stringvalue="Actions/Edit/us-physion-ovation-browser-ResetQueryAction.instance"/>
+                <attr intvalue="150" name="position"/>
             </file>
         </folder>
     </folder>
@@ -106,28 +175,6 @@
 </tc-ref>
 ]]></file>
             </folder>
-        </folder>
-    </folder>
-    <folder name="Actions">
-        <folder name="Window">
-            <file name="us-physion-ovation-browser-BrowserTopComponent.instance">
-                <!--us.physion.ovation.browser.BrowserTopComponent-->
-                <attr
-                    methodvalue="org.openide.windows.TopComponent.openAction" name="instanceCreate"/>
-                <attr name="component" newvalue="us.physion.ovation.browser.BrowserTopComponent"/>
-                <attr name="preferredID" stringvalue="BrowserTopComponent"/>
-                <attr
-                    bundlevalue="us.physion.ovation.browser.Bundle#CTL_BrowserAction" name="displayName"/>
-            </file>
-            <file name="us-physion-ovation-browser-SourceBrowserTopComponent.instance">
-                <!--us.physion.ovation.browser.SourceBrowserTopComponent-->
-                <attr
-                    methodvalue="org.openide.windows.TopComponent.openAction" name="instanceCreate"/>
-                <attr name="component" newvalue="us.physion.ovation.browser.SourceBrowserTopComponent"/>
-                <attr name="preferredID" stringvalue="SourceBrowserTopComponent"/>
-                <attr
-                    bundlevalue="us.physion.ovation.browser.Bundle#CTL_SourceBrowserAction" name="displayName"/>
-            </file>
         </folder>
     </folder>
 </filesystem>

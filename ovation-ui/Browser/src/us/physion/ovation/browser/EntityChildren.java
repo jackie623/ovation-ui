@@ -178,15 +178,8 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             
             context.beginTransaction();
             try {
-                int count = 0;
                 for (Epoch e : entity.getEpochs()) {
-                    
                     list.add(new EntityWrapper(e));
-                    /*if (count%10 == 0)
-                    {
-                        updateWithKeys(list);
-                    }
-                    count++;*/
                 }
             } finally{
                 context.commitTransaction();

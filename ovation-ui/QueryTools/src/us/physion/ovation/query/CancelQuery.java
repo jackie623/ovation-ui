@@ -22,7 +22,7 @@ id = "us.physion.ovation.query.CancelQuery")
 displayName = "#CTL_CancelQuery")
 @ActionReferences({
     @ActionReference(path = "Menu/Tools", position = 11),
-    @ActionReference(path = "Toolbars/Find", position = 11),
+    //@ActionReference(path = "Toolbars/Find", position = 11),
     @ActionReference(path = "Shortcuts", name = "D-D"),
 })
 @Messages("CTL_CancelQuery=Cancel Query")
@@ -30,7 +30,8 @@ public final class CancelQuery implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         final ExpressionTreeProvider etp = Lookup.getDefault().lookup(ExpressionTreeProvider.class);
-        if (etp instanceof QueryProvider) {
+        
+        if (etp != null && etp instanceof QueryProvider) {
             final QueryProvider qp = (QueryProvider) etp;
             for (QueryListener listener : qp.getListeners()) {
                 listener.cancel();

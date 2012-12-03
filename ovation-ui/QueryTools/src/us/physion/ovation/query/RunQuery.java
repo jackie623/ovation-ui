@@ -37,7 +37,7 @@ id = "us.physion.ovation.query.RunQuery")
 @ActionRegistration(iconBase = "us/physion/ovation/query/query.png",
 displayName = "#CTL_RunQuery")
 @ActionReferences({
-    @ActionReference(path = "Menu/Tools", position = 0),
+    @ActionReference(path = "Menu/Tools", position = 10),
     @ActionReference(path = "Toolbars/Find", position = 10),
     @ActionReference(path = "Shortcuts", name = "M-R")
 })
@@ -69,7 +69,6 @@ public final class RunQuery implements ActionListener {
             public void run() {
                 ProgressHandle ph = null;
                 System.out.println("Starting query");
-                long start = System.currentTimeMillis();
 
                 if (etp instanceof QueryProvider) {
                     final QueryProvider qp = (QueryProvider) etp;
@@ -79,35 +78,30 @@ public final class RunQuery implements ActionListener {
 
                         @Override
                         public boolean cancel() {
-                            for (QueryListener listener : qp.getListeners()) {
-                                System.out.println("About to cancel");
-                                listener.cancel();
-                                System.out.println("Cancelling");
-                            }
+                            new CancelQuery().actionPerformed(null);
                             return true;
                         }
                     });
                     ph.setDisplayName("Querying");
                     ph.switchToIndeterminate();
                     ph.start();
-
-                    for (QueryListener listener : qp.getListeners()) {
-                        FutureTask task = listener.run();
-                        try {
-                            task.get();
-                        } catch (InterruptedException ex) {
-                            Exceptions.printStackTrace(ex);
-                        } catch (ExecutionException ex) {
-                            Exceptions.printStackTrace(ex);
-                        } catch (Exception ex){
-                            Exceptions.printStackTrace(ex);
+                    try {
+                        for (QueryListener listener : qp.getListeners()) {
+                            FutureTask task = listener.run();
+                            try {
+                                task.get();
+                            } catch (InterruptedException ex) {
+                                Exceptions.printStackTrace(ex);
+                            } catch (ExecutionException ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
+                    } catch (NullPointerException ex) {
+                        //This happens when the query is cancelled
                     }
-                    
+
                     ph.finish();
                 }
-    
-                System.out.println("Finished query: " + (System.currentTimeMillis() - start)  + " ms");
             }
         });
     }

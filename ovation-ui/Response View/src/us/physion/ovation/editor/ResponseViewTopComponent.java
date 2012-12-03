@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -83,6 +84,7 @@ public final class ResponseViewTopComponent extends TopComponent {
     List<ResponsePanel> responsePanels = new ArrayList<ResponsePanel>();
     ChartTableModel chartModel = new ChartTableModel(responsePanels);
     Lookup l;
+    Future updateEntitySelection;
     private LookupListener listener = new LookupListener() {
 
         @Override
@@ -174,7 +176,14 @@ public final class ResponseViewTopComponent extends TopComponent {
             }
         };
 
-        EventQueueUtilities.runOffEDT(r);
+        long start = Calendar.getInstance().getTimeInMillis();
+        if (updateEntitySelection != null && !updateEntitySelection.isDone())
+        {
+            updateEntitySelection.cancel(true);
+            System.out.println("Cancelling other thread took " + (Calendar.getInstance().getTimeInMillis() - start) + " seconds");
+        }
+        
+        updateEntitySelection = EventQueueUtilities.runOffEDT(r);
     }
 
     protected List<Visualization> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {

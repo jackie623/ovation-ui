@@ -104,7 +104,6 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             if (projectView) {
                 for (Project p : c.getProjects()) {
                     p.getURIString();
-                    EntityWrapper x = new EntityWrapper(p);
                     list.add(new EntityWrapper(p));
                 }
             } else {
@@ -112,11 +111,9 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
                 while (itr.hasNext()) {
                     Source s = itr.next();
                     s.getURIString();
-                    EntityWrapper x = new EntityWrapper(s);
                     list.add(new EntityWrapper(s));
                 }
             }
-
             updateWithKeys(list);
 
         } else {
@@ -181,15 +178,8 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             
             context.beginTransaction();
             try {
-                int count = 0;
-                for (Epoch e : entity.getEpochsIterable()) {
-                    
+                for (Epoch e : entity.getEpochs()) {
                     list.add(new EntityWrapper(e));
-                    /*if (count%10 == 0)
-                    {
-                        updateWithKeys(list);
-                    }
-                    count++;*/
                 }
             } finally{
                 context.commitTransaction();

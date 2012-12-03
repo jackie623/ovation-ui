@@ -49,7 +49,7 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
 
         BrowserUtilities.initBrowser(em, false);
-
+        ((BeanTreeView)jScrollPane1).setRootVisible(false);
         //TODO: extend existing CopyAction somehow
         /*
         CopyAction globalCopyAction = SystemAction.get (CopyAction.class);

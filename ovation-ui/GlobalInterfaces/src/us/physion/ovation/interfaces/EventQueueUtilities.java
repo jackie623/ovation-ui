@@ -4,6 +4,8 @@ import javax.swing.SwingUtilities;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 
 public class EventQueueUtilities
 {
@@ -30,11 +32,13 @@ public class EventQueueUtilities
 	}
     }
     
-    public static void runOffEDT(Runnable r) {
+    public static Future runOffEDT(Runnable r) {
 	if (EventQueue.isDispatchThread()) {
-	    executorService.submit(r);
+	    return executorService.submit(r);
 	} else {
-	    r.run();
+	    FutureTask t = new FutureTask(r, true);
+	    t.run();
+	    return t;
 	}
     }
 }

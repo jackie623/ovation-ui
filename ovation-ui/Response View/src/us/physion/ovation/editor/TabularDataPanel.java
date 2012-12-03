@@ -5,8 +5,7 @@
 package us.physion.ovation.editor;
 import java.awt.Color;
 import javax.swing.border.LineBorder;
-import us.physion.ovation.interfaces.ZebraTable;
-
+import java.awt.Dimension;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -14,7 +13,6 @@ import javax.swing.table.DefaultTableModel;
  * @author huecotanks
  */
 public class TabularDataPanel extends javax.swing.JPanel implements StrictSizePanel{
-
     /**
      * Creates new form TabularDataPanel
      */

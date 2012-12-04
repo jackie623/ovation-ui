@@ -4,7 +4,9 @@
  */
 package us.physion.ovation.editor;
 
+import java.awt.Component;
 import java.util.List;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import org.jfree.chart.ChartPanel;
 
@@ -26,4 +28,5 @@ class ChartTableModel extends DefaultTableModel {
   public int getRowCount() { return (data == null) ? 0 : data.size(); }
   public Object getValueAt(int rowIndex, int columnIndex) { return data.get(rowIndex).getPanel(); }
   public boolean isCellEditable(int rowIndex, int columnIndex) { return true; }
+
 }

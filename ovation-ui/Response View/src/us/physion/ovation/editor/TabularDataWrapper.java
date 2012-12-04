@@ -23,6 +23,8 @@ public class TabularDataWrapper implements Visualization {
     String[] columnNames;
     String[][] tabularData;
 
+    TabularDataWrapper(){};
+    
     TabularDataWrapper(Response r) 
     {
         InputStream in;

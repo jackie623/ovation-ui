@@ -85,6 +85,7 @@ public final class ResponseViewTopComponent extends TopComponent {
     ChartTableModel chartModel = new ChartTableModel(responsePanels);
     Lookup l;
     Future updateEntitySelection;
+    ResponseCellRenderer cellRenderer = new ResponseCellRenderer();
     private LookupListener listener = new LookupListener() {
 
         @Override
@@ -108,7 +109,8 @@ public final class ResponseViewTopComponent extends TopComponent {
         setToolTipText(Bundle.HINT_ResponseViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
-        jTable1.setDefaultRenderer(ResponsePanel.class, new ResponseCellRenderer());
+        jTable1.setDefaultRenderer(ResponsePanel.class, cellRenderer);
+        cellRenderer.setTable(jTable1);
         jTable1.setVisible(true);
         responseListPane.setVisible(true);
     }
@@ -122,7 +124,7 @@ public final class ResponseViewTopComponent extends TopComponent {
     private void initComponents() {
 
         responseListPane = new BeanTreeView();
-        jTable1 = new javax.swing.JTable();
+        jTable1 = new ResponseTable();
 
         jTable1.setModel(chartModel);
         responseListPane.setViewportView(jTable1);
@@ -176,13 +178,11 @@ public final class ResponseViewTopComponent extends TopComponent {
             }
         };
 
-        long start = Calendar.getInstance().getTimeInMillis();
         if (updateEntitySelection != null && !updateEntitySelection.isDone())
         {
             updateEntitySelection.cancel(true);
-            System.out.println("Cancelling other thread took " + (Calendar.getInstance().getTimeInMillis() - start) + " seconds");
+            Ovation.getLogger().debug("Cancelled other thread");
         }
-        
         updateEntitySelection = EventQueueUtilities.runOffEDT(r);
     }
 
@@ -218,10 +218,20 @@ public final class ResponseViewTopComponent extends TopComponent {
                 responseGroups.add(ResponseWrapperFactory.create(rw).createVisualization(rw));
             }
         }
+        
+        //FOR TESTING --- DELETE
+        /*String[] columnNames = new String[] {"Column 1" ," Column 2"};
+        String[][] data = new String[][] {{"1", "2"},{"3", "4"}};
+        TabularDataWrapper tdw = new TabularDataWrapper();
+        tdw.tabularData = data;
+        tdw.columnNames = columnNames;
+        responseGroups.add(tdw);*/
+        
         EventQueueUtilities.runOnEDT(updateChartRunnable(responseGroups));
         return responseGroups;
     }
     
+    //for debugging
     protected static void error(String s)
     {
         JDialog d = new JDialog(new JFrame(), true);
@@ -232,7 +242,6 @@ public final class ResponseViewTopComponent extends TopComponent {
         l.setText(s);
         d.add(l);
         d.setVisible(true);
-        
     }
 
     private Runnable updateChartRunnable(final List<Visualization> responseGroups) {
@@ -241,19 +250,27 @@ public final class ResponseViewTopComponent extends TopComponent {
 
             @Override
             public void run() {
-                
-                
+
                 int initialSize = responsePanels.size();
                 while (!responsePanels.isEmpty()) {
                     responsePanels.remove(0);
                 }
-                if (responseGroups.size() < initialSize) {
-                    chartModel.fireTableRowsDeleted(responseGroups.size(), initialSize - 1);
-                }
+                
                 if (responseGroups.size() != 0) 
                 {
+                    /*int nonStrictHeight = height/responseGroups.size();
+                    jTable1.setRowHeight(nonStrictHeight);
+                    for (Visualization c : responseGroups) {
+                        Component p = c.generatePanel();
+                        responsePanels.add(new ResponsePanel(p));
+                    }*/
+                    
+                    //This is for setting each row in the table to a more appropriate height
                     int[] rowHeights = new int[responseGroups.size()];//highest allowable height for each row
                     ArrayList<Integer> strictHeights = new ArrayList<Integer>();
+                    int totalStrictHeight = 0;
+                    int flexiblePanels = 0;
+                    int minHeight = 150;//min height of a chart
                     
                     for (Visualization c : responseGroups) {
                         Component p = c.generatePanel();
@@ -264,39 +281,36 @@ public final class ResponseViewTopComponent extends TopComponent {
                             int strictHeight = ((StrictSizePanel)p).getStrictSize().height;
                             strictHeights.add(strictHeight);
                             rowHeights[row] = strictHeight;
+                            totalStrictHeight += strictHeight;
                         }  else{
                             rowHeights[row] = Integer.MAX_VALUE;
+                            flexiblePanels++;
                         }  
-                            
                         responsePanels.add(new ResponsePanel(p));
                     }
-                    Collections.sort(strictHeights);
-                    int totalStrictHeight = 0;
-                    int strictPanels = 0;
-                    int defaultHeight = height/responseGroups.size();
-                    while (strictHeights.size() > 0)
-                    {      
-                        //find the threshold for the default height
-                        int h = strictHeights.remove(0);
-                        if (responseGroups.size() - strictPanels == 0)
-                        {   
-                            break;
-                        }
-                        defaultHeight = (height - totalStrictHeight)/(responseGroups.size() - strictPanels);
-                        if (h > defaultHeight)
-                        {
-                            break;
-                        }
-                        totalStrictHeight += h;
-                        strictPanels ++;
+                    int flexiblePanelHeight = minHeight;
+                    if (flexiblePanels != 0)
+                    {
+                        flexiblePanelHeight = Math.max(minHeight, (height - totalStrictHeight)/flexiblePanels);
                     }
-                    jTable1.setRowHeight(defaultHeight);
                     for (int i=0; i<rowHeights.length; ++i)
                     {
-                        jTable1.setRowHeight(i, Math.min(defaultHeight, rowHeights[i]));
+                        if (rowHeights[i] == Integer.MAX_VALUE)
+                            rowHeights[i] = flexiblePanelHeight;
                     }
+                    //I have to do this, so theres a smooth transition between 
+                    if (jTable1.getRowHeight() != rowHeights[0])
+                        jTable1.setRowHeight(rowHeights[0]);
+                    cellRenderer.setHeights(rowHeights);
+                    ((ResponseTable)jTable1).setHeights(rowHeights);
+                    int tableHeight = totalStrictHeight + flexiblePanels*flexiblePanelHeight;
+                    jTable1.setSize(jTable1.getWidth(), tableHeight);
+                    chartModel.fireTableDataChanged();
                 }
-                chartModel.fireTableDataChanged();
+                else if (responseGroups.size() < initialSize) {
+                    //jTable1.setSize(0, height);
+                    chartModel.fireTableRowsDeleted(responseGroups.size(), initialSize - 1);
+                }
             }
         };
     }

@@ -80,7 +80,7 @@ public class ScrollableTableTree extends JScrollPane {
         tree.setUI(new PropertiesTreeUI(this));
         addComponentListener(new RepaintOnResize(tree));
         tree.setCellRenderer(r);
-        tree.setRowHeight(0);
+        //tree.setRowHeight(0);
         tree.setEditable(true);
         tree.setCellEditor(r);
         tree.setRootVisible(false);

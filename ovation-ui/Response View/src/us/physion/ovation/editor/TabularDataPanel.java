@@ -69,6 +69,7 @@ public class TabularDataPanel extends javax.swing.JPanel implements StrictSizePa
 
     @Override
     public Dimension getStrictSize() {
-        return new Dimension(getWidth(), jTable1.getSize().height + 10);
+        int tableHeight = (jTable1.getRowCount() +1)*jTable1.getRowHeight();
+        return new Dimension(getWidth(), tableHeight + 56);
     }
 }

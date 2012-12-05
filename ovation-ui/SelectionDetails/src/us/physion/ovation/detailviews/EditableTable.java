@@ -134,7 +134,8 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         //this is voodoo magic, DO NOT CHANGE
         if (table.getHeight() ==0)
          {
-            height = (int)super.getPreferredSize().getHeight();//this gets the height from the EditableTable default, so modify the 
+             //this gets the height from the EditableTable default, so if this gets out of whack, modify the default size in the UI builder
+            height = (int)super.getPreferredSize().getHeight();
          }
         else
         {
@@ -159,7 +160,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 int row = m.getRowCount();
                 m.addRow(new Object[]{"", ""});
                 
-                //speeds up performance! TODO: do I need this?
+                //manually set size of the containing scrollpane, since the table has resized
                 JScrollPane sp = ((JScrollPane) table.getParent().getParent());
                 sp.setSize(sp.getPreferredSize());
                 EditableTable.this.setSize(EditableTable.this.getPreferredSize());

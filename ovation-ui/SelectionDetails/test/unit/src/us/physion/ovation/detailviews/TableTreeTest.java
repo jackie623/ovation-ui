@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.joda.time.DateTime;
 import org.junit.*;
@@ -338,10 +339,18 @@ public class TableTreeTest extends OvationTestCase implements Lookup.Provider, C
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    private static class TestTreeKey extends UserPropertySet {
+    private class TestTreeKey extends UserPropertySet {
 
         public TestTreeKey(IAuthenticatedDataStoreCoordinator dsc, Set<String> uris) {
             super(dsc.getContext().currentAuthenticatedUser(), true, true , new HashMap(), uris);
+        }
+        
+        @Override
+        public TableModelListener createTableModelListener(ScrollableTableTree t, TableNode n) {
+            if (isEditable()) {
+                return new PropertyTableModelListener(uris, (ExpandableJTree) t.getTree(), n, dsc);
+            }
+            return null;
         }
     }
     

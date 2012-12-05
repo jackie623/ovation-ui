@@ -22,7 +22,7 @@ import us.physion.ovation.detailviews.ScrollableTableTree.TableInTreeCellRendere
  */
 public class TreeNodePanelFactory {
     
-    public static JPanel getPanel(ScrollableTableTree t, TableNode node, TableModelListener l) {
+    public static JPanel getPanel(ScrollableTableTree t, TableNode node) {
         TableTreeKey k = (TableTreeKey) node.getUserObject();
         String id = k.getID();
         //TODO move table lookup?
@@ -70,10 +70,12 @@ public class TreeNodePanelFactory {
         JTable table = panel.getTable();
         table.setModel(tableModel);
 
-        if (k.isEditable() && l != null) {
+        TableModelListener l = k.createTableModelListener(t, node);
+        if (l != null)
             tableModel.addTableModelListener(l);
-        }
 
         return panel.getPanel();
     }
+    
+    
 }

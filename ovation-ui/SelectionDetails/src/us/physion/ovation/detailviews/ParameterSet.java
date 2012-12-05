@@ -5,6 +5,7 @@
 package us.physion.ovation.detailviews;
 
 import java.util.*;
+import javax.swing.event.TableModelListener;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
@@ -93,6 +94,11 @@ class ParameterSet implements TableTreeKey {
         else{
             throw new UnsupportedOperationException("Object type '" + t.getClass() + "' cannot be compared with object type " + this.getClass());
         }
+    }
+
+    @Override
+    public TableModelListener createTableModelListener(ScrollableTableTree t, TableNode n) {
+        return null;
     }
     
 }

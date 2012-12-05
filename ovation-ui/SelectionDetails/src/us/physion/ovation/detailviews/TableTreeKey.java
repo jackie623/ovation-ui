@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.detailviews;
 
+import javax.swing.event.TableModelListener;
 import ovation.IAuthenticatedDataStoreCoordinator;
 
 /**
@@ -18,4 +19,5 @@ public interface TableTreeKey extends Comparable
     public String getID();// for comparison
     public boolean isEditable();
     public boolean isExpandedByDefault();
+    public TableModelListener createTableModelListener(ScrollableTableTree t, TableNode n);
 }

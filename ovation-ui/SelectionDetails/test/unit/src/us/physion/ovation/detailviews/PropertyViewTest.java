@@ -208,7 +208,7 @@ public class PropertyViewTest extends OvationTestCase implements Lookup.Provider
          
         String userURI = user2.getURI();
         //get the table for user2 and check that it's a NonEditableTable
-        JPanel p = TreeNodePanelFactory.getPanel(t, (TableNode)t.getCategoryNode(userURI).getChildAt(0), null);
+        JPanel p = TreeNodePanelFactory.getPanel(t, (TableNode)t.getCategoryNode(userURI).getChildAt(0));
         
         assertTrue(p instanceof NonEditableTable);
     }

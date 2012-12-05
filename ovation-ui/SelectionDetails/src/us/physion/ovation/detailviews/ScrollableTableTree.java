@@ -136,7 +136,7 @@ public class ScrollableTableTree extends JScrollPane {
     class TableInTreeCellRenderer extends AbstractCellEditor implements TreeCellEditor, TreeCellRenderer {
 
         boolean isCurrentUser;
-        Map<String, TablePanel> tableLookup;
+        Map<String, TablePanel> tableLookup; //TODO: is this a good thing, performance-wise?
 
         public TableInTreeCellRenderer() {
             super();
@@ -159,7 +159,7 @@ public class ScrollableTableTree extends JScrollPane {
                 if (o instanceof UserPropertySet && ((UserPropertySet)o).isEditable())
                     l = new PropertyTableModelListener(((UserPropertySet)o).uris, (ExpandableJTree)tree, (TableNode)value);
                 
-                return TreeNodePanelFactory.getPanel(ScrollableTableTree.this, ((TableNode)value), l);
+                return TreeNodePanelFactory.getPanel(ScrollableTableTree.this, ((TableNode)value));
             }
             
             return null;

@@ -78,7 +78,11 @@ public final class PropertiesViewTopComponent extends TopComponent {
     {
         return (ScrollableTableTree)jScrollPane1;
     }        
-            
+       
+    protected void setTableTree(ScrollableTableTree t)
+    {
+        jScrollPane1 = t;
+    }
     
     public void update(final Collection<? extends IEntityWrapper> entities)
     {

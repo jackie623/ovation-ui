@@ -37,7 +37,7 @@ public class ScrollableTableTree extends JScrollPane {
         return tree;
     }
 
-    public void setKeys(final ArrayList<? extends TableTreeKey> keys) {
+    public void setKeys(final java.util.List<? extends TableTreeKey> keys) {
         
         EventQueueUtilities.runOnEDT(new Runnable() {
 
@@ -155,10 +155,6 @@ public class ScrollableTableTree extends JScrollPane {
             // otherwise we expect it to be UserPropertySet object
             if (value instanceof TableNode)
             {
-                TableModelListener l = null;
-                if (o instanceof UserPropertySet && ((UserPropertySet)o).isEditable())
-                    l = new PropertyTableModelListener(((UserPropertySet)o).uris, (ExpandableJTree)tree, (TableNode)value);
-                
                 return TreeNodePanelFactory.getPanel(ScrollableTableTree.this, ((TableNode)value));
             }
             

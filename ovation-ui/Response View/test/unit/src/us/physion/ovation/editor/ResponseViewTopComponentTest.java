@@ -142,8 +142,6 @@ public class ResponseViewTopComponentTest extends OvationTestCase{
         String dataUTI = Response.NUMERIC_DATA_UTI;
         Response r = epoch.insertResponse(dev, new HashMap(), data, units, dimensionLabel, samplingRate, samplingRateUnits, dataUTI);
         
-        ChartWrapper rw = (ChartWrapper)ResponseWrapperFactory.create(r);
-        
         ChartGroupWrapper cw = (ChartGroupWrapper)ResponseWrapperFactory.create(r).createVisualization(r);
         DefaultXYDataset ds = cw.getDataset();
         ChartPanel p = cw.generateChartPanel();

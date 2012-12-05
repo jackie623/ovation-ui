@@ -220,12 +220,12 @@ public final class ResponseViewTopComponent extends TopComponent {
         }
         
         //FOR TESTING --- DELETE
-        String[] columnNames = new String[] {"Column 1" ," Column 2"};
+        /*String[] columnNames = new String[] {"Column 1" ," Column 2"};
         String[][] data = new String[][] {{"1", "2"},{"3", "4"}};
         TabularDataWrapper tdw = new TabularDataWrapper();
         tdw.tabularData = data;
         tdw.columnNames = columnNames;
-        responseGroups.add(tdw);
+        responseGroups.add(tdw);*/
         
         EventQueueUtilities.runOnEDT(updateChartRunnable(responseGroups));
         return responseGroups;

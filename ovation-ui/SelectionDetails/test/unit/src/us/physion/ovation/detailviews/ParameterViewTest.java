@@ -94,7 +94,7 @@ public class ParameterViewTest extends OvationTestCase implements Lookup.Provide
 
     @Test
     public void testGetsProperTreeNodeStructure() throws InterruptedException {
-        EventQueueUtilities.runAndWaitOnEDT(new Runnable() {
+        EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
             public void run() {

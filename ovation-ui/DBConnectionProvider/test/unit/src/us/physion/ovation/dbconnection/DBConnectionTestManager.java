@@ -39,6 +39,10 @@ public class DBConnectionTestManager extends TestManager {
                 return pwd;
             }
         });
+        if (pwd == null)
+        {
+            pwd = "/Users/huecotanks/Ovation/ui/";
+        }
         String path = pwd + "data" + File.separator
                 + "dbconnection" + File.separator
                 + "dbconnection-test.connection";

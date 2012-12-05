@@ -142,6 +142,7 @@ made subject to such option by the copyright holder.
         </condition>
         <property name="test.dist.dir" location="${build.dir}/testdist"/>
         <property name="build.classes.dir" location="${build.dir}/classes"/>
+	<property name="test-unit-sys-prop.WORKSPACE" location="${WORKSPACE}"/>  
 
     </target>
 

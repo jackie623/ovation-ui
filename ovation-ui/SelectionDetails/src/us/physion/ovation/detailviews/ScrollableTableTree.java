@@ -38,7 +38,7 @@ public class ScrollableTableTree extends JScrollPane {
     }
 
     public void setKeys(final java.util.List<? extends TableTreeKey> keys) {
-        
+        //TODO: test this logic
         EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
@@ -120,6 +120,7 @@ public class ScrollableTableTree extends JScrollPane {
     }
 
     private boolean shouldExpand(TableTreeKey tableInfo) {
+        //TODO: test this logic
         if (userNodes.containsKey(tableInfo.getID())) {
             DefaultMutableTreeNode n = userNodes.get(tableInfo.getID());
             TreePath tp = new TreePath(n.getPath());
@@ -155,6 +156,7 @@ public class ScrollableTableTree extends JScrollPane {
             // otherwise we expect it to be UserPropertySet object
             if (value instanceof TableNode)
             {
+                //TODO: test the getPanel logic
                 return TreeNodePanelFactory.getPanel(ScrollableTableTree.this, ((TableNode)value));
             }
             
@@ -177,6 +179,7 @@ public class ScrollableTableTree extends JScrollPane {
         @Override
         public boolean isCellEditable(final EventObject event) {
 
+            //TODO: test this logic
             Object node;
             if (event instanceof MouseEvent) {
                 TreePath p = tree.getPathForLocation(((MouseEvent) event).getX(), ((MouseEvent) event).getY());
@@ -213,15 +216,6 @@ public class ScrollableTableTree extends JScrollPane {
                 return editor;
             }
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                //new ScrollableTableTree().setVisible(true);
-            }
-        });
     }
 
     public int getCellWidth() {

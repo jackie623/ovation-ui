@@ -91,7 +91,6 @@ class UserPropertySet implements TableTreeKey{
         return data;
     }
     
-    //TODO: get rid of
     Map<String, Object> getProperties() {
         return properties;
     }

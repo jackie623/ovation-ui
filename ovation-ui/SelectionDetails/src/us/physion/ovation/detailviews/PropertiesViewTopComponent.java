@@ -109,7 +109,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
         }
     }
     
-    protected void setEntities(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
+    protected ArrayList<TableTreeKey> setEntities(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
     {
         DataContext c;
         if (dsc == null) {
@@ -160,6 +160,7 @@ public final class PropertiesViewTopComponent extends TopComponent {
         ((ScrollableTableTree) jScrollPane1).setKeys(properties);
         
         this.entities = entities;
+        return properties;
     }
     
     public PropertiesViewTopComponent() {

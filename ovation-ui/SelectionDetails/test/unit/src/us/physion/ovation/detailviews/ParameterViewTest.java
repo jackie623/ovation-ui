@@ -110,7 +110,6 @@ public class ParameterViewTest extends OvationTestCase implements Lookup.Provide
                 DefaultMutableTreeNode n = (DefaultMutableTreeNode) ((DefaultTreeModel) tree.getModel()).getRoot();
                 assertEquals(n.getChildCount(), 1);
 
-                
                 DefaultMutableTreeNode currentUserNode = (DefaultMutableTreeNode) n.getChildAt(0);
 
                 assertTrue(((DefaultMutableTreeNode) currentUserNode.getChildAt(0)) instanceof TableNode);
@@ -121,7 +120,7 @@ public class ParameterViewTest extends OvationTestCase implements Lookup.Provide
     }
     
     @Test
-    public void testGetsPropertiesAppropriatelyForEachUser()
+    public void testGetsParametersAppropriatelyForEachUser()
     {
         /*Set<IEntityWrapper> entitySet = new HashSet<IEntityWrapper>();
        
@@ -141,8 +140,8 @@ public class ParameterViewTest extends OvationTestCase implements Lookup.Provide
         //user2 properties
         props = getProperties(t, user1.getURI());
         databaseProps = getAggregateUserProperties(((User)user1.getEntity()), entitySet);
-        assertSetsEqual(props, databaseProps);*/
-        
+        assertSetsEqual(props, databaseProps);
+        */
     }
 
     @Override

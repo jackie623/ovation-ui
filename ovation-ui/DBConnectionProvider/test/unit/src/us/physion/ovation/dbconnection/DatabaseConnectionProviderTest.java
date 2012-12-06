@@ -54,7 +54,7 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     
     @Test
     public void testShouldRunUpdaterReturnsFalseIfUserCancels(){
-        DBConnectionDialog d = new DBConnectionDialog();
+        DBConnectionDialog d = new DBConnectionDialog(null, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
         ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
         shouldRun.cancel();
         assertFalse(d.shouldRunUpdater(1, 2, false, shouldRun));
@@ -62,28 +62,28 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     
     @Test
     public void testShouldRunUpdaterReturnsTrueIfUserPressesOK(){
-        DBConnectionDialog d = new DBConnectionDialog();
+        DBConnectionDialog d = new DBConnectionDialog(null, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
         ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
         assertTrue(d.shouldRunUpdater(1, 2, false, shouldRun));
     }
      
     @Test
     public void testShouldRunUpdaterReturnsFalseIfDatabaseVersionAndAPIVersionMatch(){
-        DBConnectionDialog d = new DBConnectionDialog();
+        DBConnectionDialog d = new DBConnectionDialog(null, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
         ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
         assertFalse(d.shouldRunUpdater(1, 1, false, shouldRun));
     }
     
     @Test
     public void testShouldRunUpdaterReturnsTrueIfDatabaseVersionIsLessThanSchemaVersion(){
-        DBConnectionDialog d = new DBConnectionDialog();
+        DBConnectionDialog d = new DBConnectionDialog(null, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
         ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
         assertTrue(d.shouldRunUpdater(1, 3, false, shouldRun));
     }
     
     @Test
     public void testShouldRunUpdaterReturnsTrueIfDatabaseVersionIsGreaterThanSchemaVersionButAlertsUserOfThis(){
-        DBConnectionDialog d = new DBConnectionDialog();
+        DBConnectionDialog d = new DBConnectionDialog(null, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
         ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
         assertTrue(d.shouldRunUpdater(2, 1, false, shouldRun)); 
     }
@@ -91,7 +91,7 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     @Test
     public void testRunUpdaterReturnsFalseIfCancelled()
     {   
-        DBConnectionDialog d = new DBConnectionDialog();
+        DBConnectionDialog d = new DBConnectionDialog(null, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
         UpdaterInProgressDialog running = new UpdaterInProgressDialog();
         running.cancelled = true;
         assertFalse(d.runUpdater(new TestUpgradeTool(), running, false));
@@ -100,7 +100,7 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     @Test 
     public void testRunUpdaterReturnsTrueIfNotCancelled()
     {
-        DBConnectionDialog d = new DBConnectionDialog();
+        DBConnectionDialog d = new DBConnectionDialog(null, true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
         UpdaterInProgressDialog running = new UpdaterInProgressDialog();
         assertTrue(d.runUpdater(new TestUpgradeTool(), running, false));
     }

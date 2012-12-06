@@ -223,6 +223,7 @@ public class ParameterViewTest extends OvationTestCase implements Lookup.Provide
         assertEquals(params.size(), 2);
         assertTrue(params.get(0) instanceof ParameterSet);
         assertTrue(params.get(1) instanceof ParameterSet);
+        
         //device params
         ParameterSet deviceParams = (ParameterSet)params.get(0);
         assertEquals(deviceParams.getDisplayName(), "Device Parameters");

@@ -125,6 +125,7 @@ public final class ParametersTopComponent extends TopComponent {
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
         global.addLookupListener(listener);
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.

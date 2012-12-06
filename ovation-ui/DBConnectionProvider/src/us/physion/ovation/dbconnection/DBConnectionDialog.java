@@ -26,15 +26,18 @@ import us.physion.ovation.interfaces.*;
  *
  * @author huecotanks
  */
-public class DBConnectionDialog extends javax.swing.JDialog {
+public class DBConnectionDialog extends javax.swing.JDialog implements ConnectionDialog{
 
     ConnectionHistoryProvider prefs;
     DefaultComboBoxModel connectionComboBoxModel;
     IAuthenticatedDataStoreCoordinator dsc;
-    Boolean cancelled = false;
+    ProgressHandle progressHandle;
 
-    public boolean isCancelled() {
-        return cancelled;
+    DBConnectionManager manager;
+    
+    public void setConnectionManager(DBConnectionManager m)
+    {
+        manager = m;
     }
 
     public IAuthenticatedDataStoreCoordinator getDataStoreCoordinator() {
@@ -64,9 +67,9 @@ public class DBConnectionDialog extends javax.swing.JDialog {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 if (dsc == null) {
-                    cancelled = true;
+                    manager.cancel();
                 }
-                dispose();
+                disposeOnEDT();
             }
         });
 
@@ -83,7 +86,7 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         this(new JFrame(), true, new JavaPreferenceProvider(java.util.prefs.Preferences.userNodeForPackage(DBConnectionDialog.class)));
     }
 
-    protected void showErrors(final Exception e, DataStoreCoordinator toClose) {
+    public void showErrors(final Exception e, DataStoreCoordinator toClose) {
         String message = "";
         try{
             if (toClose != null)
@@ -112,7 +115,29 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         });
     }
 
-    private void disposeOnEDT() {
+    @Override
+    public void startConnectionStatusBar()
+    {
+        if (progressHandle == null)
+        {
+            progressHandle = ProgressHandleFactory.createHandle("Connecting...");
+            progressHandle.start();
+        }
+    }
+    
+    public void disposeOnEDT() {
+        
+        if (progressHandle != null)
+        {
+            EventQueueUtilities.runOffEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                    progressHandle.finish();
+                }
+            });
+            
+        }
         EventQueueUtilities.runOnEDT(new Runnable() {
 
             @Override
@@ -366,190 +391,14 @@ public class DBConnectionDialog extends javax.swing.JDialog {
         final String connectionFile = connectionFileComboBox.getSelectedItem().toString();
         prefs.addConnectionFile(connectionFile);
         
-        
-        //run this on a thread that's not the event queue thread
-        Runnable r = new Runnable(){
-
-            @Override
-            public void run() {
-                ProgressHandle ph = ProgressHandleFactory.createHandle("Connecting..."); 
-                try{ 
-                ph.start();
-                DataContext c = getContextFromConnectionFile(connectionFile, username, password);
-                if (c == null) {
-                    return;
-                }
-
-                boolean authenticated = false;
-                try {
-                    authenticated = c.authenticateUser(username, password);
-                } catch (Exception ex) {
-                    showErrors(ex, c.getCoordinator());
-                    return;
-                }
-                if (!authenticated) {
-                    showErrors(new UserAuthenticationException(), c.getCoordinator());
-                    return;
-                }
-                dsc = c.getAuthenticatedDataStoreCoordinator();
-                cancelled = false;
-                } finally{
-                    ph.finish();
-                }
-                
-                disposeOnEDT();
-            }
-            
-        };
-        EventQueueUtilities.runOffEDT(r);
+        manager.tryToConnect(username, password, connectionFile);
     }//GEN-LAST:event_connectAction
 
     private void cancelAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelAction
-        cancelled = true;
-        dispose();      
+        manager.cancel();
+        disposeOnEDT();      
     }//GEN-LAST:event_cancelAction
 
-    protected DataContext getContextFromConnectionFile(String connectionFile, String username, String password)
-    {
-        DataStoreCoordinator dsc = null;
-        DataContext c = null;
-        try {
-            dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
-            c = dsc.getContext();
-        } catch (SchemaVersionException ex2)
-        {
-            int databaseVersion = ex2.getDatabaseSchemaNumber();
-            int apiVersion = ex2.getAPISchemaNumber();
-            boolean success = shouldRunUpdater(databaseVersion, apiVersion); //ask the user if they want to run the upgrader
-            if (success)
-            {
-                Collection<? extends UpdateInfo> updates = Lookup.getDefault().lookupAll(UpdateInfo.class);
-                List<UpdateInfo> versions = new LinkedList<UpdateInfo>();
-                for (UpdateInfo u : updates)
-                {
-                    int updateVersion = u.getSchemaVersion();
-                    if (updateVersion > databaseVersion && updateVersion <= apiVersion)
-                    {
-                        versions.add(u);
-                    }
-                }
-                Collections.sort(versions, new UpdateComparator());
-                UpdaterInProgressDialog uiUpdater = new UpdaterInProgressDialog();
-                UpgradeTool tool = new UpgradeTool(versions, connectionFile, username, password, uiUpdater);
-                uiUpdater.setUpgradeTool(tool);
-                try{
-                    success = runUpdater(tool, uiUpdater, true);
-                } catch (Exception e)
-                {
-                    cancelled = true;
-                    showErrors(e, dsc);
-                    return c;
-                }
-            }
-            if (success)
-            {
-                try {
-                    dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
-                    c = dsc.getContext();
-                } catch (Exception ex)
-                {
-                    showErrors(ex, dsc);
-                    return c;
-                }
-            }
-            else{
-                cancelled = true;
-                return c;
-            }
-        }
-        catch (DatabaseIsUpgradingException ex)
-        {
-            DBIsUpgradingDialog d = new DBIsUpgradingDialog();
-            d.showDialog();
-            if (d.forceUpgrade())
-            {
-                try {
-                    dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
-                    dsc.removeUpgradeLock("OVATION_UPGRADE_FLAG");
-                } catch (Exception ex1)
-                {
-                    showErrors(ex1, dsc);
-                    return c;
-                }
-               return getContextFromConnectionFile(connectionFile, username, password);
-            }
-                    
-        }
-        catch (Exception ex) {
-            showErrors(ex, dsc);
-            return c;
-        }
-        return c;
-    }
-    
-    protected boolean shouldRunUpdater(int databaseVersion, int apiVersion)
-    {
-        return shouldRunUpdater(databaseVersion, apiVersion, true, null);
-    }
-    //dependency injection, for testing
-    protected boolean shouldRunUpdater(int databaseVersion, int apiVersion, boolean showDialogs, ShouldRunUpdaterDialog shouldRun)
-    {
-        if (databaseVersion <0 || apiVersion <0 )
-        {
-            showErrors(new RuntimeException("Invalid database schema version (" + databaseVersion + ") or api schema version (" + apiVersion + ")"), null);
-            return false;
-        }
-        
-        if (databaseVersion > apiVersion)
-        {
-            if (showDialogs)
-            {
-                InstallLatestVersionDialog installVersionDialog = new InstallLatestVersionDialog();
-                installVersionDialog.showDialog();
-            }
-            return true;
-        }
-        else if (databaseVersion < apiVersion)
-        {
-            if (shouldRun == null)
-            {
-                shouldRun = new ShouldRunUpdaterDialog();
-            }
-            if (showDialogs)
-            {
-                shouldRun.showDialog();
-            }
-            return !shouldRun.isCancelled();
-        }
-        return false;
-    }
-    
-    protected boolean runUpdater(final IUpgradeDB tool, UpdaterInProgressDialog inProgress, boolean showDialogs)
-    {
-        if (showDialogs)
-        {
-            inProgress.showDialog();
-        }
-        try{
-            tool.start();
-        } catch (DatabaseIsUpgradingException e)
-        {
-            inProgress.cancel();
-            //TODO: pop up a dialog here
-            
-        } catch (Exception e)
-        {
-            inProgress.cancel();
-            throw new RuntimeException(e.getLocalizedMessage());
-        }
-        if (inProgress.isCancelled())
-        {
-            return false;
-        }
-        else{
-            return true;
-        }
-    }
     
    
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -569,17 +418,10 @@ public class DBConnectionDialog extends javax.swing.JDialog {
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
-    protected void showDialog() {
+    public void showDialog() {
         this.setLocationRelativeTo(null);
         this.pack();
         this.setVisible(true);
     }
-    
-    class UpdateComparator implements Comparator<UpdateInfo>
-    {
-        @Override
-        public int compare(UpdateInfo t, UpdateInfo t1) {
-            return t.getSchemaVersion() - t1.getSchemaVersion();
-        }
-    }
+   
 }

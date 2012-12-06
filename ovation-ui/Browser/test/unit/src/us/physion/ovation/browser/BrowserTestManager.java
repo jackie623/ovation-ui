@@ -46,7 +46,6 @@ public class BrowserTestManager extends TestManager {
         String path = pwd + "data" + File.separator
                 + "browser" + File.separator
                 + "browser-test.connection";
-        System.out.println("Got connection file");
 
         return path;
     }

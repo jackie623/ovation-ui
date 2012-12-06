@@ -16,7 +16,7 @@ import us.physion.ovation.interfaces.ModalDialogBase;
  *
  * @author huecotanks
  */
-public class UpdaterInProgressDialog extends ModalDialogBase implements IUpdateUI{
+public class UpdaterInProgressDialog extends ModalDialogBase implements IUpdateUI, CancellableDialog{
 
     
     private UpgradeTool tool;
@@ -114,7 +114,7 @@ public class UpdaterInProgressDialog extends ModalDialogBase implements IUpdateU
     }// </editor-fold>//GEN-END:initComponents
 
     boolean cancelled = false;
-    protected boolean isCancelled()
+    public boolean isCancelled()
     {
         return cancelled;
     }

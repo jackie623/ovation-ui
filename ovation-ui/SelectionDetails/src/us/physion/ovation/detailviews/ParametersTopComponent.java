@@ -68,7 +68,7 @@ public final class ParametersTopComponent extends TopComponent {
         });
     }
     
-    public void setEntities(final Collection<? extends IEntityWrapper> entities)
+    public List<TableTreeKey> setEntities(final Collection<? extends IEntityWrapper> entities)
     {
         this.entities = entities;
 
@@ -99,6 +99,7 @@ public final class ParametersTopComponent extends TopComponent {
             tableKeys.add(new ParameterSet(key, tables.get(key)));
         }
         ((ScrollableTableTree)jScrollPane2).setKeys(tableKeys);
+        return tableKeys;
     }
     
     public Collection<? extends IEntityWrapper> getEntities()
@@ -109,6 +110,11 @@ public final class ParametersTopComponent extends TopComponent {
     public ScrollableTableTree getTableTree()
     {
         return ((ScrollableTableTree)jScrollPane2);
+    }
+    
+    protected void setTableTree(ScrollableTableTree t)
+    {
+        jScrollPane2 = t;
     }
     
     public ParametersTopComponent() {
@@ -189,40 +195,5 @@ public final class ParametersTopComponent extends TopComponent {
             }
         }
         tables.put(paramName, params);
-    }
-    
-    class MultiUserParameter{
-        
-        ArrayList<Object> values;
-        MultiUserParameter(Object value)
-        {
-            values = new ArrayList();
-            add(value);
-        }
-        
-        public void add(Object value)
-        {
-            if (value instanceof MultiUserParameter)
-            {
-                values.addAll(((MultiUserParameter)value).values);
-            }else{
-                values.add(value);
-            }
-        }
-        
-        @Override
-        public String toString()
-        {
-            String s = "{";
-            for (Object value : values)
-            {
-                s += value + ", ";
-            }
-            if (s.length() == 1)
-            {
-                return "";
-            }
-            return s.substring(0, s.length() -2) + "}";
-        }
     }
 }

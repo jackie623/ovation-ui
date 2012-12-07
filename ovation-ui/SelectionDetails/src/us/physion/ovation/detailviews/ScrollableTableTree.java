@@ -207,8 +207,8 @@ public class ScrollableTableTree extends JScrollPane {
                 final boolean leaf,
                 final int row) {
             Object o = ((DefaultMutableTreeNode) value).getUserObject();
-            if (o instanceof UserPropertySet) {
-                JPanel panel = tableLookup.get(((UserPropertySet) o).getID()).getPanel();
+            if (o instanceof TableTreeKey) {
+                JPanel panel = tableLookup.get(((TableTreeKey) o).getID()).getPanel();
                 return panel;
             } else {
                 Component editor = getTreeCellRendererComponent(tree,

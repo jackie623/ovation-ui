@@ -44,10 +44,17 @@ public class TableTreeUtils {
 
     public static Set<TestTuple> getTuples(TableTreeKey k) {
         Set<TestTuple> properties = new HashSet<TestTuple>();
-        Object[][] data = k.getData();
-        for (int i  = 0; i < data.length; ++i)
+        if (k instanceof UserPropertySet)
         {
-            properties.add(new TestTuple((String) data[i][0], data[i][1]));
+            Object[][] data = ((UserPropertySet) k).getData();
+            for (int i = 0; i < data.length; ++i) {
+                properties.add(new TestTuple((String) data[i][0], data[i][1]));
+            }
+        } else if (k instanceof ParameterSet) {
+            Object[][] data = ((ParameterSet) k).getData();
+            for (int i = 0; i < data.length; ++i) {
+                properties.add(new TestTuple((String) data[i][0], data[i][1]));
+            }
         }
         return properties;
     }

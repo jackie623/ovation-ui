@@ -21,9 +21,7 @@ import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 import org.openide.windows.WindowManager;
-import ovation.IEntityBase;
-import ovation.ITaggableEntityBase;
-import ovation.KeywordTag;
+import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
@@ -118,12 +116,12 @@ public final class TagsViewTopComponent extends TopComponent {
         entities = global.allInstances();
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.getConnection().getContext(); //getContext
-        updateListModel(entities);
+        updateListModel(entities, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
     }
 
-    protected void updateListModel(Collection<? extends IEntityWrapper> entities)
+    protected List<TableTreeKey> updateListModel(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
     {
-        if (entities.isEmpty()) {
+        /*if (entities.isEmpty()) {
             listModel.setTags(new LinkedList<String>());
             return;
         }
@@ -142,7 +140,66 @@ public final class TagsViewTopComponent extends TopComponent {
         }
 
         listModel.setTags(tags);
+        */
+        DataContext c;
+        if (dsc == null) {
+            c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+        }else{
+            c = dsc.getContext();
+        }
 
+        ArrayList<TableTreeKey> tags = new ArrayList<TableTreeKey>();
+        Set<String> uris = new HashSet<String>();
+        Set<IEntityBase> entitybases = new HashSet();
+        Set<String> owners = new HashSet();
+        for (IEntityWrapper w : entities) {
+            IEntityBase e = w.getEntity();
+            entitybases.add(e);
+            uris.add(e.getURIString());
+            owners.add(e.getOwner().getUuid());
+        }
+
+        String currentUserUUID = c.currentAuthenticatedUser().getUuid();
+        Iterator<User> users = c.getUsersIterator();
+        boolean containsCurrentUser = false;//current user's property table should always exist, even if there are no properties
+        while (users.hasNext()) {
+            User u = users.next();
+            List<String> taglist = new ArrayList<String>();
+            for (IEntityBase e : entitybases) {
+                if (e instanceof ITaggableEntityBase)
+                {
+                    for (KeywordTag t : ((ITaggableEntityBase)e).getTagSet())//TODO: Make this faster
+                    {
+                        if (t.getOwner().getUuid().equals(u.getUuid()))
+                        {
+                            taglist.add(t.getTag());
+                        }
+                    }
+                }
+            }
+            if (!taglist.isEmpty()) {
+                String uuid = u.getUuid();
+                TagsSet propertySet;
+                if (currentUserUUID.equals(uuid)) {
+                    containsCurrentUser = true;
+                    propertySet = new TagsSet(u, owners.contains(uuid), true, taglist, uris);
+                } else {
+                    propertySet = new TagsSet(u, owners.contains(uuid), false, taglist, uris);
+                }
+                tags.add(propertySet);
+            }
+        }
+        if (!containsCurrentUser) {
+            User current = c.currentAuthenticatedUser();
+            tags.add(new TagsSet(current, owners.contains(current.getUuid()), true, new ArrayList<String>(), uris));
+        }
+        
+        Collections.sort(tags);
+        
+        ((ScrollableTableTree) jScrollPane2).setKeys(tags);
+        
+        this.entities = entities;
+        return tags;
     }
     public TagsViewTopComponent() {
         initComponents();
@@ -165,6 +222,7 @@ public final class TagsViewTopComponent extends TopComponent {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
+        jScrollPane2 = new ScrollableTableTree();
 
         addTagComboBox.setEditable(true);
         addTagComboBox.setModel(tagComboModel);
@@ -187,11 +245,17 @@ public final class TagsViewTopComponent extends TopComponent {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(addTagComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(addTagComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE))
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 665, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(16, 16, 16))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -200,8 +264,10 @@ public final class TagsViewTopComponent extends TopComponent {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -224,6 +290,7 @@ public final class TagsViewTopComponent extends TopComponent {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JList jList1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {

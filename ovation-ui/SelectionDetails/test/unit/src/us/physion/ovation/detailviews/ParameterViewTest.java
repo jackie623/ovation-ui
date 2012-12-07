@@ -320,8 +320,11 @@ public class ParameterViewTest extends OvationTestCase implements Lookup.Provide
         {
             return properties;
         }    
-         
-        Object[][] data = k.getData();
+        
+        if (!(k instanceof ParameterSet))
+            throw new RuntimeException("Wrong type!");
+        
+        Object[][] data = ((ParameterSet)k).getData();
         //DefaultTableModel m = ((DefaultTableModel) ((TableInTreeCellRenderer) t.getTree().getCellRenderer()).getTableModel(k));
         for (int i  = 0; i < data.length; ++i)
         {

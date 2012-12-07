@@ -6,6 +6,8 @@ package us.physion.ovation.detailviews;
 
 import java.util.*;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import org.openide.util.Lookup;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
@@ -137,5 +139,10 @@ class UserPropertySet implements TableTreeKey{
             return new PropertyTableModelListener(uris, (ExpandableJTree)t.getTree(), n, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
         }
         return null;
+    }
+
+    @Override
+    public TableModel createTableModel() {
+        return new DefaultTableModel(getData(), new String[]{"Name", "Property"});
     }
 }

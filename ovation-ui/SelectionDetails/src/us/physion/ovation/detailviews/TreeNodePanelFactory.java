@@ -13,6 +13,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import us.physion.ovation.detailviews.ScrollableTableTree.TableInTreeCellRenderer;
 
@@ -62,10 +63,7 @@ public class TreeNodePanelFactory {
             cr.tableLookup.put(id, panel);
         }
 
-        Object[][] dataVector = k.getData();
-
-        String[] columnNames = {"Name", "Value"};
-        DefaultTableModel tableModel = new DefaultTableModel(dataVector, columnNames);
+        TableModel tableModel = k.createTableModel();
 
         JTable table = panel.getTable();
         table.setModel(tableModel);

@@ -6,6 +6,8 @@ package us.physion.ovation.detailviews;
 
 import java.util.*;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
@@ -65,7 +67,6 @@ class ParameterSet implements TableTreeKey {
         return displayName;
     }
 
-    @Override
     public Object[][] getData() {
         return data;
     }
@@ -100,5 +101,8 @@ class ParameterSet implements TableTreeKey {
     public TableModelListener createTableModelListener(ScrollableTableTree t, TableNode n) {
         return null;
     }
-    
+    @Override
+    public TableModel createTableModel() {
+        return new DefaultTableModel(getData(), new String[]{"Name", "Property"});
+    }
 }

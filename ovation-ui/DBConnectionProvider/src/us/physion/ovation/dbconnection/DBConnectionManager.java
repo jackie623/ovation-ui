@@ -50,6 +50,11 @@ class DBConnectionManager {
          return cancelled;
     }
 
+    public IAuthenticatedDataStoreCoordinator getDataStoreCoordinator()
+    {
+        return dsc;
+    }
+    
     void tryToConnect(final String username, final String password, final String connectionFile) {
         //run this on a thread that's not the event queue thread
         Runnable r = new Runnable(){

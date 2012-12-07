@@ -101,7 +101,7 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
                     manager.showDialog();
                     if (manager.dialogCancelled())
                     {
-                        setDsc(dialog.getDataStoreCoordinator());
+                        setDsc(manager.getDataStoreCoordinator());
                         setWaitingFlag(false);
 
                         for (PropertyChangeListener l : listeners) {

@@ -139,7 +139,7 @@ public class UpgradeTool implements IUpgradeDB {
         String platform = "";
         File objyBin = null;
         if (isWindows()) {
-            objyBin = new File("C:\\Program Files\\Physion\\Ovation\\Objectivity\\bin"); //TODO: check this path
+            objyBin = new File("C:\\Program Files\\Physion\\Ovation\\Objectivity\\bin"); 
             platform = "Windows";
         } else if (isLinux()) {
             objyBin = new File("/usr/object/linux86_64/bin/");
@@ -201,7 +201,7 @@ public class UpgradeTool implements IUpgradeDB {
                             runCommand(pb);
 
                         } catch (Exception e) {
-                            throw new RuntimeException("Could not run jar '" + file + "'. " + e.getMessage());
+                            throw new RuntimeException("Could not run jar '" + file + "'. " + e.getClass() + ": " + e.getMessage());
                         }
                     } else if (step instanceof UpdateSchemaStep) {
                         

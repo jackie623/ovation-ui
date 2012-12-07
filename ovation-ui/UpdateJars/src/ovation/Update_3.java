@@ -116,8 +116,9 @@ public class Update_3 extends Updater{
 	    {
 		update(-1, "Warning: no objects found for current user");
 	    }
-		
+
 	    c.beginWriteTransaction();
+	    System.out.println("About to move user");
 	    try{
 		if (!u.getContainer().getOid().getString().equals(containerID))
 		{
@@ -127,25 +128,32 @@ public class Update_3 extends Updater{
 	    }
 	    catch (Exception e)
 	    {
+		update(-1, "Couldn't move users. " + e.getMessage());
 		c.abortTransaction();
 		throw new OvationException("Error while updating: "  + e.getMessage());
 	    }
+	    System.out.println("User moved successfully!");
 
 	    // for each object in the database, transfer ownership to the new user
 	    for (URI uri: set)
 	    {
+		update(-1, "Getting new object from URI : " + uri + " --------------------");
 		IEntityBase e = c.objectWithURI(uri);
+		update(-1, "Transferring ownership");
 		try{
 		    e.transferOwnership(u);
+		    update(-1, "Transferred ownership");
 		} catch (UserAccessException ex){
 		    update(-1, "Warning: unable to transfer ownership of object");
 		    //pass
 		}
 		c.beginTransaction();
 		String userOid = u.getOidString();
+		update(-1, "Got oid string");
 		try{
 		    if (!e.getOwner().getOidString().equals(userOid))
 		    {
+			update(-1, "User " + userOid + "' was moved, but ownership was not properly transferred");
 			throw new OvationException("User '" + userOid + "' was moved, but ownership was not properly transfered");
 		    }
 		}finally

@@ -48,7 +48,6 @@ public final class TagsViewTopComponent extends TopComponent {
     private DefaultComboBoxModel tagComboModel = new DefaultComboBoxModel(new String[] {});
     Lookup.Result global;
     private Collection<? extends IEntityWrapper> entities;
-    private StringListModel listModel = new StringListModel();
     private LookupListener listener = new LookupListener() {
 
         @Override
@@ -72,7 +71,6 @@ public final class TagsViewTopComponent extends TopComponent {
                 ((ITaggableEntityBase) ie).addTag(tag);
             }
         }
-        listModel.addTag(tag);
         tagComboModel.removeAllElements();
         addTagComboBox.setSelectedItem("");
         addTagComboBox.setSelectedItem(null);
@@ -123,7 +121,7 @@ public final class TagsViewTopComponent extends TopComponent {
     {
         /*if (entities.isEmpty()) {
             listModel.setTags(new LinkedList<String>());
-            return;
+            return null;
         }
 
         List<String> tags = new LinkedList<String>();
@@ -140,7 +138,8 @@ public final class TagsViewTopComponent extends TopComponent {
         }
 
         listModel.setTags(tags);
-        */
+        return null;
+       */
         DataContext c;
         if (dsc == null) {
             c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
@@ -196,13 +195,14 @@ public final class TagsViewTopComponent extends TopComponent {
         
         Collections.sort(tags);
         
-        ((ScrollableTableTree) jScrollPane2).setKeys(tags);
+        ((ScrollableTableTree) tagTree).setKeys(tags);
         
         this.entities = entities;
         return tags;
     }
     public TagsViewTopComponent() {
         initComponents();
+        this.add(tagTree);
         setName(Bundle.CTL_TagsViewTopComponent());
         setToolTipText(Bundle.HINT_TagsViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
@@ -220,9 +220,7 @@ public final class TagsViewTopComponent extends TopComponent {
 
         addTagComboBox = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
-        jScrollPane2 = new ScrollableTableTree();
+        tagTree = new ScrollableTableTree();
 
         addTagComboBox.setEditable(true);
         addTagComboBox.setModel(tagComboModel);
@@ -234,9 +232,6 @@ public final class TagsViewTopComponent extends TopComponent {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(TagsViewTopComponent.class, "TagsViewTopComponent.jLabel1.text")); // NOI18N
 
-        jList1.setModel(listModel);
-        jScrollPane1.setViewportView(jList1);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -244,18 +239,13 @@ public final class TagsViewTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(addTagComboBox, 0, 555, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(addTagComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE))
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 665, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(16, 16, 16))))
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(tagTree, javax.swing.GroupLayout.PREFERRED_SIZE, 543, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -265,9 +255,7 @@ public final class TagsViewTopComponent extends TopComponent {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 419, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tagTree, javax.swing.GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -288,9 +276,7 @@ public final class TagsViewTopComponent extends TopComponent {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox addTagComboBox;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JList jList1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane tagTree;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -312,10 +298,5 @@ public final class TagsViewTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
-    }
-    
-    protected List<String> getTagList()
-    {
-        return listModel.tags;
     }
 }

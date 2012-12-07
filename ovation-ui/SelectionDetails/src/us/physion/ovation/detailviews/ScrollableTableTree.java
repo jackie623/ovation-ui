@@ -85,7 +85,7 @@ public class ScrollableTableTree extends JScrollPane {
         tree.setCellEditor(r);
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);
-        tree.addMouseMotionListener(new MouseMotionAdapter() {
+        /*tree.addMouseMotionListener(new MouseMotionAdapter() {
 
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -109,7 +109,7 @@ public class ScrollableTableTree extends JScrollPane {
 
                 tree.setCursor(Cursor.getDefaultCursor());
             }
-        });
+        });*/
         this.setViewportView(tree);
 
         userNodes = new HashMap<String, DefaultMutableTreeNode>();

@@ -99,7 +99,7 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
                     dialog.setConnectionManager(manager);
                     manager.setConnectionDialog(dialog);
                     manager.showDialog();
-                    if (manager.dialogCancelled())
+                    if (!manager.dialogCancelled())
                     {
                         setDsc(manager.getDataStoreCoordinator());
                         setWaitingFlag(false);

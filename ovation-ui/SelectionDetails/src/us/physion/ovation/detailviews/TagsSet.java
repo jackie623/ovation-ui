@@ -5,6 +5,7 @@
 package us.physion.ovation.detailviews;
 
 import java.util.*;
+import javax.swing.JButton;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -99,6 +100,18 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
 
     @Override
     public TableModel createTableModel() {
-        return new DefaultTableModel(new Vector(tags), 1);
+        Object[][] data  = new Object[tags.size()][1];
+        int row = 0;
+        for (String tag: tags)
+        {
+            data[row][0] = tag;
+            /*JButton b = new JButton();
+            b.setLabel("Press me");
+            data[row++][1] = b;
+            * 
+            */
+            
+        }
+        return new DefaultTableModel(data, new String[]{"Value"});
     }
 }

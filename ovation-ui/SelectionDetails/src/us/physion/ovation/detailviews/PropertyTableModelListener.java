@@ -37,7 +37,7 @@ import us.physion.ovation.interfaces.EventQueueUtilities;
  *
  * @author huecotanks
  */
-class PropertyTableModelListener implements TableModelListener{
+class PropertyTableModelListener implements EditableTableModelListener{
 
     ResizableTree tree;
     Set<String> uris;
@@ -94,13 +94,13 @@ class PropertyTableModelListener implements TableModelListener{
                             parseAndAdd(eb, key, props.get(key));
                         }
                     }
-                    node.resetProperties(dsc);
+                    node.reset(dsc);
                 }
             });
         }
     }
 
-    void deleteProperty(final DefaultTableModel model, int[] rowsToRemove) {
+    public void deleteRows(final DefaultTableModel model, int[] rowsToRemove) {
         
         Arrays.sort(rowsToRemove);
         final int[] rows = rowsToRemove;
@@ -122,7 +122,7 @@ class PropertyTableModelListener implements TableModelListener{
                     }
 
                 }
-                node.resetProperties(dsc);
+                node.reset(dsc);
                 EventQueueUtilities.runOnEDT(new Runnable() {
 
                     @Override

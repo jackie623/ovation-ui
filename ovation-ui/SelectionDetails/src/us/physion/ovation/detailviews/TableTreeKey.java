@@ -21,4 +21,5 @@ public interface TableTreeKey extends Comparable
     public boolean isExpandedByDefault();
     public TableModelListener createTableModelListener(ScrollableTableTree t, TableNode n);
     public TableModel createTableModel();
+    public Object[][] getData();// for testing and ease of use
 }

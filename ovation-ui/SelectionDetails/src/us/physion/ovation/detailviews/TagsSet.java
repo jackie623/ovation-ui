@@ -6,6 +6,7 @@ package us.physion.ovation.detailviews;
 
 import java.util.*;
 import javax.swing.JButton;
+import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -37,12 +38,11 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
         for (String uri: uris)
         {
             IEntityBase eb = c.objectWithURI(uri);
-            if (eb.getOwner().getUuid().equals(uuid))
-            {
-                owner = true;
-            }
             if (eb instanceof ITaggableEntityBase)
             {
+                if (eb.getOwner().getUuid().equals(uuid)) {
+                    owner = true;
+                }
                 Set<KeywordTag> keywords = ((ITaggableEntityBase)eb).getTagSet();
                 for (KeywordTag keyword : keywords)
                 {
@@ -93,25 +93,33 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
     public TableModelListener createTableModelListener(ScrollableTableTree t, TableNode n) {
         if (isEditable())
         {
-            return null;//new PropertyTableModelListener(uris, (ExpandableJTree)t.getTree(), n, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+            return new TagTableModelListener(uris,  (ExpandableJTree)t.getTree(), n, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
         }
         return null;
     }
 
     @Override
     public TableModel createTableModel() {
-        Object[][] data  = new Object[tags.size()][1];
-        int row = 0;
+        Object[][] data = new Object[tags.size()][2];
+        int i = 0;
         for (String tag: tags)
         {
-            data[row][0] = tag;
-            /*JButton b = new JButton();
-            b.setLabel("Press me");
-            data[row++][1] = b;
-            * 
-            */
-            
+            data[i][0] = tag;
+            data[i++][1] = "";
         }
-        return new DefaultTableModel(data, new String[]{"Value"});
+        DefaultTableModel m = new DefaultTableModel(data, new String[]{"Value"});
+        JTable table = null;
+        table.removeColumn(table.getColumn("Value"));
+        return m;
+    }
+    public Object[][] getData()
+    {
+        Object[][] data = new Object[tags.size()][1];
+        int i = 0;
+        for (String tag: tags)
+        {
+            data[i++][0] = tag;
+        }
+        return data;
     }
 }

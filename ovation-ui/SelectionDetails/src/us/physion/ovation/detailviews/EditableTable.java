@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.Arrays;
+import java.util.Vector;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -136,8 +137,6 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
          {
              //this gets the height from the EditableTable default, so if this gets out of whack, modify the default size in the UI builder
             height = (int)super.getPreferredSize().getHeight();
-            //height = 24 + addButton.getPreferredSize().height;
-
          }
         else
         {
@@ -160,7 +159,24 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
             public void run() {
                 DefaultTableModel m = ((DefaultTableModel) table.getModel());
                 int row = m.getRowCount();
-                m.addRow(new Object[]{"", ""});
+                Vector newRow = new Vector(m.getColumnCount());
+                Vector dataVector = m.getDataVector();
+                Vector columnIdentifiers = new Vector(m.getColumnCount());
+                for (int i=0; i< m.getColumnCount(); i++)
+                {
+                    newRow.addElement("");
+                    columnIdentifiers.add(m.getColumnName(i));
+                }
+                try {
+                    /*dataVector.addElement(newRow);
+                    m.setDataVector(dataVector, columnIdentifiers);
+                    m.fireTableChanged(new TableModelEvent(m, row, row, -1, TableModelEvent.INSERT));
+                    */
+                    m.insertRow(row, new Object[] {""});
+                    //m.addRow(newRow);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
                 
                 //manually set size of the containing scrollpane, since the table has resized
                 JScrollPane sp = ((JScrollPane) table.getParent().getParent());
@@ -171,7 +187,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 
                 boolean noListener = true;
                 for (TableModelListener l : m.getListeners(TableModelListener.class)) {
-                    if (l instanceof PropertyTableModelListener) {
+                    if (l instanceof EditableTableModelListener) {
                         noListener = false;
 
                         TableModelEvent t = new TableModelEvent(m, row, row, 1, TableModelEvent.INSERT);
@@ -199,7 +215,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
                 boolean noListener = true;
                 for (TableModelListener l : m.getListeners(TableModelListener.class)) {
-                    if (l instanceof PropertyTableModelListener) {
+                    if (l instanceof EditableTableModelListener) {
                         noListener = false;
 
                         TableModelEvent t = new TableModelEvent(m, row, row, 1, TableModelEvent.UPDATE);
@@ -215,11 +231,11 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
     }
 
     protected void deleteRows(int[] rows) {
-        //There is a bug in getListeners - it doesnt find the PropertyTableModelListener if you pass is PropertyTableModelListener.class
+        //There is a bug in getListeners - it doesnt find the EditableTableModelListener if you pass is EditableTableModelListener.class
         TableModelListener[] listeners = ((DefaultTableModel) table.getModel()).getListeners(TableModelListener.class);
         for (TableModelListener l : listeners) {
-            if (l instanceof PropertyTableModelListener) {
-                ((PropertyTableModelListener) l).deleteProperty((DefaultTableModel) table.getModel(), rows);
+            if (l instanceof EditableTableModelListener) {
+                ((EditableTableModelListener) l).deleteRows((DefaultTableModel) table.getModel(), rows);
                 break;
             }
         }

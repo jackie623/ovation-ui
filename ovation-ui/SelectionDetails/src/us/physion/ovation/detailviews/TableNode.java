@@ -25,18 +25,11 @@ public class TableNode extends DefaultMutableTreeNode{
         super(p);
     }
     
-    public void resetProperties(IAuthenticatedDataStoreCoordinator dsc)
+    public void reset(IAuthenticatedDataStoreCoordinator dsc)
     {
-        //regrab properties from the database
+        //regrab properties/tags/etc from the database
         TableTreeKey p = (TableTreeKey)getUserObject();
         p.refresh(dsc);
-    }
-    
-    public void resetProperties()
-    {
-        //regrab properties from the database
-        TableTreeKey p = (TableTreeKey)getUserObject();
-        p.refresh(Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
     }
     
     public void setPanel(TablePanel t)

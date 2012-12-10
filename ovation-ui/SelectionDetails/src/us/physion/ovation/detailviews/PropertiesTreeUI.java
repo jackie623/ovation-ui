@@ -22,8 +22,9 @@ import javax.swing.tree.TreePath;
  */
 public class PropertiesTreeUI extends BasicTreeUI{
     
-    JComponent window;
-    PropertiesTreeUI(JComponent window)
+    JScrollPane window;
+    //int cellWidth = 0;
+    PropertiesTreeUI(JScrollPane window)
     {
         this.window = window;
     }
@@ -31,6 +32,9 @@ public class PropertiesTreeUI extends BasicTreeUI{
     public int getCellWidth()
     {
         return window.getWidth() - 24;//2*getRowX(1, 2);
+        /*cellWidth = cellWidth == 0 ? window.getViewport().getWidth()-12 : cellWidth;
+        return cellWidth;
+        */
     }
     
     @Override
@@ -44,10 +48,11 @@ public class PropertiesTreeUI extends BasicTreeUI{
                 Rectangle dimensions = super.getNodeDimensions(value, row,
                         depth, expanded, size);
                 
-                dimensions.width = window.getWidth() - 24;//- 2*getRowX(row, depth);
-
+                dimensions.width = window.getWidth() - 24;//window.getViewport().getWidth() - 2*getRowX(row, depth); 
                 if (depth == 1)
-                    dimensions.width -= (getRowX(row, depth) -4);
+                    dimensions.width -= (getRowX(row, depth) - 4);//+= getRowX(row, depth);//
+                //cellWidth = dimensions.width;
+                
                 if (value instanceof TableNode)
                 {
                     int height = ((TableNode)value).getHeight();

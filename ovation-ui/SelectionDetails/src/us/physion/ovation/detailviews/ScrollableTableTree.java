@@ -221,6 +221,16 @@ public class ScrollableTableTree extends JScrollPane {
     public int getCellWidth() {
         return ((PropertiesTreeUI) tree.getUI()).getCellWidth();
     }
+    
+    public void resizeEditableNode(TableNode node)
+    {
+        EditableTable p = (EditableTable) node.getPanel();
+        JScrollPane sp = p.getScrollPane();
+        if (sp != null) {
+            sp.setSize(sp.getPreferredSize());
+        }
+        p.setSize(p.getPreferredSize());
+    }
 
     //Getters, currently used for tests
     //The category is the top-level node in the tree - username for PropertiesView, protocol type for protocol parameters 

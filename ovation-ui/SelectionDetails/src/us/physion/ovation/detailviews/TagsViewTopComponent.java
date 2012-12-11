@@ -9,7 +9,12 @@ import java.util.*;
 import java.util.concurrent.FutureTask;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -23,6 +28,7 @@ import org.openide.util.Utilities;
 import org.openide.windows.WindowManager;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 
@@ -63,18 +69,15 @@ public final class TagsViewTopComponent extends TopComponent {
 
     };
 
-    /*protected void addTag(Collection<? extends IEntityWrapper> entities, String tag) {
-        for (IEntityWrapper e : entities) {
-
-            IEntityBase ie = e.getEntity();
-            if (ie instanceof ITaggableEntityBase) {
-                ((ITaggableEntityBase) ie).addTag(tag);
+    protected void addTags(final Collection<? extends IEntityWrapper> entities, String tags) {
+        final String[] tagList = tags.split(",");
+        EventQueueUtilities.runOffEDT(new Runnable() {
+            @Override
+            public void run() {
+                updateTagList(tagList, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
             }
-        }
-        tagComboModel.removeAllElements();
-        addTagComboBox.setSelectedItem("");
-        addTagComboBox.setSelectedItem(null);
-    }*/
+        });
+    }
 
     protected void update()
     {
@@ -86,27 +89,6 @@ public final class TagsViewTopComponent extends TopComponent {
 
     protected List<TableTreeKey> update(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
     {
-        /*if (entities.isEmpty()) {
-            listModel.setTags(new LinkedList<String>());
-            return null;
-        }
-
-        List<String> tags = new LinkedList<String>();
-        for (IEntityWrapper e: entities)
-        {
-            IEntityBase entity = e.getEntity();
-            if (entity != null && entity instanceof ITaggableEntityBase)
-            {
-                for (KeywordTag t : ((ITaggableEntityBase)entity).getTagSet())
-                {
-                    tags.add(t.getTag());
-                }
-            }
-        }
-
-        listModel.setTags(tags);
-        return null;
-       */
         DataContext c;
         if (dsc == null) {
             c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
@@ -167,6 +149,58 @@ public final class TagsViewTopComponent extends TopComponent {
         this.entities = entities;
         return tags;
     }
+    
+    protected void updateTagList(String[] newTags, IAuthenticatedDataStoreCoordinator dsc)
+    {
+        JTree tree = ((ScrollableTableTree) tagTree).getTree();
+        DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
+
+        DefaultMutableTreeNode currentUserNode = (DefaultMutableTreeNode)n.getChildAt(0);
+        final DefaultMutableTreeNode tagTableNode = (DefaultMutableTreeNode)currentUserNode.getChildAt(0);
+        if (tagTableNode instanceof TableNode)
+        {
+            TableNode node = (TableNode)tagTableNode;
+            /*for (IEntityWrapper eb : entities)
+            {
+                IEntityBase e = eb.getEntity();
+                if (e instanceof ITaggableEntityBase)
+                {
+                    for (String newTag : newTags)
+                    {
+                        ((ITaggableEntityBase)e).addTag(newTag.trim());
+                    }
+                }
+            }
+
+            node.reset(dsc);
+            */
+            TagsSet t = (TagsSet)(node.getUserObject());
+            List<String> tagList = t.getTags();
+            for (String tag : newTags)
+            {
+                tagList.add(tag);
+            }
+            Collections.sort(tagList);
+            final String[] tags = tagList.toArray(new String[tagList.size()]);
+            
+            EventQueueUtilities.runOnEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                    DefaultTableModel model = ((DefaultTableModel)((TableNode)tagTableNode).getPanel().getTable().getModel());
+                    Object[][] data = new Object[tags.length][1];
+                    for (int i=0; i<tags.length; i++)
+                    {
+                        data[i][0] = tags[i];
+                    }
+                    model.setDataVector(data, new Object[]{"Value"});
+                    
+                    ((ScrollableTableTree)tagTree).resizeEditableNode((TableNode)tagTableNode);
+                }
+            });
+        }
+    }
+    
     public TagsViewTopComponent() {
         initComponents();
         this.add(tagTree);
@@ -229,15 +263,17 @@ public final class TagsViewTopComponent extends TopComponent {
 
     private void addTagComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagComboBoxActionPerformed
 
-        /*if (evt.getActionCommand().equals("comboBoxEdited"))
+        if (evt.getActionCommand().equals("comboBoxEdited"))
         {
             //add tag
             ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
             cp.getConnection().getContext(); //getContext
-            String tag = addTagComboBox.getSelectedItem().toString();
-            
-            addTag(entities, tag);
-        }*/
+            String tags = addTagComboBox.getSelectedItem().toString();
+            addTags(entities, tags);
+            tagComboModel.removeAllElements();
+            addTagComboBox.setSelectedItem("");
+            addTagComboBox.setSelectedItem(null);
+        }
     }//GEN-LAST:event_addTagComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

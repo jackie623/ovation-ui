@@ -63,42 +63,54 @@ class TagTableModelListener implements EditableTableModelListener {
                     tags.add(tag);
             }
 
-            final Set<String> newTags = tags;
-            if (newTags.isEmpty())
-                return;
-            //add new tags
-            EventQueueUtilities.runOffEDT(new Runnable() {
-
-                @Override
-                public void run() {
-                    List<String> originalTags = ((TagsSet) node.getUserObject()).getTags();
-                    List<String> toRemove = new ArrayList<String>();
-                    DataContext c = dsc.getContext();
-                    
-                    for (String original : originalTags) {
-                        if (!newTags.contains(original)) {
-                            toRemove.add(original);
-                        }else{
-                            newTags.remove(original);
-                        }
-                    }
-                    for (String uri : uris) {
-                        IEntityBase eb = c.objectWithURI(uri);
-                        if (eb instanceof ITaggableEntityBase) {
-                            for (String tag : newTags) {
-                                if (tag != null && !tag.isEmpty())
-                                    ((ITaggableEntityBase) eb).addTag(tag);
-                            }
-                            for (String tag : toRemove) {
-                                if (tag != null && !tag.isEmpty())
-                                    ((ITaggableEntityBase) eb).removeTag(tag);
-                            }
-                        }
-                    }
-                    node.reset(dsc);
-                }
-            });
+            updateTagList(tags, uris, node, dsc);
         }
+    }
+    //TODO: move these methods out into the other class
+    protected static List<String> getTags(TableNode node)
+    {
+        return ((TagsSet) node.getUserObject()).getTags();
+    }
+    
+    protected static void updateTagList(final Set<String> newTags, final Set<String> uris, final TableNode node, final IAuthenticatedDataStoreCoordinator dsc)
+    {
+        if (newTags.isEmpty()) {
+            return;
+        }
+        //add new tags
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                List<String> originalTags = getTags(node);
+                List<String> toRemove = new ArrayList<String>();
+                DataContext c = dsc.getContext();
+
+                for (String original : originalTags) {
+                    if (!newTags.contains(original)) {
+                        toRemove.add(original);
+                    } else {
+                        newTags.remove(original);
+                    }
+                }
+                for (String uri : uris) {
+                    IEntityBase eb = c.objectWithURI(uri);
+                    if (eb instanceof ITaggableEntityBase) {
+                        for (String tag : newTags) {
+                            if (tag != null && !tag.isEmpty()) {
+                                ((ITaggableEntityBase) eb).addTag(tag.trim());
+                            }
+                        }
+                        for (String tag : toRemove) {
+                            if (tag != null && !tag.isEmpty()) {
+                                ((ITaggableEntityBase) eb).removeTag(tag.trim());
+                            }
+                        }
+                    }
+                }
+                node.reset(dsc);
+            }
+        });
     }
 
     public void deleteRows(final DefaultTableModel model, int[] rowsToRemove) {
@@ -108,7 +120,7 @@ class TagTableModelListener implements EditableTableModelListener {
 
         Set<String> tags = new HashSet<String>();
         for (int i = rows.length - 1; i >= 0; i--) 
-           tags.add((String) model.getValueAt(rows[i], 0));
+           tags.add(((String) model.getValueAt(rows[i], 0)).trim());
         
         final Set<String> toRemove = tags;
         EventQueueUtilities.runOffEDT(new Runnable() {

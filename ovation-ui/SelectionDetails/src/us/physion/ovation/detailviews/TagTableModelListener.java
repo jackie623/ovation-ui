@@ -44,22 +44,28 @@ class TagTableModelListener implements EditableTableModelListener {
     @Override
     public void tableChanged(TableModelEvent tme) {
         DefaultTableModel t = (DefaultTableModel)tme.getSource();
-        final int firstRow = tme.getFirstRow();
-        final int lastRow = tme.getLastRow();
                          
         if (tme.getType() == TableModelEvent.INSERT)
         {
-            tree.resizeNode(node);
+            EventQueueUtilities.runOffEDT(new Runnable() {
+                @Override
+                public void run() {
+                    tree.resizeNode(node);
+                }
+            });
 
         } else if (tme.getType() == TableModelEvent.UPDATE)
         {
             Set<String> tags = new HashSet();
             for (int i = 0; i < t.getRowCount(); i++) {
                 String tag = (String) t.getValueAt(i, 0);
-                tags.add(tag);
+                if (tag != null && !tag.isEmpty())
+                    tags.add(tag);
             }
 
             final Set<String> newTags = tags;
+            if (newTags.isEmpty())
+                return;
             //add new tags
             EventQueueUtilities.runOffEDT(new Runnable() {
 
@@ -99,14 +105,18 @@ class TagTableModelListener implements EditableTableModelListener {
         
         Arrays.sort(rowsToRemove);
         final int[] rows = rowsToRemove;
+
+        Set<String> tags = new HashSet<String>();
+        for (int i = rows.length - 1; i >= 0; i--) 
+           tags.add((String) model.getValueAt(rows[i], 0));
+        
+        final Set<String> toRemove = tags;
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             @Override
             public void run() {
                 DataContext c = dsc.getContext();
-                for (int i = rows.length - 1; i >= 0; i--) {
-                    String tag = (String) model.getValueAt(rows[i], 0);
-
+                for (String tag : toRemove) {
                     for (String uri : uris) {
                         IEntityBase eb = c.objectWithURI(uri);
                         if (eb instanceof ITaggableEntityBase)

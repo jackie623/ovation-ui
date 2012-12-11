@@ -188,7 +188,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         });
     }
     
-    protected void editRow(final int row, final String key, final Object value)
+    /*protected void editRow(final int row, final String key, final Object value)
     {
         final DefaultTableModel m = ((DefaultTableModel) table.getModel());
         EventQueueUtilities.runOffEDT(new Runnable() {
@@ -214,7 +214,7 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 }
             }
         });
-    }
+    }*/
 
     protected void deleteRows(int[] rows) {
         //There is a bug in getListeners - it doesnt find the EditableTableModelListener if you pass is EditableTableModelListener.class

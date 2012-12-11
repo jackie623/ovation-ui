@@ -25,6 +25,7 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
     TagsSet(User u, boolean isOwner, boolean currentUser, List<String> tags, Set<String> uris)
     {
         super(u, isOwner, currentUser, null, uris);
+        Collections.sort(tags);
         this.tags = tags;
     }
     
@@ -55,6 +56,7 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
                         tags.add(keyword.getTag());
                     }
                 }
+                Collections.sort(tags);
             }
         }
         
@@ -112,7 +114,7 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
         int i = 0;
         for (String tag: tags)
         {
-            data[i][0] = tag;
+            data[i++][0] = tag;
         }
         return data;
     }

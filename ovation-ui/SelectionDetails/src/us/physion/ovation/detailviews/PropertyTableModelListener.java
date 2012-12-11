@@ -67,7 +67,13 @@ class PropertyTableModelListener implements EditableTableModelListener{
                          
         if (tme.getType() == TableModelEvent.INSERT)
         {
-            tree.resizeNode(node);
+            EventQueueUtilities.runOffEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                    tree.resizeNode(node);
+                }
+            });
 
         } else if (tme.getType() == TableModelEvent.UPDATE)
         {

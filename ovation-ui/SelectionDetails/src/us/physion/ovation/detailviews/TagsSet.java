@@ -28,6 +28,10 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
         this.tags = tags;
     }
     
+    List<String> getTags()
+    {
+        return tags;
+    }
     public void refresh(IAuthenticatedDataStoreCoordinator dsc) {
         DataContext c = dsc.getContext();
         User u = (User)c.objectWithURI(userURI);
@@ -100,17 +104,7 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
 
     @Override
     public TableModel createTableModel() {
-        Object[][] data = new Object[tags.size()][2];
-        int i = 0;
-        for (String tag: tags)
-        {
-            data[i][0] = tag;
-            data[i++][1] = "";
-        }
-        DefaultTableModel m = new DefaultTableModel(data, new String[]{"Value"});
-        JTable table = null;
-        table.removeColumn(table.getColumn("Value"));
-        return m;
+        return new DefaultTableModel(getData(), new String[]{"Value"});
     }
     public Object[][] getData()
     {
@@ -118,7 +112,7 @@ public class TagsSet extends UserPropertySet{//TODO make a baseclass that they b
         int i = 0;
         for (String tag: tags)
         {
-            data[i++][0] = tag;
+            data[i][0] = tag;
         }
         return data;
     }

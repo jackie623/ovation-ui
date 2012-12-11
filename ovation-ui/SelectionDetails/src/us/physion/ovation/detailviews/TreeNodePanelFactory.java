@@ -68,11 +68,6 @@ public class TreeNodePanelFactory {
         JTable table = panel.getTable();
         table.setModel(tableModel);
 
-        /*if (k instanceof TagsSet)
-        {
-            table.removeColumn(table.getColumn("Value"));
-        }*/
-        
         TableModelListener l = k.createTableModelListener(t, node);
         if (l != null)
             tableModel.addTableModelListener(l);

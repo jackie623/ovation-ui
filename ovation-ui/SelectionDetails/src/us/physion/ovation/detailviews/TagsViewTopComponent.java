@@ -57,13 +57,13 @@ public final class TagsViewTopComponent extends TopComponent {
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
             {
-                updateListModel();
+                update();
             }
         }
 
     };
 
-    protected void addTag(Collection<? extends IEntityWrapper> entities, String tag) {
+    /*protected void addTag(Collection<? extends IEntityWrapper> entities, String tag) {
         for (IEntityWrapper e : entities) {
 
             IEntityBase ie = e.getEntity();
@@ -74,50 +74,17 @@ public final class TagsViewTopComponent extends TopComponent {
         tagComboModel.removeAllElements();
         addTagComboBox.setSelectedItem("");
         addTagComboBox.setSelectedItem(null);
-    }
+    }*/
 
-    private class StringListModel extends AbstractListModel
-    {
-        List<String> tags = new LinkedList<String>();
-
-        @Override
-        public int getSize() {
-            return tags.size();
-        }
-
-        @Override
-        public Object getElementAt(int i) {
-            if (i < tags.size())
-                return tags.get(i);
-            return null;
-        }
-
-        protected void setTags(List<String> newTags)
-        {
-            int length = Math.max(tags.size(), newTags.size());
-            tags = newTags;
-            this.fireContentsChanged(this, 0, length);
-        }
-
-        protected void addTag(String tag)
-        {
-            if (!tags.contains(tag))
-            {
-                tags.add(tag);
-                this.fireContentsChanged(this, tags.size(), tags.size());
-            }
-        }
-    };
-
-    protected void updateListModel()
+    protected void update()
     {
         entities = global.allInstances();
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.getConnection().getContext(); //getContext
-        updateListModel(entities, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+        update(entities, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
     }
 
-    protected List<TableTreeKey> updateListModel(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
+    protected List<TableTreeKey> update(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
     {
         /*if (entities.isEmpty()) {
             listModel.setTags(new LinkedList<String>());
@@ -262,7 +229,7 @@ public final class TagsViewTopComponent extends TopComponent {
 
     private void addTagComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTagComboBoxActionPerformed
 
-        if (evt.getActionCommand().equals("comboBoxEdited"))
+        /*if (evt.getActionCommand().equals("comboBoxEdited"))
         {
             //add tag
             ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
@@ -270,7 +237,7 @@ public final class TagsViewTopComponent extends TopComponent {
             String tag = addTagComboBox.getSelectedItem().toString();
             
             addTag(entities, tag);
-        }
+        }*/
     }//GEN-LAST:event_addTagComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

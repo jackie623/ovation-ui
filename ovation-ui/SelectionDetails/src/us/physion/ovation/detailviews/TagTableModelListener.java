@@ -34,11 +34,11 @@ class TagTableModelListener implements EditableTableModelListener {
     ResizableTree tree;
     IAuthenticatedDataStoreCoordinator dsc;
     TableNode node;
-    public TagTableModelListener(Set<String> uriSet, ExpandableJTree expandableJTree, TableNode n, IAuthenticatedDataStoreCoordinator connection) {
-        this.dsc = dsc;
+    public TagTableModelListener(Set<String> uriSet, ResizableTree expandableJTree, TableNode n, IAuthenticatedDataStoreCoordinator connection) {
+        this.dsc = connection;
         uris = uriSet;
-        this.tree = tree;
-        this.node = node;
+        this.tree = expandableJTree;
+        this.node = n;
     }
 
     @Override
@@ -53,37 +53,39 @@ class TagTableModelListener implements EditableTableModelListener {
 
         } else if (tme.getType() == TableModelEvent.UPDATE)
         {
-            List<String> tags = new ArrayList();
-            for (int i = firstRow; i <= lastRow; i++) {
+            Set<String> tags = new HashSet();
+            for (int i = 0; i < t.getRowCount(); i++) {
                 String tag = (String) t.getValueAt(i, 0);
-                if (tag == null || tag.isEmpty())
-                    continue;
                 tags.add(tag);
             }
 
-            final String[] newTags = tags.toArray(new String[tags.size()]);
+            final Set<String> newTags = tags;
             //add new tags
             EventQueueUtilities.runOffEDT(new Runnable() {
 
                 @Override
                 public void run() {
-                    Object[][] originalTags = ((TagsSet) node.getUserObject()).getData();
+                    List<String> originalTags = ((TagsSet) node.getUserObject()).getTags();
                     List<String> toRemove = new ArrayList<String>();
                     DataContext c = dsc.getContext();
                     
-                    for (int i = firstRow; i <= lastRow; i++) {
-                        if (!newTags[i].equals(originalTags[i][0])) {
-                            toRemove.add((String)originalTags[i][0]);
+                    for (String original : originalTags) {
+                        if (!newTags.contains(original)) {
+                            toRemove.add(original);
+                        }else{
+                            newTags.remove(original);
                         }
                     }
                     for (String uri : uris) {
                         IEntityBase eb = c.objectWithURI(uri);
                         if (eb instanceof ITaggableEntityBase) {
                             for (String tag : newTags) {
-                                ((ITaggableEntityBase) eb).addTag(tag);
+                                if (tag != null && !tag.isEmpty())
+                                    ((ITaggableEntityBase) eb).addTag(tag);
                             }
                             for (String tag : toRemove) {
-                                ((ITaggableEntityBase) eb).removeTag(tag);
+                                if (tag != null && !tag.isEmpty())
+                                    ((ITaggableEntityBase) eb).removeTag(tag);
                             }
                         }
                     }

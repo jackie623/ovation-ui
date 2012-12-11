@@ -159,24 +159,10 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
             public void run() {
                 DefaultTableModel m = ((DefaultTableModel) table.getModel());
                 int row = m.getRowCount();
-                Vector newRow = new Vector(m.getColumnCount());
-                Vector dataVector = m.getDataVector();
-                Vector columnIdentifiers = new Vector(m.getColumnCount());
+                Object[] blankRow = new String[m.getColumnCount()];
                 for (int i=0; i< m.getColumnCount(); i++)
-                {
-                    newRow.addElement("");
-                    columnIdentifiers.add(m.getColumnName(i));
-                }
-                try {
-                    /*dataVector.addElement(newRow);
-                    m.setDataVector(dataVector, columnIdentifiers);
-                    m.fireTableChanged(new TableModelEvent(m, row, row, -1, TableModelEvent.INSERT));
-                    */
-                    m.insertRow(row, new Object[] {""});
-                    //m.addRow(newRow);
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                }
+                    blankRow[i] = "";
+                m.addRow(blankRow);
                 
                 //manually set size of the containing scrollpane, since the table has resized
                 JScrollPane sp = ((JScrollPane) table.getParent().getParent());

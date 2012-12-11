@@ -353,19 +353,5 @@ public class TableTreeTest extends OvationTestCase implements Lookup.Provider, C
             return null;
         }
     }
-    
-    class MockResizableTree implements ResizableTree {
-
-        boolean wasResized = false;
-
-        @Override
-        public void resizeNode(TableNode n) {
-            wasResized = true;
-        }
-
-        boolean wasResized() {
-            return wasResized;
-        }
-    }
 
 }

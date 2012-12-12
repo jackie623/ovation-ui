@@ -26,7 +26,7 @@ public class TreeNodePanelFactory {
     public static JPanel getPanel(ScrollableTableTree t, TableNode node) {
         TableTreeKey k = (TableTreeKey) node.getUserObject();
         String id = k.getID();
-        //TODO move table lookup?
+        //TODO move or get rid of table lookup?
         TableInTreeCellRenderer cr = t.getCellRenderer();
         TablePanel panel;
         if (cr.tableLookup.containsKey(id)) {
@@ -59,10 +59,9 @@ public class TreeNodePanelFactory {
                 panel = new NonEditableTable(table, t);
             }
 
-            node.setPanel(panel);
             cr.tableLookup.put(id, panel);
         }
-        
+        node.setPanel(panel);
         TableModel tableModel = k.createTableModel();
 
         JTable table = panel.getTable();

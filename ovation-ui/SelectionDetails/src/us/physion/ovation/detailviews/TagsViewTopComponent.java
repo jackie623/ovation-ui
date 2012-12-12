@@ -160,26 +160,14 @@ public final class TagsViewTopComponent extends TopComponent {
         if (tagTableNode instanceof TableNode)
         {
             final TableNode node = (TableNode)tagTableNode;
-            /*for (IEntityWrapper eb : entities)
-            {
-                IEntityBase e = eb.getEntity();
-                if (e instanceof ITaggableEntityBase)
-                {
-                    for (String newTag : newTags)
-                    {
-                        ((ITaggableEntityBase)e).addTag(newTag.trim());
-                    }
-                }
-            }
-
-            node.reset(dsc);
-            */
             TagsSet t = (TagsSet)(node.getUserObject());
             List<String> tagList = new ArrayList();
             tagList.addAll( t.getTags());
             for (String tag : newTags)
             {
-                tagList.add(tag);
+                String trimmed = tag.trim();
+                if (!trimmed.isEmpty())
+                    tagList.add(tag);
             }
             Collections.sort(tagList);
             final String[] tags = tagList.toArray(new String[tagList.size()]);
@@ -195,10 +183,13 @@ public final class TagsViewTopComponent extends TopComponent {
 
                 @Override
                 public void run() {
-                    
+                    try{
                     ((ScrollableTableTree)tagTree).resizeEditableNode(node);
-                    
                     ((DefaultTreeModel)((ScrollableTableTree)tagTree).getTree().getModel()).nodeStructureChanged(node);
+                    } catch (Exception e)
+                    {
+                        System.out.println("Error: " + e.getMessage());
+                    }
                 }
             });
         }
@@ -244,23 +235,22 @@ public final class TagsViewTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(addTagComboBox, 0, 565, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(tagTree, javax.swing.GroupLayout.PREFERRED_SIZE, 514, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(addTagComboBox, 0, 485, Short.MAX_VALUE))
+                    .addComponent(tagTree))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(tagTree, javax.swing.GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE)
+                .addComponent(tagTree, javax.swing.GroupLayout.DEFAULT_SIZE, 605, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents

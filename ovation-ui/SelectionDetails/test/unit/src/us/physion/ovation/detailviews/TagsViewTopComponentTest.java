@@ -70,7 +70,6 @@ public class TagsViewTopComponentTest extends OvationTestCase{
     public static void tearDownClass() throws Exception {
         OvationTestCase.tearDownDatabase(mgr);
     }
-
    
     @Test
     public void testUpdateSetsMySelectedTagsProperly()
@@ -114,7 +113,6 @@ public class TagsViewTopComponentTest extends OvationTestCase{
         {
             assertTrue(mytags.contains(s));
         }
-        
     }
     
      @Test
@@ -125,6 +123,29 @@ public class TagsViewTopComponentTest extends OvationTestCase{
      @Test
      public void testOnlyMyTagsAreEditable()
      {
-         
+        TagsViewTopComponent t = new TagsViewTopComponent();
+        Set entitySet = new HashSet();
+        entitySet.add(project);
+        entitySet.add(project2);
+        
+        //both projects are selected
+        List<TableTreeKey> tagSets = t.update(entitySet, dsc);
+        List<String> myTagsFromUserNode = ((TagsSet)tagSets.get(0)).getTags();
+        Set<String> mytags = new HashSet();
+        for (String tag : ((ITaggableEntityBase)project.getEntity()).getMyTags())
+        {
+            mytags.add(tag);
+        }
+        for (String tag : ((ITaggableEntityBase)project2.getEntity()).getMyTags())
+        {
+            mytags.add(tag);
+        }
+        assertEquals(myTagsFromUserNode.size(), mytags.size());
+        
+        for (String s : myTagsFromUserNode)
+        {
+            assertTrue(mytags.contains(s));
+        }
+        
      }
 }

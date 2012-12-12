@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.Future;
 import javax.swing.JScrollPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -17,10 +18,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.openide.util.Lookup;
-import ovation.DataContext;
-import ovation.IAuthenticatedDataStoreCoordinator;
-import ovation.IEntityBase;
-import ovation.ITaggableEntityBase;
+import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 
@@ -113,20 +111,23 @@ class TagTableModelListener implements EditableTableModelListener {
         });
     }
 
-    public void deleteRows(final DefaultTableModel model, int[] rowsToRemove) {
+    public void deleteRows(final DefaultTableModel model, final int[] rowsToRemove) {
         
-        Arrays.sort(rowsToRemove);
-        final int[] rows = rowsToRemove;
-
-        Set<String> tags = new HashSet<String>();
-        for (int i = rows.length - 1; i >= 0; i--) 
-           tags.add(((String) model.getValueAt(rows[i], 0)).trim());
-        
-        final Set<String> toRemove = tags;
         EventQueueUtilities.runOffEDT(new Runnable() {
 
             @Override
             public void run() {
+
+                Arrays.sort(rowsToRemove);
+                final int[] rows = rowsToRemove;
+
+                Set<String> tags = new HashSet<String>();
+                for (int i = rows.length - 1; i >= 0; i--) {
+                    tags.add(((String) model.getValueAt(rows[i], 0)).trim());
+                }
+
+                final Set<String> toRemove = tags;
+
                 DataContext c = dsc.getContext();
                 for (String tag : toRemove) {
                     for (String uri : uris) {
@@ -138,14 +139,26 @@ class TagTableModelListener implements EditableTableModelListener {
                     }
                 }
                 node.reset(dsc);
+
                 //remove rows and resize
                 EventQueueUtilities.runOnEDT(new Runnable() {
 
                     @Override
                     public void run() {
-                        for (int i = rows.length - 1; i >= 0; i--) {
-                            model.removeRow(rows[i]);
+                        
+                        Object[][] data = new Object[model.getRowCount() - rows.length][1];
+                        int j = 0;
+                        for (int i = 0; i< model.getRowCount(); i++)
+                        {
+                            if (j != rows.length && rows[j] == i)
+                            {
+                                j++;
+                            }
+                            else{
+                                data[i-j][0] = model.getValueAt(i, 0);
+                            }
                         }
+                        model.setDataVector(data, new Object[]{"Value"});
                         EditableTable p = (EditableTable)node.getPanel();
                         JScrollPane sp = p.getScrollPane();
                         if (sp != null)

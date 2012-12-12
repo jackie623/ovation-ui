@@ -115,10 +115,6 @@ public class ScrollableTableTree extends JScrollPane {
         userNodes = new HashMap<String, DefaultMutableTreeNode>();
     }
 
-    public Dimension getPreferredSize() {
-        return getParent().getPreferredSize();
-    }
-
     private boolean shouldExpand(TableTreeKey tableInfo) {
         //TODO: test this logic
         if (userNodes.containsKey(tableInfo.getID())) {

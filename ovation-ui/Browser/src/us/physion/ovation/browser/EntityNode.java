@@ -12,10 +12,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openide.actions.CopyAction;
@@ -28,6 +25,7 @@ import org.openide.util.datatransfer.ExTransferable;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 import ovation.*;
+import us.physion.ovation.browser.moveme.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
@@ -38,18 +36,89 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class EntityNode extends AbstractNode{
 
     private Action[] actionList;
-
+    private IEntityWrapper parent;
         
-    public EntityNode(Children c, Lookup l) {
+    public EntityNode(Children c, Lookup l, IEntityWrapper parent) {
         super (c, l);
-        actionList = new Action[] {CopyAction.get(CopyAction.class)};
+        this.parent = parent;
     }
   
-   public EntityNode(Children c)
+   public EntityNode(Children c, IEntityWrapper parent)
    {
        super(c);
-       actionList = new Action[] {CopyAction.get(CopyAction.class)};
+       this.parent = parent;
    }
+   
+   @Override
+    public Action[] getActions(boolean popup) {
+       if (actionList == null)
+       {
+           if (parent == null)// root node
+           {
+               Collection<? extends RootInsertable> insertables = Lookup.getDefault().lookupAll(RootInsertable.class);
+               List<RootInsertable> l = new ArrayList(insertables);
+               Collections.sort(l);
+               actionList = l.toArray(new RootInsertable[l.size()]);
+           }
+           else{
+               Class entityClass = parent.getType();
+               if (entityClass.isAssignableFrom(Project.class))
+               {
+                   Collection<? extends ProjectInsertable> insertables = Lookup.getDefault().lookupAll(ProjectInsertable.class);
+                   List<ProjectInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new ProjectInsertable[l.size()]);
+                           
+               }else if (entityClass.isAssignableFrom(Source.class))
+               {
+                   Collection<? extends SourceInsertable> insertables = Lookup.getDefault().lookupAll(SourceInsertable.class);
+                   List<SourceInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new ProjectInsertable[l.size()]);
+               }else if (entityClass.isAssignableFrom(Experiment.class))
+               {
+                   Collection<? extends ExperimentInsertable> insertables = Lookup.getDefault().lookupAll(ExperimentInsertable.class);
+                   List<ExperimentInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new ExperimentInsertable[l.size()]);
+               }else if (entityClass.isAssignableFrom(EpochGroup.class))
+               {
+                   Collection<? extends EpochGroupInsertable> insertables = Lookup.getDefault().lookupAll(EpochGroupInsertable.class);
+                   List<EpochGroupInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new EpochGroupInsertable[l.size()]);
+               }else if (entityClass.isAssignableFrom(Epoch.class))
+               {
+                   Collection<? extends EpochInsertable> insertables = Lookup.getDefault().lookupAll(EpochInsertable.class);
+                   List<EpochInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new EpochInsertable[l.size()]);
+               }else if (entityClass.isAssignableFrom(Response.class))
+               {
+                   Collection<? extends ResponseInsertable> insertables = Lookup.getDefault().lookupAll(ResponseInsertable.class);
+                   List<ResponseInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new ResponseInsertable[l.size()]);
+               }else if (entityClass.isAssignableFrom(DerivedResponse.class))
+               {
+                   Collection<? extends DerivedResponseInsertable> insertables = Lookup.getDefault().lookupAll(DerivedResponseInsertable.class);
+                   List<DerivedResponseInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new DerivedResponseInsertable[l.size()]);
+               }else if (entityClass.isAssignableFrom(AnalysisRecord.class))
+               {
+                   Collection<? extends AnalysisRecordInsertable> insertables = Lookup.getDefault().lookupAll(AnalysisRecordInsertable.class);
+                   List<AnalysisRecordInsertable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new AnalysisRecordInsertable[l.size()]);
+               }  
+               else{
+                   actionList = new Action[0];
+               }
+           }
+       }
+        return actionList;
+    }
    
    /*@Override
    public Sheet createSheet()
@@ -140,15 +209,22 @@ public class EntityNode extends AbstractNode{
         return added;
     }*/
     
-    private class OpenAction extends AbstractAction{
+    private class InsertAction extends AbstractAction{
         
-        public OpenAction() {
-            putValue(NAME, "Open");
+        public InsertAction() {
+            putValue(NAME, "Insert");
         }
 
         @Override
         public void actionPerformed(ActionEvent ae) {
-            
+            //get selected 
+            Lookup.Result global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
+            Collection<? extends IEntityWrapper> entities = global.allInstances();
+            String selection = "";
+            if (entities.size() == 1) {
+                String uri = entities.iterator().next().getURI();
+                System.out.println("Insert uri " + uri);
+            }
         }
 
     }

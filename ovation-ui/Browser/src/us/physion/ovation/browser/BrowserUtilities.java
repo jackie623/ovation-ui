@@ -88,7 +88,7 @@ public class BrowserUtilities{
                 etp.addQueryListener(ql);
             }
         }
-        em.setRootContext(new EntityNode(new EntityChildren(null, projectView, null)));
+        em.setRootContext(new EntityNode(new EntityChildren(null, projectView, null), null));
         resetView(em, projectView);
     }
     
@@ -96,13 +96,13 @@ public class BrowserUtilities{
     {
         browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-            mgr.setRootContext(new EntityNode(new EntityChildren(null, registeredViewManagers.get(mgr), null)));
+            mgr.setRootContext(new EntityNode(new EntityChildren(null, registeredViewManagers.get(mgr), null), null));
         }
     }
 
     protected static void resetView(ExplorerManager e, boolean projectView)
     {
-        e.setRootContext(new EntityNode(new EntityChildren(null, projectView, null)));
+        e.setRootContext(new EntityNode(new EntityChildren(null, projectView, null), null));
     }
     
     protected static void setTrees(final ExpressionTree result)
@@ -113,7 +113,7 @@ public class BrowserUtilities{
         Set<ExplorerManager> mgrs = new HashSet<ExplorerManager>();
         for (ExplorerManager em : registeredViewManagers.keySet())
         {
-            em.setRootContext(new EntityNode(new QueryChildren(registeredViewManagers.get(em))));
+            em.setRootContext(new EntityNode(new QueryChildren(registeredViewManagers.get(em)), null));
             mgrs.add(em);
         }
         

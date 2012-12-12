@@ -4,8 +4,10 @@
  */
 package us.physion.ovation.browser;
 
+import us.physion.ovation.browser.insertion.InsertProject;
 import java.beans.PropertyVetoException;
 import java.util.*;
+import javax.swing.Action;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 import org.openide.explorer.ExplorerManager;
@@ -19,6 +21,7 @@ import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import ovation.*;
+import us.physion.ovation.browser.insertion.InsertSource;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
@@ -179,7 +182,7 @@ public class EntityWrapperUtilities {
         }
 
         //otherwise, create an AbstractNode representing this object
-        EntityNode n = new EntityNode(c, Lookups.singleton(key));
+        EntityNode n = new EntityNode(c, Lookups.singleton(key), key);
         n.setDisplayName(key.getDisplayName());
         setIconForType(n, key.getType());
         if (uri != null) {//TODO: test this for nodes that don't have uris

@@ -8,6 +8,6 @@ package us.physion.ovation.browser.moveme;
  *
  * @author huecotanks
  */
-public interface DerivedResponseInsertable {
+public interface DerivedResponseInsertable extends EntityInsertable{
     
 }

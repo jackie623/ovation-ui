@@ -8,6 +8,6 @@ package us.physion.ovation.browser.moveme;
  *
  * @author huecotanks
  */
-public interface EpochGroupInsertable {
+public interface EpochGroupInsertable extends EntityInsertable{
     
 }

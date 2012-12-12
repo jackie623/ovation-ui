@@ -8,6 +8,6 @@ package us.physion.ovation.browser.moveme;
  *
  * @author huecotanks
  */
-public interface StimulusInsertable {
+public interface StimulusInsertable extends EntityInsertable{
     
 }

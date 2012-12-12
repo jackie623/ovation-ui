@@ -127,14 +127,14 @@ public final class TagsViewTopComponent extends TopComponent {
             }
             if (!taglist.isEmpty()) {
                 String uuid = u.getUuid();
-                TagsSet propertySet;
+                TagsSet tagSet;
                 if (currentUserUUID.equals(uuid)) {
                     containsCurrentUser = true;
-                    propertySet = new TagsSet(u, owners.contains(uuid), true, taglist, uris);
+                    tagSet = new TagsSet(u, owners.contains(uuid), true, taglist, uris);
                 } else {
-                    propertySet = new TagsSet(u, owners.contains(uuid), false, taglist, uris);
+                    tagSet = new TagsSet(u, owners.contains(uuid), false, taglist, uris);
                 }
-                tags.add(propertySet);
+                tags.add(tagSet);
             }
         }
         if (!containsCurrentUser) {
@@ -159,7 +159,7 @@ public final class TagsViewTopComponent extends TopComponent {
         final DefaultMutableTreeNode tagTableNode = (DefaultMutableTreeNode)currentUserNode.getChildAt(0);
         if (tagTableNode instanceof TableNode)
         {
-            TableNode node = (TableNode)tagTableNode;
+            final TableNode node = (TableNode)tagTableNode;
             /*for (IEntityWrapper eb : entities)
             {
                 IEntityBase e = eb.getEntity();
@@ -175,7 +175,8 @@ public final class TagsViewTopComponent extends TopComponent {
             node.reset(dsc);
             */
             TagsSet t = (TagsSet)(node.getUserObject());
-            List<String> tagList = t.getTags();
+            List<String> tagList = new ArrayList();
+            tagList.addAll( t.getTags());
             for (String tag : newTags)
             {
                 tagList.add(tag);
@@ -183,19 +184,21 @@ public final class TagsViewTopComponent extends TopComponent {
             Collections.sort(tagList);
             final String[] tags = tagList.toArray(new String[tagList.size()]);
             
+            DefaultTableModel model = ((DefaultTableModel) node.getPanel().getTable().getModel());
+            Object[][] data = new Object[tags.length][1];
+            for (int i = 0; i < tags.length; i++) {
+                data[i][0] = tags[i];
+            }
+            model.setDataVector(data, new Object[]{"Value"});
+
             EventQueueUtilities.runOnEDT(new Runnable() {
 
                 @Override
                 public void run() {
-                    DefaultTableModel model = ((DefaultTableModel)((TableNode)tagTableNode).getPanel().getTable().getModel());
-                    Object[][] data = new Object[tags.length][1];
-                    for (int i=0; i<tags.length; i++)
-                    {
-                        data[i][0] = tags[i];
-                    }
-                    model.setDataVector(data, new Object[]{"Value"});
                     
-                    ((ScrollableTableTree)tagTree).resizeEditableNode((TableNode)tagTableNode);
+                    ((ScrollableTableTree)tagTree).resizeEditableNode(node);
+                    
+                    ((DefaultTreeModel)((ScrollableTableTree)tagTree).getTree().getModel()).nodeStructureChanged(node);
                 }
             });
         }
@@ -219,6 +222,7 @@ public final class TagsViewTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSpinner1 = new javax.swing.JSpinner();
         addTagComboBox = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         tagTree = new ScrollableTableTree();
@@ -240,11 +244,11 @@ public final class TagsViewTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(addTagComboBox, 0, 555, Short.MAX_VALUE)
+                    .addComponent(addTagComboBox, 0, 565, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(tagTree, javax.swing.GroupLayout.PREFERRED_SIZE, 543, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(tagTree, javax.swing.GroupLayout.PREFERRED_SIZE, 514, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -279,6 +283,7 @@ public final class TagsViewTopComponent extends TopComponent {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox addTagComboBox;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JSpinner jSpinner1;
     private javax.swing.JScrollPane tagTree;
     // End of variables declaration//GEN-END:variables
     @Override

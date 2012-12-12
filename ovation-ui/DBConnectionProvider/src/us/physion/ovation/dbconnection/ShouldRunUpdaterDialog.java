@@ -14,7 +14,7 @@ import us.physion.ovation.interfaces.ModalDialogBase;
  *
  * @author huecotanks
  */
-public class ShouldRunUpdaterDialog extends ModalDialogBase{
+public class ShouldRunUpdaterDialog extends ModalDialogBase implements CancellableDialog{
 
     /**
      * Creates new form ShouldRunUpdaterDialog
@@ -130,7 +130,7 @@ public class ShouldRunUpdaterDialog extends ModalDialogBase{
         dispose();
     }//GEN-LAST:event_okButtonActionPerformed
 
-    protected void cancel()
+    public void cancel()
     {
         cancelled = true;
         dispose();

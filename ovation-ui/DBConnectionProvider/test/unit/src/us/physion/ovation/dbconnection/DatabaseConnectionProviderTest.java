@@ -26,6 +26,20 @@ import us.physion.ovation.interfaces.OvationTestCase;
 public class DatabaseConnectionProviderTest extends OvationTestCase{
     
     static TestManager mgr = new DBConnectionTestManager();
+
+    private class DummyDialog implements CancellableDialog {
+
+        boolean cancelled = false;
+        public DummyDialog() {}
+        public void cancel()
+        {
+            cancelled = true;
+        }                
+        public boolean isCancelled(){
+            return cancelled;
+        }
+        public void showDialog(){}
+    }
     public DatabaseConnectionProviderTest() {
         setTestManager(mgr); //this is because there are static and non-static methods that need to use the test manager
     }
@@ -54,55 +68,65 @@ public class DatabaseConnectionProviderTest extends OvationTestCase{
     
     @Test
     public void testShouldRunUpdaterReturnsFalseIfUserCancels(){
-        DBConnectionDialog d = new DBConnectionDialog();
-        ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
-        shouldRun.cancel();
-        assertFalse(d.shouldRunUpdater(1, 2, false, shouldRun));
+        DBConnectionManager d = new DBConnectionManager();
+        d.setInstallVersionDialog(new DummyDialog());
+        DummyDialog cancelledDialog = new DummyDialog();
+        cancelledDialog.cancel();
+        d.setShouldRunDialog(cancelledDialog);
+        
+        assertFalse(d.shouldRunUpdater(1, 2));
     }
     
     @Test
     public void testShouldRunUpdaterReturnsTrueIfUserPressesOK(){
-        DBConnectionDialog d = new DBConnectionDialog();
-        ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
-        assertTrue(d.shouldRunUpdater(1, 2, false, shouldRun));
+        DBConnectionManager d = new DBConnectionManager();
+        d.setInstallVersionDialog(new DummyDialog());
+        d.setShouldRunDialog(new DummyDialog());
+        
+        assertTrue(d.shouldRunUpdater(1, 2));
     }
      
     @Test
     public void testShouldRunUpdaterReturnsFalseIfDatabaseVersionAndAPIVersionMatch(){
-        DBConnectionDialog d = new DBConnectionDialog();
-        ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
-        assertFalse(d.shouldRunUpdater(1, 1, false, shouldRun));
+        DBConnectionManager d = new DBConnectionManager();
+        d.setInstallVersionDialog(new DummyDialog());
+        d.setShouldRunDialog(new DummyDialog());
+        
+        assertFalse(d.shouldRunUpdater(1, 1));
     }
     
     @Test
     public void testShouldRunUpdaterReturnsTrueIfDatabaseVersionIsLessThanSchemaVersion(){
-        DBConnectionDialog d = new DBConnectionDialog();
-        ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
-        assertTrue(d.shouldRunUpdater(1, 3, false, shouldRun));
+        DBConnectionManager d = new DBConnectionManager();
+        d.setInstallVersionDialog(new DummyDialog());
+        d.setShouldRunDialog(new DummyDialog());
+        
+        assertTrue(d.shouldRunUpdater(1, 3));
     }
     
     @Test
     public void testShouldRunUpdaterReturnsTrueIfDatabaseVersionIsGreaterThanSchemaVersionButAlertsUserOfThis(){
-        DBConnectionDialog d = new DBConnectionDialog();
-        ShouldRunUpdaterDialog shouldRun = new ShouldRunUpdaterDialog();
-        assertTrue(d.shouldRunUpdater(2, 1, false, shouldRun)); 
+        DBConnectionManager d = new DBConnectionManager();
+        d.setInstallVersionDialog(new DummyDialog());
+        d.setShouldRunDialog(new DummyDialog());
+        
+        assertTrue(d.shouldRunUpdater(2, 1)); 
     }
     
     @Test
     public void testRunUpdaterReturnsFalseIfCancelled()
     {   
-        DBConnectionDialog d = new DBConnectionDialog();
-        UpdaterInProgressDialog running = new UpdaterInProgressDialog();
-        running.cancelled = true;
-        assertFalse(d.runUpdater(new TestUpgradeTool(), running, false));
+        DBConnectionManager d = new DBConnectionManager();
+        CancellableDialog running = new DummyDialog();
+        running.cancel();
+        assertFalse(d.runUpdater(new TestUpgradeTool(), running));
     }
     
     @Test 
     public void testRunUpdaterReturnsTrueIfNotCancelled()
     {
-        DBConnectionDialog d = new DBConnectionDialog();
-        UpdaterInProgressDialog running = new UpdaterInProgressDialog();
-        assertTrue(d.runUpdater(new TestUpgradeTool(), running, false));
+        DBConnectionManager d = new DBConnectionManager();
+        assertTrue(d.runUpdater(new TestUpgradeTool(), new DummyDialog()));
     }
     
     @Test

@@ -25,6 +25,10 @@ public class ResponseViewTestManager extends TestManager {
                 return pwd;
             }
         });
+        if (pwd == null)
+        {
+            pwd = "/Users/huecotanks/Ovation/ui/";
+        }
         connectionFile = pwd + "data" + File.separator
                 + "responseView" + File.separator
                 + "response-test.connection";

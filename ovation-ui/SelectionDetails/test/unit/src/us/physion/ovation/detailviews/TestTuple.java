@@ -8,10 +8,10 @@ package us.physion.ovation.detailviews;
  *
  * @author huecotanks
  */
-class TestProperty {
+class TestTuple {
     String key;
     Object value;
-    TestProperty(String key, Object value)
+    TestTuple(String key, Object value)
     {
         this.key = key;
         this.value = value;
@@ -30,9 +30,9 @@ class TestProperty {
     @Override
     public boolean equals(Object obj) 
     {
-        if (obj instanceof TestProperty)
+        if (obj instanceof TestTuple)
         {
-            return (((TestProperty)obj).getKey().equals(key) && ((TestProperty)obj).getValue().equals(value));
+            return (((TestTuple)obj).getKey().equals(key) && ((TestTuple)obj).getValue().equals(value));
         }
         return false;
     }

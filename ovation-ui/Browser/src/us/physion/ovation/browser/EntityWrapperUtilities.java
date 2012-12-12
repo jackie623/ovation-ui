@@ -39,6 +39,7 @@ public class EntityWrapperUtilities {
 
             Stack<IEntityWrapper> p = new Stack();
             p.push(ew);
+            //TODO: getParentsInTree could stop before hitting the top-level projects and sources
             Set<Stack<IEntityWrapper>> paths = getParentsInTree(e, p);// set of paths from this entity wrapper to a parent that has already been created in the tree
 
             for (Stack<IEntityWrapper> path : paths) {
@@ -70,9 +71,9 @@ public class EntityWrapperUtilities {
         return resultSet;
     }
 
+    //TODO use the BrowserUtilites.getNodeMap() to stop early
     protected static Set<Stack<IEntityWrapper>> getParentsInTree(IEntityBase e, Stack<IEntityWrapper> path) {
         Set<Stack<IEntityWrapper>> paths = new HashSet<Stack<IEntityWrapper>>();
-        String uri = e.getURIString();
 
         if (isPerUser(e)) {
             path.push(new PerUserEntityWrapper(e.getOwner().getUsername(), e.getOwner().getURIString()));
@@ -97,6 +98,8 @@ public class EntityWrapperUtilities {
 
     }
 
+    //entity....... the entity whose parents we find
+    //path......... the path from result set object to entity (for getting Sources from EpochGroups)
     private static Set<IEntityBase> getParents(IEntityBase entity, Stack<IEntityWrapper> path) {
         Set<IEntityBase> parents = new HashSet();
         Class type = entity.getClass();

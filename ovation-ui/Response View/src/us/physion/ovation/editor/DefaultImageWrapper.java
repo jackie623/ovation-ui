@@ -20,17 +20,17 @@ import org.openide.util.Exceptions;
 import ovation.Response;
 import ovation.URLResponse;
 
+
 /**
  *
  * @author huecotanks
  */
-public class DefaultImageWrapper implements ResponseWrapper, ResponseGroupWrapper{
+public class DefaultImageWrapper implements Visualization{
 
     String name;
     BufferedImage img;
     DefaultImageWrapper(Response r)
     {
-        
         InputStream in = null;
         try {
             if (r instanceof URLResponse)
@@ -64,24 +64,18 @@ public class DefaultImageWrapper implements ResponseWrapper, ResponseGroupWrappe
         return p;
     }
     
-    @Override
-    public ResponseGroupWrapper createGroup() {
-        return this;
-    }
-
 
     @Override
-    public boolean shouldAdd(ResponseWrapper r) {
+    public boolean shouldAdd(Response r) {
         return false;
     }
 
     @Override
-    public void add(ResponseWrapper r) {
+    public void add(Response r) {
         throw new UnsupportedOperationException("Images are currently implemented one per panel");
     }
     
 }
-
 class BufferedImagePanel extends JPanel
 {
     BufferedImage img;

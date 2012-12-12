@@ -18,7 +18,7 @@ import us.physion.ovation.interfaces.EventQueueUtilities;
  *
  * @author huecotanks
  */
-public class InstallLatestVersionDialog extends javax.swing.JDialog {
+public class InstallLatestVersionDialog extends javax.swing.JDialog implements CancellableDialog{
 
     /**
      * Creates new form InstallLatestVersionDialog
@@ -205,6 +205,13 @@ public class InstallLatestVersionDialog extends javax.swing.JDialog {
                 dialog.setVisible(true);
             }
         });
+    }
+    
+    public void cancel(){}
+    
+    public boolean isCancelled()
+    {
+        return false;
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton downloadLink;

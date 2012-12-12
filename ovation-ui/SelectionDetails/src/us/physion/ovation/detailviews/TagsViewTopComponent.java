@@ -9,7 +9,12 @@ import java.util.*;
 import java.util.concurrent.FutureTask;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -21,10 +26,9 @@ import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 import org.openide.windows.WindowManager;
-import ovation.IEntityBase;
-import ovation.ITaggableEntityBase;
-import ovation.KeywordTag;
+import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 
@@ -50,7 +54,6 @@ public final class TagsViewTopComponent extends TopComponent {
     private DefaultComboBoxModel tagComboModel = new DefaultComboBoxModel(new String[] {});
     Lookup.Result global;
     private Collection<? extends IEntityWrapper> entities;
-    private StringListModel listModel = new StringListModel();
     private LookupListener listener = new LookupListener() {
 
         @Override
@@ -60,92 +63,141 @@ public final class TagsViewTopComponent extends TopComponent {
             //then we could get rid of the Library dependancy on the Explorer API
             if (TopComponent.getRegistry().getActivated() instanceof ExplorerManager.Provider)
             {
-                updateListModel();
+                update();
             }
         }
 
     };
 
-    protected void addTag(Collection<? extends IEntityWrapper> entities, String tag) {
-        for (IEntityWrapper e : entities) {
-
-            IEntityBase ie = e.getEntity();
-            if (ie instanceof ITaggableEntityBase) {
-                ((ITaggableEntityBase) ie).addTag(tag);
+    protected void addTags(final Collection<? extends IEntityWrapper> entities, String tags) {
+        final String[] tagList = tags.split(",");
+        EventQueueUtilities.runOffEDT(new Runnable() {
+            @Override
+            public void run() {
+                updateTagList(tagList, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
             }
-        }
-        listModel.addTag(tag);
-        tagComboModel.removeAllElements();
-        addTagComboBox.setSelectedItem("");
-        addTagComboBox.setSelectedItem(null);
+        });
     }
 
-    private class StringListModel extends AbstractListModel
-    {
-        List<String> tags = new LinkedList<String>();
-
-        @Override
-        public int getSize() {
-            return tags.size();
-        }
-
-        @Override
-        public Object getElementAt(int i) {
-            if (i < tags.size())
-                return tags.get(i);
-            return null;
-        }
-
-        protected void setTags(List<String> newTags)
-        {
-            int length = Math.max(tags.size(), newTags.size());
-            tags = newTags;
-            this.fireContentsChanged(this, 0, length);
-        }
-
-        protected void addTag(String tag)
-        {
-            if (!tags.contains(tag))
-            {
-                tags.add(tag);
-                this.fireContentsChanged(this, tags.size(), tags.size());
-            }
-        }
-    };
-
-    protected void updateListModel()
+    protected void update()
     {
         entities = global.allInstances();
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.getConnection().getContext(); //getContext
-        updateListModel(entities);
+        update(entities, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
     }
 
-    protected void updateListModel(Collection<? extends IEntityWrapper> entities)
+    protected List<TableTreeKey> update(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
     {
-        if (entities.isEmpty()) {
-            listModel.setTags(new LinkedList<String>());
-            return;
+        DataContext c;
+        if (dsc == null) {
+            c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
+        }else{
+            c = dsc.getContext();
         }
 
-        List<String> tags = new LinkedList<String>();
-        for (IEntityWrapper e: entities)
-        {
-            IEntityBase entity = e.getEntity();
-            if (entity != null && entity instanceof ITaggableEntityBase)
-            {
-                for (KeywordTag t : ((ITaggableEntityBase)entity).getTagSet())
+        ArrayList<TableTreeKey> tags = new ArrayList<TableTreeKey>();
+        Set<String> uris = new HashSet<String>();
+        Set<IEntityBase> entitybases = new HashSet();
+        Set<String> owners = new HashSet();
+        for (IEntityWrapper w : entities) {
+            IEntityBase e = w.getEntity();
+            entitybases.add(e);
+            uris.add(e.getURIString());
+            owners.add(e.getOwner().getUuid());
+        }
+
+        String currentUserUUID = c.currentAuthenticatedUser().getUuid();
+        Iterator<User> users = c.getUsersIterator();
+        boolean containsCurrentUser = false;//current user's property table should always exist, even if there are no properties
+        while (users.hasNext()) {
+            User u = users.next();
+            List<String> taglist = new ArrayList<String>();
+            for (IEntityBase e : entitybases) {
+                if (e instanceof ITaggableEntityBase)
                 {
-                    tags.add(t.getTag());
+                    for (KeywordTag t : ((ITaggableEntityBase)e).getTagSet())//TODO: Make this faster
+                    {
+                        if (t.getOwner().getUuid().equals(u.getUuid()))
+                        {
+                            taglist.add(t.getTag());
+                        }
+                    }
                 }
             }
+            if (!taglist.isEmpty()) {
+                String uuid = u.getUuid();
+                TagsSet tagSet;
+                if (currentUserUUID.equals(uuid)) {
+                    containsCurrentUser = true;
+                    tagSet = new TagsSet(u, owners.contains(uuid), true, taglist, uris);
+                } else {
+                    tagSet = new TagsSet(u, owners.contains(uuid), false, taglist, uris);
+                }
+                tags.add(tagSet);
+            }
         }
-
-        listModel.setTags(tags);
-
+        if (!containsCurrentUser) {
+            User current = c.currentAuthenticatedUser();
+            tags.add(new TagsSet(current, owners.contains(current.getUuid()), true, new ArrayList<String>(), uris));
+        }
+        
+        Collections.sort(tags);
+        
+        ((ScrollableTableTree) tagTree).setKeys(tags);
+        
+        this.entities = entities;
+        return tags;
     }
+    
+    protected void updateTagList(String[] newTags, IAuthenticatedDataStoreCoordinator dsc)
+    {
+        JTree tree = ((ScrollableTableTree) tagTree).getTree();
+        DefaultMutableTreeNode n = (DefaultMutableTreeNode)((DefaultTreeModel)tree.getModel()).getRoot();
+
+        DefaultMutableTreeNode currentUserNode = (DefaultMutableTreeNode)n.getChildAt(0);
+        final DefaultMutableTreeNode tagTableNode = (DefaultMutableTreeNode)currentUserNode.getChildAt(0);
+        if (tagTableNode instanceof TableNode)
+        {
+            final TableNode node = (TableNode)tagTableNode;
+            TagsSet t = (TagsSet)(node.getUserObject());
+            List<String> tagList = new ArrayList();
+            tagList.addAll( t.getTags());
+            for (String tag : newTags)
+            {
+                String trimmed = tag.trim();
+                if (!trimmed.isEmpty())
+                    tagList.add(tag);
+            }
+            Collections.sort(tagList);
+            final String[] tags = tagList.toArray(new String[tagList.size()]);
+            
+            DefaultTableModel model = ((DefaultTableModel) node.getPanel().getTable().getModel());
+            Object[][] data = new Object[tags.length][1];
+            for (int i = 0; i < tags.length; i++) {
+                data[i][0] = tags[i];
+            }
+            model.setDataVector(data, new Object[]{"Value"});
+
+            EventQueueUtilities.runOnEDT(new Runnable() {
+
+                @Override
+                public void run() {
+                    try{
+                    ((ScrollableTableTree)tagTree).resizeEditableNode(node);
+                    ((DefaultTreeModel)((ScrollableTableTree)tagTree).getTree().getModel()).nodeStructureChanged(node);
+                    } catch (Exception e)
+                    {
+                        System.out.println("Error: " + e.getMessage());
+                    }
+                }
+            });
+        }
+    }
+    
     public TagsViewTopComponent() {
         initComponents();
+        this.add(tagTree);
         setName(Bundle.CTL_TagsViewTopComponent());
         setToolTipText(Bundle.HINT_TagsViewTopComponent());
         global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
@@ -161,10 +213,10 @@ public final class TagsViewTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSpinner1 = new javax.swing.JSpinner();
         addTagComboBox = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
+        tagTree = new ScrollableTableTree();
 
         addTagComboBox.setEditable(true);
         addTagComboBox.setModel(tagComboModel);
@@ -176,9 +228,6 @@ public final class TagsViewTopComponent extends TopComponent {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(TagsViewTopComponent.class, "TagsViewTopComponent.jLabel1.text")); // NOI18N
 
-        jList1.setModel(listModel);
-        jScrollPane1.setViewportView(jList1);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -187,21 +236,21 @@ public final class TagsViewTopComponent extends TopComponent {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(addTagComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE))
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(addTagComboBox, 0, 485, Short.MAX_VALUE))
+                    .addComponent(tagTree))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addTagComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 521, Short.MAX_VALUE)
+                .addComponent(tagTree, javax.swing.GroupLayout.DEFAULT_SIZE, 605, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -213,17 +262,19 @@ public final class TagsViewTopComponent extends TopComponent {
             //add tag
             ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
             cp.getConnection().getContext(); //getContext
-            String tag = addTagComboBox.getSelectedItem().toString();
-            
-            addTag(entities, tag);
+            String tags = addTagComboBox.getSelectedItem().toString();
+            addTags(entities, tags);
+            tagComboModel.removeAllElements();
+            addTagComboBox.setSelectedItem("");
+            addTagComboBox.setSelectedItem(null);
         }
     }//GEN-LAST:event_addTagComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox addTagComboBox;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JList jList1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSpinner jSpinner1;
+    private javax.swing.JScrollPane tagTree;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -245,10 +296,5 @@ public final class TagsViewTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
-    }
-    
-    protected List<String> getTagList()
-    {
-        return listModel.tags;
     }
 }

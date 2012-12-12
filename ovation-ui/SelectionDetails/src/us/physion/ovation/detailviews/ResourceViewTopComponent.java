@@ -70,10 +70,11 @@ public final class ResourceViewTopComponent extends TopComponent {
     protected Collection<? extends IEntityWrapper> entities;
     protected ResourceListModel listModel;
     protected Set<IResourceWrapper> editedSet = new HashSet();
+    boolean saveButtonEnabled;
 
     public ResourceViewTopComponent() {
         initComponents();
-        saveButton.setEnabled(false);
+        setSavedButtonEnabled(false);
         resourceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setName(Bundle.CTL_ResourceViewTopComponent());
         setToolTipText(Bundle.HINT_ResourceViewTopComponent());
@@ -109,11 +110,11 @@ public final class ResourceViewTopComponent extends TopComponent {
                 {
                     if (editedSet.contains(value))
                     {
-                       saveButton.setEnabled(true);
+                       setSavedButtonEnabled(true);
                        return;
                     }
                 }
-                saveButton.setEnabled(false);
+                setSavedButtonEnabled(false);
             }
         });
     }
@@ -133,14 +134,20 @@ public final class ResourceViewTopComponent extends TopComponent {
             }
             editedSet.add(rw);
             
-            EventQueueUtilities.runOnEDT(new Runnable(){
+            setSavedButtonEnabled(true);
+        }
+    }
+    
+    protected void setSavedButtonEnabled(final boolean enable)
+    {
+        saveButtonEnabled = enable;
+        EventQueueUtilities.runOnEDT(new Runnable(){
 
                 @Override
                 public void run() {
-                    saveButton.setEnabled(true);
+                    saveButton.setEnabled(enable);
                 }
             });
-        }
     }
     
     protected void closeEditedResourceFiles()
@@ -150,7 +157,7 @@ public final class ResourceViewTopComponent extends TopComponent {
             rw.getEntity().releaseLocalFile();
         }
         editedSet = new HashSet();
-        saveButton.setEnabled(false);
+        setSavedButtonEnabled(false);
     }
 
     protected void updateResources()
@@ -194,16 +201,9 @@ public final class ResourceViewTopComponent extends TopComponent {
         
         listModel.setResources(resources);
 
-        EventQueueUtilities.runOnEDT(new Runnable(){
-            
-            @Override
-            public void run() {
-                if (editedSet.isEmpty()) {
-                    saveButton.setEnabled(false);
-                }
-            }
-        });
-        
+        if (editedSet.isEmpty()) {
+            setSavedButtonEnabled(false);
+        }
     }
     
 
@@ -325,7 +325,7 @@ public final class ResourceViewTopComponent extends TopComponent {
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
-        saveButton.setEnabled(false);
+        this.setSavedButtonEnabled(false);
     }
 
     @Override
@@ -369,7 +369,7 @@ public final class ResourceViewTopComponent extends TopComponent {
     
     protected boolean saveButtonIsEnabled()
     {
-        return saveButton.isEnabled();
+        return saveButtonEnabled;
     }
     
     protected List<IResourceWrapper> getResources()

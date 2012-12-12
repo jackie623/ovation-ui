@@ -42,10 +42,10 @@ public class UpdateInfo_3 implements UpdateInfo{
         List<UpdateStep> steps = new LinkedList<UpdateStep>();
         //steps.add(new UpdateSchemaStep("/Users/huecotanks/Ovation/production/schemas/r16/ovation.schema"));
         steps.add(new UpdateSchemaStep("https://s3.amazonaws.com/com.physionconsulting.ovation.updates/1.4/ovation.schema"));
-        steps.add(new UpdateJarStep("https://s3.amazonaws.com/com.physionconsulting.ovation.updates/1.4/UpgradeApplication.jar"));
-        steps.add(new UpdateJarStep("https://s3.amazonaws.com/com.physionconsulting.ovation.updates/1.4/Update_3.jar"));
+        //steps.add(new UpdateJarStep("https://s3.amazonaws.com/com.physionconsulting.ovation.updates/1.4/UpgradeApplication.jar"));
+        //steps.add(new UpdateJarStep("https://s3.amazonaws.com/com.physionconsulting.ovation.updates/1.4/Update_3.jar"));
         //steps.add(new UpdateJarStep("/Users/huecotanks/Ovation/trunk/java/Ovation/artifacts/UpgradeApplication.jar"));
-        //steps.add(new UpdateJarStep("/Users/huecotanks/Ovation/ovation-ui/UIPlatformApplication/Update_3.jar"));//for development, this is a hardcoded path, in production and tests, this should be on s3
+        steps.add(new UpdateJarStep("/Users/huecotanks/Ovation/ui/ovation-ui/Update_3.jar"));//for development, this is a hardcoded path, in production and tests, this should be on s3
         return steps;
     }
 }

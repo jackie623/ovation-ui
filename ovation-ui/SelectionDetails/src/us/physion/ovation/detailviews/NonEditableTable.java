@@ -19,11 +19,11 @@ import javax.swing.table.TableRowSorter;
 public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
-    private TreeWithTableRenderer treeUtils;
+    private ScrollableTableTree treeUtils;
     /**
      * Creates new form NonEditableTable
      */
-    public NonEditableTable(JTable table, TreeWithTableRenderer t) {
+    public NonEditableTable(JTable table, ScrollableTableTree t) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
@@ -50,9 +50,7 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 83, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(0, 0, Short.MAX_VALUE))
+            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -71,15 +69,7 @@ public class NonEditableTable extends javax.swing.JPanel implements TablePanel {
     
     @Override
     public Dimension getPreferredSize(){  
-        int height; 
-        if (table.getHeight() ==0)
-        {
-            height = (int)super.getPreferredSize().getHeight();
-        }
-        else
-        {
-            height = (table.getRowCount()+1)*table.getRowHeight() + 5;
-        }
+        int height = table.getHeight() == 0 ? 0 : (table.getRowCount())*table.getRowHeight() + 5; 
         Dimension actual = new Dimension(treeUtils.getCellWidth(), height);
         return actual;  
     }

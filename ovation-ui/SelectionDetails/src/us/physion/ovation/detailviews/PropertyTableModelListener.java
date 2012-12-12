@@ -8,10 +8,9 @@ import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
@@ -23,6 +22,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.openide.util.Lookup;
 import ovation.DataContext;
 import ovation.IAuthenticatedDataStoreCoordinator;
@@ -35,13 +37,22 @@ import us.physion.ovation.interfaces.EventQueueUtilities;
  *
  * @author huecotanks
  */
-class PropertyTableModelListener implements TableModelListener{
+class PropertyTableModelListener implements EditableTableModelListener{
 
-    JTree tree;
+    ResizableTree tree;
     Set<String> uris;
     IAuthenticatedDataStoreCoordinator dsc;
     TableNode node;
-    public PropertyTableModelListener(Set<String> uriSet, JTree tree, TableNode node, IAuthenticatedDataStoreCoordinator dsc) {
+    public PropertyTableModelListener(Set<String> uriSet, ResizableTree tree, TableNode node) {
+        this.dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
+        uris = uriSet;
+        this.tree = tree;
+        this.node = node;
+    }
+
+    // this contructor is used in unit tests
+    public PropertyTableModelListener(Set<String> uriSet, ResizableTree tree, TableNode node,
+            IAuthenticatedDataStoreCoordinator dsc) {
         this.dsc = dsc;
         uris = uriSet;
         this.tree = tree;
@@ -56,11 +67,11 @@ class PropertyTableModelListener implements TableModelListener{
                          
         if (tme.getType() == TableModelEvent.INSERT)
         {
-            EventQueueUtilities.runOnEDT(new Runnable()
-            {
+            EventQueueUtilities.runOffEDT(new Runnable() {
+
                 @Override
                 public void run() {
-                    ((DefaultTreeModel)tree.getModel()).nodeChanged(node);//this resizes the tree cell that contains the editable table that just added a row
+                    tree.resizeNode(node);
                 }
             });
 
@@ -75,7 +86,6 @@ class PropertyTableModelListener implements TableModelListener{
                 Object value = t.getValueAt(i, 1);
                 newProperties.put(key, value);
             }
-            node.getUserProperties().setBlankRow(false);
             final Map<String, Object> props = newProperties;
             EventQueueUtilities.runOffEDT(new Runnable() {
 
@@ -90,13 +100,13 @@ class PropertyTableModelListener implements TableModelListener{
                             parseAndAdd(eb, key, props.get(key));
                         }
                     }
-                    node.resetProperties(dsc);
+                    node.reset(dsc);
                 }
             });
         }
     }
 
-    void deleteProperty(final DefaultTableModel model, int[] rowsToRemove) {
+    public void deleteRows(final DefaultTableModel model, int[] rowsToRemove) {
         
         Arrays.sort(rowsToRemove);
         final int[] rows = rowsToRemove;
@@ -118,7 +128,7 @@ class PropertyTableModelListener implements TableModelListener{
                     }
 
                 }
-                node.resetProperties(dsc);
+                node.reset(dsc);
                 EventQueueUtilities.runOnEDT(new Runnable() {
 
                     @Override
@@ -128,9 +138,10 @@ class PropertyTableModelListener implements TableModelListener{
                         }
                         EditableTable p = (EditableTable)node.getPanel();
                         JScrollPane sp = p.getScrollPane();
-                        sp.setSize(sp.getPreferredSize());
+                        if (sp != null)
+                            sp.setSize(sp.getPreferredSize());
                         p.setSize(p.getPreferredSize());
-                        ((DefaultTreeModel) tree.getModel()).nodeChanged(node);//this resizes the tree cell that contains the editable table that just deleted a row
+                        tree.resizeNode(node);//this resizes the tree cell that contains the editable table that just deleted a row
                     }
                 });
             }
@@ -159,12 +170,6 @@ class PropertyTableModelListener implements TableModelListener{
                 return;
             } catch (NumberFormatException e) {
             }
-            try {
-                double v = Double.parseDouble(s);
-                eb.addProperty(key, v);
-                return;
-            } catch (NumberFormatException e) {
-            }
             if (s.toLowerCase().equals("true"))
             {
                 eb.addProperty(key, true);
@@ -175,13 +180,39 @@ class PropertyTableModelListener implements TableModelListener{
                 eb.addProperty(key, false);
                 return;
             }
+            
             try{
-                DateTime dt = new DateTime(s);
+                DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+                DateTime dt = fmt.parseDateTime(s);
                 eb.addProperty(key, new Timestamp(dt.getMillis()));
-            }catch (IllegalArgumentException e)
-            {
-                //pass
+                return;
+            } catch (IllegalArgumentException e) {
             }
+            ArrayList<String> patterns = new ArrayList();
+            String pattern1 = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())).toLocalizedPattern();
+            String pattern2 = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault())).toLocalizedPattern();
+            String pattern3 = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault())).toLocalizedPattern();
+            String pattern4 = pattern1 + " " + ((SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault())).toLocalizedPattern();
+            String pattern5 = pattern2 + " " + ((SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.MEDIUM, Locale.getDefault())).toLocalizedPattern();
+            String pattern6 = pattern3 + " " + ((SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.LONG, Locale.getDefault())).toLocalizedPattern();
+
+            patterns.add(pattern1);
+            patterns.add(pattern2);
+            patterns.add(pattern3);
+            patterns.add(pattern4);
+            patterns.add(pattern5);
+            patterns.add(pattern6);
+
+            for (String pattern : patterns) {
+                try {
+
+                    DateTimeFormatter fmt = DateTimeFormat.forPattern(pattern);
+                    DateTime dt = fmt.parseDateTime(s);
+                    eb.addProperty(key, new Timestamp(dt.getMillis()));
+                    return;
+                } catch (IllegalArgumentException e) {}
+            }
+            
             //byte array
             //NumericData
             //EntityBase

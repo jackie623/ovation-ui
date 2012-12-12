@@ -7,6 +7,7 @@ package us.physion.ovation.detailviews;
 import java.io.File;
 import java.net.InetAddress;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.joda.time.DateTime;
 import org.junit.*;
@@ -69,10 +70,9 @@ public class TagsViewTopComponentTest extends OvationTestCase{
     public static void tearDownClass() throws Exception {
         OvationTestCase.tearDownDatabase(mgr);
     }
-
    
     @Test
-    public void testUpdateListModelSetsSelectedTagsProperly()
+    public void testUpdateSetsMySelectedTagsProperly()
     {
         TagsViewTopComponent t = new TagsViewTopComponent();
         Set entitySet = new HashSet();
@@ -80,71 +80,72 @@ public class TagsViewTopComponentTest extends OvationTestCase{
         entitySet.add(project2);
         
         //both projects are selected
-        t.updateListModel(entitySet);
-        Set<String> tags = new HashSet();
-        for (String tag : ((ITaggableEntityBase)project.getEntity()).getTags())
+        List<TableTreeKey> tagSets = t.update(entitySet, dsc);
+        List<String> myTagsFromUserNode = ((TagsSet)tagSets.get(0)).getTags();
+        Set<String> mytags = new HashSet();
+        for (String tag : ((ITaggableEntityBase)project.getEntity()).getMyTags())
         {
-            tags.add(tag);
+            mytags.add(tag);
         }
-        for (String tag : ((ITaggableEntityBase)project2.getEntity()).getTags())
+        for (String tag : ((ITaggableEntityBase)project2.getEntity()).getMyTags())
         {
-            tags.add(tag);
+            mytags.add(tag);
         }
-        assertEquals(t.getTagList().size(), tags.size());
+        assertEquals(myTagsFromUserNode.size(), mytags.size());
         
-        for (String s : t.getTagList())
+        for (String s : myTagsFromUserNode)
         {
-            assertTrue(tags.contains(s));
+            assertTrue(mytags.contains(s));
         }
         
         //a single project is selected
         entitySet = new HashSet();
         entitySet.add(project);
-        t.updateListModel(entitySet);
-        tags = new HashSet();
+        myTagsFromUserNode = ((TagsSet)t.update(entitySet, dsc).get(0)).getTags();
+        mytags = new HashSet<String>();
         for (String tag : ((ITaggableEntityBase)project.getEntity()).getTags())
         {
-            tags.add(tag);
+            mytags.add(tag);
         }
-        assertEquals(t.getTagList().size(), tags.size());
+        assertEquals(myTagsFromUserNode.size(), mytags.size());
         
-        for (String s : t.getTagList())
+        for (String s : myTagsFromUserNode)
         {
-            assertTrue(tags.contains(s));
+            assertTrue(mytags.contains(s));
         }
-        
     }
     
      @Test
-    public void testAddTagToSelectedEntities()
+    public void testUpdateSetsOtherUsersSelectedTagsProperly()
     {
+    }
+
+     @Test
+     public void testOnlyMyTagsAreEditable()
+     {
         TagsViewTopComponent t = new TagsViewTopComponent();
         Set entitySet = new HashSet();
         entitySet.add(project);
         entitySet.add(project2);
         
-        t.updateListModel(entitySet);
-        String newTag = "aaaa new tag";//should be at the beginning of the list
-        t.addTag(entitySet, newTag);
+        //both projects are selected
+        List<TableTreeKey> tagSets = t.update(entitySet, dsc);
+        List<String> myTagsFromUserNode = ((TagsSet)tagSets.get(0)).getTags();
+        Set<String> mytags = new HashSet();
+        for (String tag : ((ITaggableEntityBase)project.getEntity()).getMyTags())
+        {
+            mytags.add(tag);
+        }
+        for (String tag : ((ITaggableEntityBase)project2.getEntity()).getMyTags())
+        {
+            mytags.add(tag);
+        }
+        assertEquals(myTagsFromUserNode.size(), mytags.size());
         
-        //adds new tag to both entites
-        assertTrue(t.getTagList().contains(newTag));
-        assertEquals(((ITaggableEntityBase)project2.getEntity()).getTags()[0], newTag);
-        assertEquals(((ITaggableEntityBase)project.getEntity()).getTags()[0], newTag);
+        for (String s : myTagsFromUserNode)
+        {
+            assertTrue(mytags.contains(s));
+        }
         
-        entitySet = new HashSet();
-        entitySet.add(project2);
-        
-        Project p2 = (Project)project2.getEntity();
-        String oldTag = p2.getTags()[0];
-        int tagNumber = p2.getTags().length;
-        
-        t.updateListModel(entitySet);
-
-        assertEquals(tagNumber, t.getTagList().size());
-        t.addTag(entitySet, oldTag);
-        
-        assertEquals(tagNumber, t.getTagList().size());
-    }
-     
+     }
 }

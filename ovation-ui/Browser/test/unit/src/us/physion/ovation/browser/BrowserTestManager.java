@@ -32,21 +32,20 @@ public class BrowserTestManager extends TestManager {
 
     @Override
     public String getConnectionFile() {
-        System.out.println("Getting connection file");
-        String pwd = "";/*AccessController.doPrivileged(new PrivilegedAction<String>() {
+        String pwd = AccessController.doPrivileged(new PrivilegedAction<String>() {
 
             public String run() {
                 String pwd = System.getProperty("WORKSPACE");
                 return pwd;
             }
-        });*/
-        System.out.println(System.getProperty("java.security.debug"));
-        System.out.println(System.getProperty("java.security.policy"));
-        System.out.println("Got working dir");
+        });
+        if (pwd == null)
+        {
+            pwd = "/Users/huecotanks/Ovation/ui/";
+        }
         String path = pwd + "data" + File.separator
                 + "browser" + File.separator
                 + "browser-test.connection";
-        System.out.println("Got connection file");
 
         return path;
     }

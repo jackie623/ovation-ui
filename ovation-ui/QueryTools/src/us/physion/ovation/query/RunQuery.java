@@ -37,7 +37,7 @@ id = "us.physion.ovation.query.RunQuery")
 @ActionRegistration(iconBase = "us/physion/ovation/query/query.png",
 displayName = "#CTL_RunQuery")
 @ActionReferences({
-    @ActionReference(path = "Menu/Tools", position = 0),
+    @ActionReference(path = "Menu/Tools", position = 10),
     @ActionReference(path = "Toolbars/Find", position = 10),
     @ActionReference(path = "Shortcuts", name = "M-R")
 })
@@ -69,31 +69,39 @@ public final class RunQuery implements ActionListener {
             public void run() {
                 ProgressHandle ph = null;
                 System.out.println("Starting query");
-                long start = System.currentTimeMillis();
-
-                ph = ProgressHandleFactory.createHandle("Querying");
-                ph.setDisplayName("Querying");
-                ph.switchToIndeterminate();
-                ph.start();
 
                 if (etp instanceof QueryProvider) {
-                    QueryProvider qp = (QueryProvider) etp;
+                    final QueryProvider qp = (QueryProvider) etp;
                     qp.setExpressionTree(result);
-                    for (QueryListener listener : qp.getListeners()) {
-                        FutureTask task = listener.run();
-                        try {
-                            task.get();
-                        } catch (InterruptedException ex) {
-                            Exceptions.printStackTrace(ex);
-                        } catch (ExecutionException ex) {
-                            Exceptions.printStackTrace(ex);
-                        }
-                    }
-                }
 
-                ph.finish();
-    
-                System.out.println("Finished query: " + (System.currentTimeMillis() - start)  + " ms");
+                    ph = ProgressHandleFactory.createHandle("Querying", new Cancellable() {
+
+                        @Override
+                        public boolean cancel() {
+                            new CancelQuery().actionPerformed(null);
+                            return true;
+                        }
+                    });
+                    ph.setDisplayName("Querying");
+                    ph.switchToIndeterminate();
+                    ph.start();
+                    try {
+                        for (QueryListener listener : qp.getListeners()) {
+                            FutureTask task = listener.run();
+                            try {
+                                task.get();
+                            } catch (InterruptedException ex) {
+                                Exceptions.printStackTrace(ex);
+                            } catch (ExecutionException ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
+                        }
+                    } catch (NullPointerException ex) {
+                        //This happens when the query is cancelled
+                    }
+
+                    ph.finish();
+                }
             }
         });
     }

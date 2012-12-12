@@ -9,7 +9,9 @@ import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.Arrays;
+import java.util.Vector;
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -25,18 +27,16 @@ import us.physion.ovation.interfaces.EventQueueUtilities;
 public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     private JTable table;
-    private TreeWithTableRenderer treeUtils;
-    private UserPropertySet propertySet;
+    private ScrollableTableTree treeUtils;
     /**
      * Creates new form EditableTable
      */
-    public EditableTable(JTable table, TreeWithTableRenderer t, UserPropertySet p) {
+    public EditableTable(JTable table, ScrollableTableTree t) {
         initComponents();
         jScrollPane1.getViewport().add(table, null);
         jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
         this.table = table;
         this.treeUtils = t;
-        propertySet = p;
         //this.setBorder(BorderFactory.createEtchedBorder());
     }
 
@@ -78,17 +78,17 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
                 .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 28, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 28, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(0, 386, Short.MAX_VALUE))
+                .add(0, 360, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 445, Short.MAX_VALUE)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                    .add(deleteButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(addButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 23, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -104,33 +104,13 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         }
         if ( (lastKey != null && !lastKey.isEmpty()))
         {
-                EventQueueUtilities.runOffEDT(new Runnable()
-                {
-                    @Override
-                    public void run() {
-                        ((DefaultTableModel)table.getModel()).addRow(new Object[]{"", ""});
-                        //speeds up performance!
-                        JScrollPane sp = ((JScrollPane)table.getParent().getParent());
-                        sp.setSize(sp.getPreferredSize());
-                        //((JScrollPane)table.getParent().getParent()).setViewportView(table);
-                        EditableTable.this.setSize(EditableTable.this.getPreferredSize());
-                        table.getSelectionModel().setSelectionInterval(table.getRowCount()-1, table.getRowCount()-1);
-                        propertySet.setBlankRow(true);
-                    }
-                });
+            addBlankRow();
         }
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
        
-         //There is a bug in getListeners - it doesnt find the PropertyTableModelListener if you pass is PropertyTableModelListener.class
-        TableModelListener[] listeners = ((DefaultTableModel) table.getModel()).getListeners(TableModelListener.class);
-        for (TableModelListener l : listeners) {
-            if (l instanceof PropertyTableModelListener) {
-                ((PropertyTableModelListener) l).deleteProperty((DefaultTableModel) table.getModel(), table.getSelectedRows());
-                break;
-            }
-        }
+        deleteRows(table.getSelectedRows());
     }//GEN-LAST:event_deleteButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -151,14 +131,99 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
 
     @Override
     public Dimension getPreferredSize(){  
-        int height = (table.getRowCount()+1)*table.getRowHeight() + 24 + addButton.getHeight();
-                
-        Dimension actual = new Dimension(treeUtils.getCellWidth(), height);
-        return actual;  
+        int height = 0;
+        //this is voodoo magic, DO NOT CHANGE
+        if (table.getHeight() ==0)
+         {
+             //this gets the height from the EditableTable default, so if this gets out of whack, modify the default size in the UI builder
+            height = (int)super.getPreferredSize().getHeight();
+         }
+        else
+        {
+            height = (table.getRowCount())*table.getRowHeight() + 24 + addButton.getHeight();
+        }
+        int width = treeUtils == null ? getWidth() : treeUtils.getCellWidth();
+        Dimension actual = new Dimension(width, height);
+         return actual;  
+       
     }
     
     protected JScrollPane getScrollPane()
     {
        return jScrollPane1;
+    }
+
+    protected void addBlankRow() {
+        EventQueueUtilities.runOffEDT(new Runnable() {
+            @Override
+            public void run() {
+                DefaultTableModel m = ((DefaultTableModel) table.getModel());
+                int row = m.getRowCount();
+                Object[] blankRow = new String[m.getColumnCount()];
+                for (int i=0; i< m.getColumnCount(); i++)
+                    blankRow[i] = "";
+                m.addRow(blankRow);
+                
+                //manually set size of the containing scrollpane, since the table has resized
+                JScrollPane sp = ((JScrollPane) table.getParent().getParent());
+                sp.setSize(sp.getPreferredSize());
+                EditableTable.this.setSize(EditableTable.this.getPreferredSize());
+                table.getSelectionModel().setSelectionInterval(table.getRowCount() - 1, table.getRowCount() - 1);
+                
+                
+                boolean noListener = true;
+                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                    if (l instanceof EditableTableModelListener) {
+                        noListener = false;
+
+                        TableModelEvent t = new TableModelEvent(m, row, row, 1, TableModelEvent.INSERT);
+                        l.tableChanged(t);
+                        break;
+                    }
+                }
+                if (noListener) {
+                    Ovation.getLogger().debug("No listener available for the TableModel");
+                }
+            }
+        });
+    }
+    
+    /*protected void editRow(final int row, final String key, final Object value)
+    {
+        final DefaultTableModel m = ((DefaultTableModel) table.getModel());
+        EventQueueUtilities.runOffEDT(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                m.setValueAt(key, row, 0);
+                m.setValueAt(value, row, 1);
+
+                boolean noListener = true;
+                for (TableModelListener l : m.getListeners(TableModelListener.class)) {
+                    if (l instanceof EditableTableModelListener) {
+                        noListener = false;
+
+                        TableModelEvent t = new TableModelEvent(m, row, row, 1, TableModelEvent.UPDATE);
+                        l.tableChanged(t);
+                        break;
+                    }
+                }
+                if (noListener) {
+                    Ovation.getLogger().debug("No listener available for the TableModel");
+                }
+            }
+        });
+    }*/
+
+    protected void deleteRows(int[] rows) {
+        //There is a bug in getListeners - it doesnt find the EditableTableModelListener if you pass is EditableTableModelListener.class
+        TableModelListener[] listeners = ((DefaultTableModel) table.getModel()).getListeners(TableModelListener.class);
+        for (TableModelListener l : listeners) {
+            if (l instanceof EditableTableModelListener) {
+                ((EditableTableModelListener) l).deleteRows((DefaultTableModel) table.getModel(), rows);
+                break;
+            }
+        }
     }
 }

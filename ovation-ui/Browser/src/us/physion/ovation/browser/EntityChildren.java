@@ -21,6 +21,7 @@ import org.openide.util.Lookup;
 import ovation.*;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.browser.EntityWrapper;
+import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 
@@ -66,47 +67,26 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
    
     protected void updateWithKeys(final List<EntityWrapper> list)
     {
-        if (EventQueue.isDispatchThread())
-        {
-            setKeys(list);
-            addNotify();
-            refresh();
-        }
-        else{
-           // try {
-                SwingUtilities.invokeLater(new Runnable(){
+        EventQueueUtilities.runOnEDT(new Runnable(){
 
-                    @Override
-                    public void run() {
-                        setKeys(list);
-                        addNotify();
-                        refresh();
-                    }
-                    
-                });
-            /*} catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (InvocationTargetException ex) {
-                Exceptions.printStackTrace(ex);
-            }*/
-        }
+            @Override
+            public void run() {
+                setKeys(list);
+                addNotify();
+                refresh();
+            }
+        });
     }
     
     protected void initKeys()
     {
-        if (EventQueue.isDispatchThread())
-        {
-            BrowserUtilities.submit(new Runnable(){
+        EventQueueUtilities.runOffEDT(new Runnable(){
 
-                @Override
-                public void run() {
-                    createKeys();
-                }
-            });
-        }
-        else{
-            createKeys();
-        }
+            @Override
+            public void run() {
+                createKeys();
+            }
+        });
     }
     
     protected void createKeys() {
@@ -124,7 +104,6 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             if (projectView) {
                 for (Project p : c.getProjects()) {
                     p.getURIString();
-                    EntityWrapper x = new EntityWrapper(p);
                     list.add(new EntityWrapper(p));
                 }
             } else {
@@ -132,11 +111,9 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
                 while (itr.hasNext()) {
                     Source s = itr.next();
                     s.getURIString();
-                    EntityWrapper x = new EntityWrapper(s);
                     list.add(new EntityWrapper(s));
                 }
             }
-
             updateWithKeys(list);
 
         } else {
@@ -201,15 +178,8 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
             
             context.beginTransaction();
             try {
-                int count = 0;
-                for (Epoch e : entity.getEpochsIterable()) {
-                    
+                for (Epoch e : entity.getEpochs()) {
                     list.add(new EntityWrapper(e));
-                    /*if (count%10 == 0)
-                    {
-                        updateWithKeys(list);
-                    }
-                    count++;*/
                 }
             } finally{
                 context.commitTransaction();
@@ -225,8 +195,6 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
                 for (Response r : entity.getResponseIterable()) {
                     list.add(new EntityWrapper(r));
                 }
-
-                String currentUser = c.currentAuthenticatedUser().getUsername();
 
                 Iterator<User> userItr = c.getUsersIterator();
                 while (userItr.hasNext()) {

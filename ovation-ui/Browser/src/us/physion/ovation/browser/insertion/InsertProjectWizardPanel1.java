@@ -10,25 +10,17 @@ import org.openide.WizardDescriptor;
 import org.openide.util.ChangeSupport;
 import org.openide.util.HelpCtx;
 
-public class InsertProjectWizardPanel1 implements WizardDescriptor.Panel<WizardDescriptor> {
-
-    private final ChangeSupport changeSupport = new ChangeSupport(this);
-    /**
-     * The visual component that displays this panel. If you need to access the
-     * component from this class, just use getComponent().
-     */
-    private InsertProjectVisualPanel1 component;
+public class InsertProjectWizardPanel1 extends BasicWizardPanel{
 
     // Get the visual component for the panel. In this template, the component
     // is kept separate. This can be more efficient: if the wizard is created
     // but never displayed, or not all panels are displayed, it is better to
     // create only those which really need to be visible.
-    @Override
     public InsertProjectVisualPanel1 getComponent() {
         if (component == null) {
             component = new InsertProjectVisualPanel1(changeSupport);
         }
-        return component;
+        return (InsertProjectVisualPanel1)component;
     }
 
     @Override
@@ -41,10 +33,11 @@ public class InsertProjectWizardPanel1 implements WizardDescriptor.Panel<WizardD
 
     @Override
     public boolean isValid() {
-        if (component != null)
+        InsertProjectVisualPanel1 c = (InsertProjectVisualPanel1)component;
+        if (c != null)
         {
-           return (component.getProjectName() != null && !component.getProjectName().isEmpty() 
-                   && component.getProjectPurpose() != null && !component.getProjectPurpose().isEmpty() );
+           return (c.getProjectName() != null && !c.getProjectName().isEmpty() 
+                   && c.getProjectPurpose() != null && !c.getProjectPurpose().isEmpty() );
                    //&& component.getStart() != null);
         }
         return false;
@@ -53,29 +46,19 @@ public class InsertProjectWizardPanel1 implements WizardDescriptor.Panel<WizardD
         // use ChangeSupport to implement add/removeChangeListener below.
         // WizardDescriptor.ERROR/WARNING/INFORMATION_MESSAGE will also be useful.
     }
-
-    @Override
-    public void addChangeListener(ChangeListener l) {
-        changeSupport.addChangeListener(l);
-    }
-
-    @Override
-    public void removeChangeListener(ChangeListener l) {
-        changeSupport.removeChangeListener(l);
-    }
-
-    @Override
-    public void readSettings(WizardDescriptor wiz) {
-        // use wiz.getProperty to retrieve previous panel state
+    
+    public String getName()
+    {
+        return "Project Data";
     }
 
     @Override
     public void storeSettings(WizardDescriptor wiz) {
-        wiz.putProperty("project.name", component.getProjectName());
-        wiz.putProperty("project.purpose", component.getProjectPurpose());
-        wiz.putProperty("project.start", component.getStart());
-        wiz.putProperty("project.end", component.getEnd());
+        InsertProjectVisualPanel1 c = (InsertProjectVisualPanel1)component;
+        wiz.putProperty("project.name", c.getProjectName());
+        wiz.putProperty("project.purpose", c.getProjectPurpose());
+        wiz.putProperty("project.start", c.getStart());
+        wiz.putProperty("project.end", c.getEnd());
         // use wiz.putProperty to remember current panel state
     }
-
 }

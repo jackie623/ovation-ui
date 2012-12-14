@@ -29,11 +29,11 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class InsertProject extends InsertEntity implements RootInsertable {
 
     public InsertProject() {
-        putValue(NAME, "Insert Project");
+        putValue(NAME, "Insert Project...");
     }
     
     @Override
-    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent)
     {
         List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
         panels.add(new InsertProjectWizardPanel1());

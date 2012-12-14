@@ -178,41 +178,11 @@ public final class InsertProjectVisualPanel1 extends JPanel {
     }//GEN-LAST:event_purposeTextAreaKeyTyped
 
     private void purposeTextAreaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_purposeTextAreaKeyReleased
-        if (purposeTextArea.getText().isEmpty())
-        {
-            projectPurpose = "";
-            notifyController();
-        }else{
-            boolean notify = false;
-            if (projectPurpose == null || projectPurpose.isEmpty())
-            {
-                notify = true;
-            }
-            projectPurpose = purposeTextArea.getText();
-            if (notify)
-            {
-                notifyController();
-            }
-        }
+        projectPurpose = BasicWizardPanel.updateTextArea(purposeTextArea, change, projectPurpose);
     }//GEN-LAST:event_purposeTextAreaKeyReleased
 
     private void projectNameTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_projectNameTextFieldKeyReleased
-        if (projectNameTextField.getText().isEmpty())
-        {
-            projectName = "";
-            notifyController();
-        }else{
-            boolean notify = false;
-            if (projectName == null || projectName.isEmpty())
-            {
-                notify = true;
-            }
-            projectName = projectNameTextField.getText();
-            if (notify)
-            {
-                notifyController();
-            }
-        }
+        projectName = BasicWizardPanel.updateTextField(projectNameTextField, change, projectName);
     }//GEN-LAST:event_projectNameTextFieldKeyReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

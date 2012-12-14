@@ -4,20 +4,31 @@
  */
 package us.physion.ovation.browser.insertion;
 
+import java.util.Iterator;
 import javax.swing.JPanel;
+import org.openide.util.ChangeSupport;
+import ovation.AnalysisRecord;
 
 public final class InsertAnalysisRecordVisualPanel2 extends JPanel {
 
+    ChangeSupport cs;
+    Iterator<AnalysisRecord> inputs;
     /**
      * Creates new form InsertAnalysisRecordVisualPanel2
      */
-    public InsertAnalysisRecordVisualPanel2() {
+    public InsertAnalysisRecordVisualPanel2(ChangeSupport cs) {
         initComponents();
+        this.cs = cs;
     }
 
     @Override
     public String getName() {
         return "Step #2";
+    }
+    
+    public Iterator<AnalysisRecord> getInputs()
+    {
+        return inputs;
     }
 
     /**

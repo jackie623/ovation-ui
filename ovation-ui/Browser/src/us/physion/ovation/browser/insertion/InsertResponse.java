@@ -25,7 +25,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class InsertResponse extends InsertEntity implements EpochInsertable {
 
     public InsertResponse() {
-        putValue(NAME, "Insert Response");
+        putValue(NAME, "Insert Response...");
     }
 
     public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()

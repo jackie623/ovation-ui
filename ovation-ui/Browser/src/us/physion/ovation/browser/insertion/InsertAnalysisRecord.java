@@ -29,10 +29,11 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class InsertAnalysisRecord extends InsertEntity implements ProjectInsertable{
 
     public InsertAnalysisRecord() {
-        putValue(NAME, "Insert Analysis Record");
+        putValue(NAME, "Insert Analysis Record...");
     }
 
-    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    @Override
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent)
     {
         List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
         panels.add(new InsertAnalysisRecordWizardPanel1());

@@ -68,7 +68,6 @@ public final class RunQuery implements ActionListener {
             @Override
             public void run() {
                 ProgressHandle ph = null;
-                System.out.println("Starting query");
 
                 if (etp instanceof QueryProvider) {
                     final QueryProvider qp = (QueryProvider) etp;

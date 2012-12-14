@@ -4,15 +4,22 @@
  */
 package us.physion.ovation.browser.insertion;
 
+import java.util.Iterator;
 import javax.swing.JPanel;
+import org.openide.util.ChangeSupport;
+import ovation.Epoch;
 
 public final class InsertAnalysisRecordVisualPanel1 extends JPanel {
 
+    private ChangeSupport cs;
+    private String analysisRecordName;
+    private Iterator<Epoch> epochs;
     /**
      * Creates new form InsertAnalysisRecordVisualPanel1
      */
-    public InsertAnalysisRecordVisualPanel1() {
+    public InsertAnalysisRecordVisualPanel1(ChangeSupport cs) {
         initComponents();
+        this.cs = cs;
     }
 
     @Override
@@ -20,6 +27,15 @@ public final class InsertAnalysisRecordVisualPanel1 extends JPanel {
         return "Step #1";
     }
 
+    public String getAnalysisRecordName()
+    {
+        return analysisRecordName;
+    }
+    
+    public Iterator<Epoch> getEpochs()
+    {
+        return epochs;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

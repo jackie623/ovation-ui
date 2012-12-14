@@ -65,7 +65,7 @@ public class BrowserUtilities{
         executorService.submit(runnable);
     }
     
-    protected static void initBrowser(final ExplorerManager em, 
+    public static void initBrowser(final ExplorerManager em, 
                                    final boolean projectView)
     {
         registeredViewManagers.put(em, projectView);//TODO: don't need this. we should be able to look up the explorerManagers from TopComponents

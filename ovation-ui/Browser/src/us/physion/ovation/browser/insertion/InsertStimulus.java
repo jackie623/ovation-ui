@@ -22,6 +22,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class InsertStimulus extends InsertEntity implements EpochInsertable {
 
     public InsertStimulus(IEntityWrapper parent) {
+        putValue(NAME, "Insert Stimulus...");
     }
 
     public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()

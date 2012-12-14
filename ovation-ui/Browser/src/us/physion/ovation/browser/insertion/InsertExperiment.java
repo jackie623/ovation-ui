@@ -31,7 +31,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class InsertExperiment extends InsertEntity implements ProjectInsertable{
     
     public InsertExperiment(){    
-        putValue(NAME, "Insert Experiment");
+        putValue(NAME, "Insert Experiment...");
     }
     
     public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()

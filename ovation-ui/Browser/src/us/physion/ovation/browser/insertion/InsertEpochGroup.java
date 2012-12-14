@@ -15,6 +15,7 @@ import org.openide.WizardDescriptor;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import ovation.*;
+import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.browser.moveme.*;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
@@ -29,28 +30,31 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class InsertEpochGroup extends InsertEntity implements EpochGroupInsertable, ExperimentInsertable {
 
     public InsertEpochGroup() {
-        putValue(NAME, "Insert Epoch Group");
+        putValue(NAME, "Insert Epoch Group...");
     }
 
-    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent)
     {
         List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
-        panels.add(new InsertAnalysisRecordWizardPanel1());
-        panels.add(new InsertAnalysisRecordWizardPanel2());
-        panels.add(new InsertAnalysisRecordWizardPanel3()); 
+        if (parent.getType().equals(EpochGroup.class))
+            panels.add(new InsertEpochGroupWizardPanel1(new EntityWrapper(((EpochGroup)parent.getEntity()).getSource())));
+        else
+            panels.add(new InsertEpochGroupWizardPanel1(null));
+        panels.add(new InsertEpochGroupWizardPanel2());
         return panels;
     }
 
     @Override
     public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper parent)
     {
+        Source source = ((Source)((IEntityWrapper)wiz.getProperty("epochGroup.source")).getEntity());
         if (parent.getType().isAssignableFrom(Experiment.class))
-            ((Experiment)parent.getEntity()).insertEpochGroup(((Source)wiz.getProperty("epochGroup.source")),
+            ((Experiment)parent.getEntity()).insertEpochGroup(source,
                     ((String)wiz.getProperty("epochGroup.label")),
                     ((DateTime)wiz.getProperty("epochGroup.start")),
                     ((DateTime)wiz.getProperty("epochGroup.end")));
         else if (parent.getType().isAssignableFrom(EpochGroup.class))
-            ((EpochGroup)parent.getEntity()).insertEpochGroup(((Source)wiz.getProperty("epochGroup.source")),
+            ((EpochGroup)parent.getEntity()).insertEpochGroup(source,
                     ((String)wiz.getProperty("epochGroup.label")),
                     ((DateTime)wiz.getProperty("epochGroup.start")),
                     ((DateTime)wiz.getProperty("epochGroup.end")));

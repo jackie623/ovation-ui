@@ -37,6 +37,7 @@ public class EntityNode extends AbstractNode{
 
     private Action[] actionList;
     private IEntityWrapper parent;
+    private static Map<Class, Class> insertableMap = createMap();
         
     public EntityNode(Children c, Lookup l, IEntityWrapper parent) {
         super (c, l);
@@ -47,6 +48,11 @@ public class EntityNode extends AbstractNode{
    {
        super(c);
        this.parent = parent;
+   }
+   
+   protected void setActionList(Action[] actions)
+   {
+       actionList = actions;
    }
    
    @Override
@@ -62,62 +68,32 @@ public class EntityNode extends AbstractNode{
            }
            else{
                Class entityClass = parent.getType();
-               if (entityClass.isAssignableFrom(Project.class))
+               Class insertableClass = insertableMap.get(entityClass);
+               if (insertableClass == null)
                {
-                   Collection<? extends ProjectInsertable> insertables = Lookup.getDefault().lookupAll(ProjectInsertable.class);
-                   List<ProjectInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new ProjectInsertable[l.size()]);
-                           
-               }else if (entityClass.isAssignableFrom(Source.class))
-               {
-                   Collection<? extends SourceInsertable> insertables = Lookup.getDefault().lookupAll(SourceInsertable.class);
-                   List<SourceInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new ProjectInsertable[l.size()]);
-               }else if (entityClass.isAssignableFrom(Experiment.class))
-               {
-                   Collection<? extends ExperimentInsertable> insertables = Lookup.getDefault().lookupAll(ExperimentInsertable.class);
-                   List<ExperimentInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new ExperimentInsertable[l.size()]);
-               }else if (entityClass.isAssignableFrom(EpochGroup.class))
-               {
-                   Collection<? extends EpochGroupInsertable> insertables = Lookup.getDefault().lookupAll(EpochGroupInsertable.class);
-                   List<EpochGroupInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new EpochGroupInsertable[l.size()]);
-               }else if (entityClass.isAssignableFrom(Epoch.class))
-               {
-                   Collection<? extends EpochInsertable> insertables = Lookup.getDefault().lookupAll(EpochInsertable.class);
-                   List<EpochInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new EpochInsertable[l.size()]);
-               }else if (entityClass.isAssignableFrom(Response.class))
-               {
-                   Collection<? extends ResponseInsertable> insertables = Lookup.getDefault().lookupAll(ResponseInsertable.class);
-                   List<ResponseInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new ResponseInsertable[l.size()]);
-               }else if (entityClass.isAssignableFrom(DerivedResponse.class))
-               {
-                   Collection<? extends DerivedResponseInsertable> insertables = Lookup.getDefault().lookupAll(DerivedResponseInsertable.class);
-                   List<DerivedResponseInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new DerivedResponseInsertable[l.size()]);
-               }else if (entityClass.isAssignableFrom(AnalysisRecord.class))
-               {
-                   Collection<? extends AnalysisRecordInsertable> insertables = Lookup.getDefault().lookupAll(AnalysisRecordInsertable.class);
-                   List<AnalysisRecordInsertable> l = new ArrayList(insertables);
-                   Collections.sort(l);
-                   actionList = l.toArray(new AnalysisRecordInsertable[l.size()]);
-               }  
-               else{
                    actionList = new Action[0];
+               } else {
+                   Collection insertables = Lookup.getDefault().lookupAll(insertableClass);
+                   List<? extends Comparable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new EntityInsertable[l.size()]);
                }
            }
        }
         return actionList;
+    }
+
+    private static Map<Class, Class> createMap() {
+        Map<Class, Class> insertables = new HashMap<Class, Class>();
+        insertables.put(Project.class, ProjectInsertable.class);
+        insertables.put(Source.class, SourceInsertable.class);
+        insertables.put(Experiment.class, ExperimentInsertable.class);
+        insertables.put(EpochGroup.class, EpochGroupInsertable.class);
+        insertables.put(Epoch.class, EpochInsertable.class);
+        insertables.put(Response.class, ResponseInsertable.class);
+        insertables.put(Stimulus.class, StimulusInsertable.class);
+        insertables.put(DerivedResponse.class, DerivedResponseInsertable.class);
+        return insertables;
     }
    
    /*@Override

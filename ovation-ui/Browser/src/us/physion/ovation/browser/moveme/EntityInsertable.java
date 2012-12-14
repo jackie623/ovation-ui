@@ -18,6 +18,6 @@ import us.physion.ovation.interfaces.IEntityWrapper;
  */
 public interface EntityInsertable extends Action, Comparable{
     public int getPosition();
-    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels();
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent);
     public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper ew);
 }

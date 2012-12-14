@@ -30,7 +30,7 @@ import us.physion.ovation.interfaces.IEntityWrapper;
 public class InsertSource extends InsertEntity implements SourceInsertable, EpochGroupInsertable, ExperimentInsertable, RootInsertable
 {
     public InsertSource() {
-        putValue(NAME, "Insert Source");
+        putValue(NAME, "Insert Source...");
     }
 
     public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()

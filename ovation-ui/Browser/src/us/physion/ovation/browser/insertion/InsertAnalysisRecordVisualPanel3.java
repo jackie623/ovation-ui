@@ -4,15 +4,23 @@
  */
 package us.physion.ovation.browser.insertion;
 
+import java.util.Map;
 import javax.swing.JPanel;
+import org.openide.util.ChangeSupport;
 
 public final class InsertAnalysisRecordVisualPanel3 extends JPanel {
 
+    ChangeSupport cs;
+    String entryFn;
+    Map<String, Object> parameters;
+    String scmURL;
+    String scmRevision;
     /**
      * Creates new form InsertAnalysisRecordVisualPanel3
      */
-    public InsertAnalysisRecordVisualPanel3() {
+    public InsertAnalysisRecordVisualPanel3(ChangeSupport cs) {
         initComponents();
+        this.cs = cs;
     }
 
     @Override
@@ -20,6 +28,22 @@ public final class InsertAnalysisRecordVisualPanel3 extends JPanel {
         return "Step #3";
     }
 
+    public String getEntryFunction()
+    {
+        return entryFn;
+    }
+    public Map<String, Object> getParameters()
+    {
+        return parameters;
+    }
+    public String getScmURL()
+    {
+        return scmURL;
+    }
+    public String getScmRevision()
+    {
+        return scmRevision;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

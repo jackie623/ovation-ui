@@ -5,20 +5,48 @@
 package us.physion.ovation.browser.insertion;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
+import org.openide.WizardDescriptor;
+import org.openide.util.lookup.ServiceProvider;
+import ovation.*;
+import us.physion.ovation.browser.moveme.EpochInsertable;
+import us.physion.ovation.browser.moveme.ProjectInsertable;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
+@ServiceProvider(service=EpochInsertable.class)
 /**
  *
  * @author huecotanks
  */
-public class InsertResponse extends AbstractAction {
+public class InsertResponse extends InsertEntity implements EpochInsertable {
 
-    public InsertResponse(IEntityWrapper parent) {
+    public InsertResponse() {
+        putValue(NAME, "Insert Response");
+    }
+
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    {
+        List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
+        panels.add(new InsertAnalysisRecordWizardPanel1());
+        panels.add(new InsertAnalysisRecordWizardPanel2());
+        panels.add(new InsertAnalysisRecordWizardPanel3()); 
+        return panels;
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper parent)
+    {
+        ((Epoch)parent.getEntity()).insertResponse(((ExternalDevice)wiz.getProperty("response.device")), 
+                ((Map<String, Object>)wiz.getProperty("response.deviceParameters")), 
+                ((NumericData)wiz.getProperty("response.numericData")), 
+                ((String)wiz.getProperty("response.units")), 
+                ((String[])wiz.getProperty("response.dimensionLabels")), 
+                ((double[])wiz.getProperty("response.samplingRates")),
+                ((String[])wiz.getProperty("response.samplingRateUnits")),
+                ((String)wiz.getProperty("response.dataUTI")));
     }
 }

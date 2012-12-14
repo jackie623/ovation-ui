@@ -4,7 +4,12 @@
  */
 package us.physion.ovation.browser.moveme;
 
+import java.util.List;
 import javax.swing.Action;
+import org.openide.WizardDescriptor;
+import org.openide.util.Lookup;
+import ovation.IAuthenticatedDataStoreCoordinator;
+import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 /**
@@ -13,4 +18,6 @@ import us.physion.ovation.interfaces.IEntityWrapper;
  */
 public interface EntityInsertable extends Action, Comparable{
     public int getPosition();
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels();
+    public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper ew);
 }

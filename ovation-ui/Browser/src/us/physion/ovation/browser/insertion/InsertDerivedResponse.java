@@ -5,20 +5,45 @@
 package us.physion.ovation.browser.insertion;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
+import org.openide.WizardDescriptor;
+import org.openide.util.lookup.ServiceProvider;
+import ovation.*;
+import us.physion.ovation.browser.moveme.EpochInsertable;
+import us.physion.ovation.browser.moveme.ProjectInsertable;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
+@ServiceProvider(service=EpochInsertable.class)
 /**
  *
  * @author huecotanks
  */
-public class InsertDerivedResponse extends AbstractAction {
+public class InsertDerivedResponse extends InsertEntity implements EpochInsertable{
 
-    public InsertDerivedResponse(IEntityWrapper parent) {
+    public InsertDerivedResponse() {
+        putValue(NAME, "Insert Derived Response");
+    }
+
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    {
+        List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
+        panels.add(new InsertAnalysisRecordWizardPanel1());
+        panels.add(new InsertAnalysisRecordWizardPanel2());
+        panels.add(new InsertAnalysisRecordWizardPanel3()); 
+        return panels;
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper parent)
+    {
+        ((Epoch)parent.getEntity()).insertDerivedResponse(((String)wiz.getProperty("analysisRecord.name")), 
+                ((NumericData)wiz.getProperty("analysisRecord.data")), 
+                ((String)wiz.getProperty("analysisRecord.units")), 
+                ((Map<String, Object>)wiz.getProperty("analysisRecord.derivationParameters")), 
+                ((String[])wiz.getProperty("analysisRecord.dimensionLabels"))); 
     }
 }

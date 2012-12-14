@@ -5,34 +5,35 @@
 package us.physion.ovation.browser.insertion;
 
 import java.awt.event.ActionEvent;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.swing.AbstractAction;
+import org.joda.time.DateTime;
+import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
-import org.openide.util.lookup.ServiceProviders;
-import ovation.*;
-import us.physion.ovation.browser.moveme.*;
+import ovation.AnalysisRecord;
+import ovation.Epoch;
+import ovation.IAuthenticatedDataStoreCoordinator;
+import ovation.Project;
+import us.physion.ovation.browser.moveme.ProjectInsertable;
+import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
-@ServiceProviders(value={
-    @ServiceProvider(service=SourceInsertable.class),
-    @ServiceProvider(service=EpochGroupInsertable.class),
-    @ServiceProvider(service=ExperimentInsertable.class),
-    @ServiceProvider(service=RootInsertable.class)
-})
+@ServiceProvider(service=ProjectInsertable.class)
 /**
  *
- * @author huecotanks
+ * @author jackie
  */
-public class InsertSource extends InsertEntity implements SourceInsertable, EpochGroupInsertable, ExperimentInsertable, RootInsertable
-{
-    public InsertSource() {
-        putValue(NAME, "Insert Source");
+public class InsertExperiment extends InsertEntity implements ProjectInsertable{
+    
+    public InsertExperiment(){    
+        putValue(NAME, "Insert Experiment");
     }
-
+    
     public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
     {
         List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
@@ -45,6 +46,8 @@ public class InsertSource extends InsertEntity implements SourceInsertable, Epoc
     @Override
     public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper parent)
     {
-        ((Source)parent.getEntity()).insertSource(((String)wiz.getProperty("Source.label")));
+        ((Project)parent.getEntity()).insertExperiment(((String)wiz.getProperty("experiment.purpose")), 
+                ((DateTime)wiz.getProperty("experiment.start")), 
+                ((DateTime)wiz.getProperty("experiment.end"))); 
     }
 }

@@ -5,22 +5,46 @@
 package us.physion.ovation.browser.insertion;
 
 import java.awt.event.ActionEvent;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.joda.time.DateTime;
+import org.openide.DialogDisplayer;
+import org.openide.WizardDescriptor;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.ServiceProvider;
+import ovation.IAuthenticatedDataStoreCoordinator;
+import us.physion.ovation.browser.moveme.ProjectInsertable;
+import us.physion.ovation.browser.moveme.RootInsertable;
+import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
+@ServiceProvider(service=RootInsertable.class)
 /**
  *
  * @author huecotanks
  */
-public class InsertProject extends AbstractAction {
+public class InsertProject extends InsertEntity implements RootInsertable {
 
     public InsertProject() {
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent ae) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        putValue(NAME, "Insert Project");
     }
     
+    @Override
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    {
+        List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
+        panels.add(new InsertProjectWizardPanel1());
+        return panels;
+    }
+    @Override
+    public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper parent)
+    {
+            dsc.getContext().insertProject((String)wiz.getProperty("project.name"), 
+                    (String)wiz.getProperty("project.purpose"), 
+                    (DateTime)wiz.getProperty("project.start"), 
+                    (DateTime)wiz.getProperty("project.end"));
+    }
 }

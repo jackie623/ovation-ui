@@ -4,42 +4,108 @@
  */
 package us.physion.ovation.browser.insertion;
 
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.DateFormat;
+import java.util.*;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.openide.util.ChangeSupport;
 
-public final class InsertEpochGroupVisualPanel2 extends JPanel {
+public final class InsertEpochGroupVisualPanel2 extends JPanel{
 
     private ChangeSupport cs;
     private String label;
     private DateTime start;
     private DateTime end;
-    
+    private DateTimePicker startPicker;
+    private DateTimePicker endPicker;
+    private String[] availableIDs; 
     /**
      * Creates new form InsertEpochGroupVisualPanel2
      */
     public InsertEpochGroupVisualPanel2(ChangeSupport cs) {
+        Set<String> ids = DateTimeZone.getAvailableIDs();
+        List<String> idList = new ArrayList(ids);
+        Collections.sort(idList);
+        availableIDs = idList.toArray(new String[idList.size()]);
         initComponents();
+
         this.cs = cs;
+        startPicker = new DateTimePicker();
+	startPicker.setTimeZone(TimeZone.getTimeZone("UTC"));
+        startPicker.setFormats(
+                new DateFormat[]{DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
+                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)}
+        );
+        startPicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
+        //startPicker.addActionListener(this);
+        startPicker.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+                if ("date".equals(propertyChangeEvent.getPropertyName())) {
+                    startDateTimeChanged();
+                }
+            }
+        });
+        startPicker.setVisible(true);
+        endPicker = new DateTimePicker();
+	endPicker.setTimeZone(TimeZone.getTimeZone("UTC"));
+        endPicker.setFormats(
+                new DateFormat[]{DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
+                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)}
+        );
+        endPicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
+        endPicker.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+                if ("date".equals(propertyChangeEvent.getPropertyName())) {
+                    endDateTimeChanged();
+                }
+            }
+        });
+        
+        jComboBox1.setSelectedItem(startPicker.getTimeZone().getID());
+        jComboBox2.setSelectedItem(endPicker.getTimeZone().getID());
+        startTimePane.setBackground(this.getBackground());
+        endTimePane.setBackground(this.getBackground());
+        startTimePane.setViewportView(startPicker);
+        endTimePane.setViewportView(endPicker);
     }
 
+    protected void startDateTimeChanged() {
+        start = new DateTime(startPicker.getDate(),  DateTimeZone.forTimeZone(startPicker.getTimeZone()));
+        cs.fireChange();
+    }
+    protected void endDateTimeChanged() {
+        end = new DateTime(endPicker.getDate(), DateTimeZone.forTimeZone(endPicker.getTimeZone()));
+        cs.fireChange();
+    }
     @Override
     public String getName() {
-        return "Step #2";
+        return "Set Epoch Group Data";
     }
 
-    String getLabel()
-    {
+    String getLabel() {
         return label;
     }
-    DateTime getStart()
-    {
+
+    DateTime getStart() {
         return start;
     }
-    DateTime getEnd()
-    {
+
+    DateTime getEnd() {
         return end;
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -52,8 +118,10 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         labelTextField = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        startTimePane = new javax.swing.JScrollPane();
+        endTimePane = new javax.swing.JScrollPane();
+        jComboBox1 = new javax.swing.JComboBox();
+        jComboBox2 = new javax.swing.JComboBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(InsertEpochGroupVisualPanel2.class, "InsertEpochGroupVisualPanel2.jLabel1.text")); // NOI18N
 
@@ -73,9 +141,26 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel {
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(InsertEpochGroupVisualPanel2.class, "InsertEpochGroupVisualPanel2.jButton1.text")); // NOI18N
+        startTimePane.setBackground(new java.awt.Color(204, 204, 204));
+        startTimePane.setBorder(null);
 
-        org.openide.awt.Mnemonics.setLocalizedText(jButton2, org.openide.util.NbBundle.getMessage(InsertEpochGroupVisualPanel2.class, "InsertEpochGroupVisualPanel2.jButton2.text")); // NOI18N
+        endTimePane.setBackground(new java.awt.Color(204, 204, 204));
+        endTimePane.setBorder(null);
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(availableIDs));
+        jComboBox1.setMaximumSize(new java.awt.Dimension(300, 32767));
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
+
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(availableIDs));
+        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -87,32 +172,47 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel {
                     .addComponent(jLabel1)
                     .addComponent(jLabel2)
                     .addComponent(jLabel3))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labelTextField)
                     .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(labelTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(14, 14, 14)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
-                            .addComponent(jButton2))
-                        .addGap(0, 225, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(endTimePane)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(startTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(8, 8, 8)
+                .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(labelTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jButton1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jButton2))
-                .addContainerGap(182, Short.MAX_VALUE))
+                    .addComponent(labelTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addGap(20, 20, 20)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGap(13, 13, 13)
+                            .addComponent(jLabel2)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(startTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(endTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(166, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -124,12 +224,24 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel {
         label = BasicWizardPanel.updateTextField(labelTextField, cs, label);
     }//GEN-LAST:event_labelTextFieldKeyReleased
 
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        start = new DateTime(startPicker.getDate(),  DateTimeZone.forID(((String)jComboBox1.getSelectedItem())));
+        cs.fireChange();
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
+        end = new DateTime(endPicker.getDate(),  DateTimeZone.forID(((String)jComboBox2.getSelectedItem())));
+        cs.fireChange();
+    }//GEN-LAST:event_jComboBox2ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JScrollPane endTimePane;
+    private javax.swing.JComboBox jComboBox1;
+    private javax.swing.JComboBox jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JTextField labelTextField;
+    private javax.swing.JScrollPane startTimePane;
     // End of variables declaration//GEN-END:variables
 }

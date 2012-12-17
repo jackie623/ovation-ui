@@ -8,25 +8,33 @@ import com.physion.ebuilder.ExpressionBuilder;
 import com.physion.ebuilder.expression.ExpressionTree;
 import java.awt.Color;
 import java.awt.Component;
-import java.util.Collection;
-import javax.swing.JLabel;
-import javax.swing.JTree;
+import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
+import org.openide.util.Cancellable;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.IAuthenticatedDataStoreCoordinator;
+import ovation.IEntityBase;
 import ovation.Source;
 import us.physion.ovation.browser.BrowserUtilities;
 import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.browser.ResetQueryAction;
-import us.physion.ovation.interfaces.ConnectionProvider;
-import us.physion.ovation.interfaces.ExpressionTreeProvider;
-import us.physion.ovation.interfaces.IEntityWrapper;
+import us.physion.ovation.interfaces.*;
 
 
 /**
@@ -35,6 +43,12 @@ import us.physion.ovation.interfaces.IEntityWrapper;
  */
 public class SourceSelector extends javax.swing.JPanel {
 
+    @Override
+    public String getName() {
+        return "Select a Source";
+    }
+
+    
     ChangeSupport cs;
     private IAuthenticatedDataStoreCoordinator dsc;
     private void resetSources() {
@@ -84,8 +98,9 @@ public class SourceSelector extends javax.swing.JPanel {
             
             if (selected)
             {
-                l.setForeground(Color.GRAY);
-                System.out.println("Set the background color");
+                l.setOpaque(true);
+                l.setBackground(Color.BLUE);
+                l.setForeground(Color.WHITE);
             }
             return l;
         }
@@ -98,6 +113,10 @@ public class SourceSelector extends javax.swing.JPanel {
     public SourceSelector(ChangeSupport changeSupport, IEntityWrapper source) {
         initComponents();
         this.cs = changeSupport;
+        //TODO: find the relative paths
+        resetButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/Browser/build/classes/us/physion/ovation/browser/reset-query24.png"));
+        runQueryButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/QueryTools/build/classes/us/physion/ovation/query/query24.png"));
+            
         //save Browser regisetered ems
         
         //init Browser = ExplorerUtils.createLookup(em, getActionMap());
@@ -105,7 +124,7 @@ public class SourceSelector extends javax.swing.JPanel {
         //addComponentListener(new RepaintOnResize(tree));
         sourcesTree.setCellRenderer(new SourcesCellRenderer());
         sourcesTree.setEditable(true);
-        //sourcesTree.setRootVisible(false);
+        sourcesTree.setRootVisible(false);
         sourcesTree.setShowsRootHandles(true);
         sourcesTree.setEditable(false);
         if (source != null)
@@ -122,11 +141,9 @@ public class SourceSelector extends javax.swing.JPanel {
                 if (n.getUserObject() instanceof IEntityWrapper)
                 {
                     selected = (IEntityWrapper)n.getUserObject();
-                    System.out.println("Selected");
                     cs.fireChange();
                 }else{
                     selected = null;
-                    System.out.println("Not selected");
                     cs.fireChange();
                 }
             }
@@ -156,6 +173,7 @@ public class SourceSelector extends javax.swing.JPanel {
         sourcesTree = new javax.swing.JTree();
 
         runQueryButton.setText(org.openide.util.NbBundle.getMessage(SourceSelector.class, "SourceSelector.runQueryButton.text")); // NOI18N
+        runQueryButton.setBorderPainted(false);
         runQueryButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 runQueryButtonActionPerformed(evt);
@@ -163,12 +181,18 @@ public class SourceSelector extends javax.swing.JPanel {
         });
 
         resetButton.setText(org.openide.util.NbBundle.getMessage(SourceSelector.class, "SourceSelector.resetButton.text")); // NOI18N
+        resetButton.setBorderPainted(false);
         resetButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 resetButtonActionPerformed(evt);
             }
         });
 
+        sourcesTree.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                sourcesTreeMouseReleased(evt);
+            }
+        });
         jScrollPane1.setViewportView(sourcesTree);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
@@ -177,18 +201,19 @@ public class SourceSelector extends javax.swing.JPanel {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 409, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
             .add(layout.createSequentialGroup()
-                .add(resetButton)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(runQueryButton))
+                .add(resetButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 25, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(runQueryButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 24, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(runQueryButton)
+                    .add(resetButton))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(resetButton)
-                    .add(runQueryButton)))
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 324, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -202,7 +227,58 @@ public class SourceSelector extends javax.swing.JPanel {
         
         final ExpressionTree result = ExpressionBuilder.editExpression(et).expressionTree;
         //run query, and reset
+        EventQueueUtilities.runOffEDT(new Runnable(){
+            @Override
+            public void run() {
+                 Iterator itr = dsc.getContext().query(result);
+                 DefaultMutableTreeNode root = new DefaultMutableTreeNode("Sources");
+                Map<String, DefaultMutableTreeNode> sources = new HashMap<String, DefaultMutableTreeNode>(); 
+                
+                while(itr.hasNext())
+                 {
+                     Object n = itr.next();
+                     if (n instanceof Source) {
+                         Source child = (Source) n;
+                         Source parent;
+                         DefaultMutableTreeNode parentNode = null;
+                         DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new EntityWrapper(child));
+                         if (sources.containsKey(child.getURIString())) {
+                             continue;
+                         }
+                         
+                         while ( (parent = child.getParent()) != null)
+                         {
+                             if (sources.containsKey(parent.getURIString())) 
+                             {
+                                 parentNode = sources.get(parent.getURIString());
+                                 break;
+                             }else{
+                                 sources.put(child.getURIString(), childNode);
+                                 child = child.getParent();
+                                 DefaultMutableTreeNode cn = new DefaultMutableTreeNode(new EntityWrapper(child));
+                                 cn.add(childNode);
+                                 childNode = cn;
+                             }
+                         }
+                         if (parentNode == null){
+                             parentNode = root;
+                         }
+                         parentNode.add(childNode);
+                     }
+                 }
+                ((DefaultTreeModel)sourcesTree.getModel()).setRoot(root);
+            }
+        });
     }//GEN-LAST:event_runQueryButtonActionPerformed
+
+    private void sourcesTreeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sourcesTreeMouseReleased
+        TreePath p = sourcesTree.getPathForLocation(evt.getX(), evt.getY());
+        if (p == null || evt.getID() == MouseEvent.BUTTON2)
+        {
+            selected = null;
+            cs.fireChange();
+        }
+    }//GEN-LAST:event_sourcesTreeMouseReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;

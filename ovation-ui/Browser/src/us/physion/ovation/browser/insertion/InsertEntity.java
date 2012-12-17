@@ -64,7 +64,7 @@ public class InsertEntity extends AbstractAction implements EntityInsertable{
     }
 
     @Override
-    public List<Panel<WizardDescriptor>> getPanels(IEntityWrapper parent) {
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent){
         throw new UnsupportedOperationException("Subclasses of InsertEntity should implement the getPanels method");
     }
 

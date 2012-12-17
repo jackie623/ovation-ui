@@ -30,12 +30,9 @@ public class InsertEpochGroupWizardPanel2 extends BasicWizardPanel {
 
     @Override
     public boolean isValid() {
-        // If it is always OK to press Next or Finish, then:
-        return true;
-        // If it depends on some condition (form filled out...) and
-        // this condition changes (last form field filled in...) then
-        // use ChangeSupport to implement add/removeChangeListener below.
-        // WizardDescriptor.ERROR/WARNING/INFORMATION_MESSAGE will also be useful.
+        InsertEpochGroupVisualPanel2 c = (InsertEpochGroupVisualPanel2)component;
+        return c.getStart() != null && c.getEnd() != null && c.getEnd().isAfter(c.getStart()) &&
+                c.getLabel() != null && !c.getLabel().isEmpty();
     }
 
     @Override

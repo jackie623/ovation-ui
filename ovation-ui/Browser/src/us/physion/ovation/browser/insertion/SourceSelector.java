@@ -6,6 +6,7 @@ package us.physion.ovation.browser.insertion;
 
 import com.physion.ebuilder.ExpressionBuilder;
 import com.physion.ebuilder.expression.ExpressionTree;
+import java.awt.Color;
 import java.awt.Component;
 import java.util.Collection;
 import javax.swing.JLabel;
@@ -67,17 +68,26 @@ public class SourceSelector extends javax.swing.JPanel {
         @Override
         public Component getTreeCellRendererComponent(JTree jtree, 
         Object o, 
-        boolean bln, 
-        boolean bln1, 
-        boolean bln2, 
-        int i, 
-        boolean bln3) {
+        boolean selected, 
+        boolean expanded, 
+        boolean leaf, 
+        int row, 
+        boolean hasFocus) {
+            JLabel l;
             Object value = ((DefaultMutableTreeNode) o).getUserObject();
             if (value instanceof String)
             {
-                return new JLabel((String)value);
+                l = new JLabel((String)value);
+            }else{
+                l = new JLabel(((Source)((IEntityWrapper)value).getEntity()).getLabel());
             }
-            return new JLabel(((Source)((IEntityWrapper)value).getEntity()).getLabel());
+            
+            if (selected)
+            {
+                l.setForeground(Color.GRAY);
+                System.out.println("Set the background color");
+            }
+            return l;
         }
     }
 
@@ -108,12 +118,15 @@ public class SourceSelector extends javax.swing.JPanel {
             @Override
             public void valueChanged(TreeSelectionEvent tse) {
                 TreePath path = tse.getPath();
-                if (path.getLastPathComponent() instanceof IEntityWrapper)
+                DefaultMutableTreeNode n = (DefaultMutableTreeNode)path.getLastPathComponent();
+                if (n.getUserObject() instanceof IEntityWrapper)
                 {
-                    selected = (IEntityWrapper)path.getLastPathComponent();
+                    selected = (IEntityWrapper)n.getUserObject();
+                    System.out.println("Selected");
                     cs.fireChange();
                 }else{
                     selected = null;
+                    System.out.println("Not selected");
                     cs.fireChange();
                 }
             }
@@ -139,7 +152,6 @@ public class SourceSelector extends javax.swing.JPanel {
 
         runQueryButton = new javax.swing.JButton();
         resetButton = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         sourcesTree = new javax.swing.JTree();
 
@@ -159,31 +171,24 @@ public class SourceSelector extends javax.swing.JPanel {
 
         jScrollPane1.setViewportView(sourcesTree);
 
-        jScrollPane2.setViewportView(jScrollPane1);
-
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 409, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane2)
-                .addContainerGap())
-            .add(layout.createSequentialGroup()
-                .addContainerGap()
                 .add(resetButton)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(runQueryButton)
-                .add(0, 201, Short.MAX_VALUE))
+                .add(runQueryButton))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 233, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(runQueryButton)
-                    .add(resetButton))
-                .addContainerGap(8, Short.MAX_VALUE))
+                    .add(resetButton)
+                    .add(runQueryButton)))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -201,7 +206,6 @@ public class SourceSelector extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton resetButton;
     private javax.swing.JButton runQueryButton;
     private javax.swing.JTree sourcesTree;

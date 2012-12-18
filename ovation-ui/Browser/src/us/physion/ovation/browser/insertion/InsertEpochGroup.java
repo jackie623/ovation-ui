@@ -37,9 +37,10 @@ public class InsertEpochGroup extends InsertEntity implements EpochGroupInsertab
     {
         List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
         InsertEpochGroupWizardPanel1 panel1;
-        if (parent.getType().equals(EpochGroup.class))
+        /*if (parent.getType().equals(EpochGroup.class))
             panel1 = new InsertEpochGroupWizardPanel1(new EntityWrapper(((EpochGroup)parent.getEntity()).getSource()));
         else
+        */
             panel1 = new InsertEpochGroupWizardPanel1(null);
         panels.add(panel1);
         panels.add(new InsertEpochGroupWizardPanel2());

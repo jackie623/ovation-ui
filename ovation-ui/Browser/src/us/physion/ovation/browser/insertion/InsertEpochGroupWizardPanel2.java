@@ -31,8 +31,10 @@ public class InsertEpochGroupWizardPanel2 extends BasicWizardPanel {
     @Override
     public boolean isValid() {
         InsertEpochGroupVisualPanel2 c = (InsertEpochGroupVisualPanel2)component;
-        return c.getStart() != null && c.getEnd() != null && c.getEnd().isAfter(c.getStart()) &&
-                c.getLabel() != null && !c.getLabel().isEmpty();
+        boolean valid = c.getStart() != null && c.getLabel() != null && !c.getLabel().isEmpty();
+        if (c.getEnd() != null)
+            return valid && !c.getStart().isAfter(c.getEnd());
+        return valid;
     }
 
     @Override

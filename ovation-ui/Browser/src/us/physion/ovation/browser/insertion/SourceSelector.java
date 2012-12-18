@@ -60,15 +60,15 @@ public class SourceSelector extends javax.swing.JPanel {
                 root.add(new DefaultMutableTreeNode(new EntityWrapper(s)));
             }
         }
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)root.getFirstChild();
-        while ((node =node.getNextNode()) != null) 
-        {
-           Source s = ((Source)((IEntityWrapper)node.getUserObject()).getEntity());
-           Source[] children = s.getChildren();
-           for (Source child: children)
-           {
-               node.add(new DefaultMutableTreeNode(new EntityWrapper(child)));
-           }
+        if (!root.isLeaf()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) root.getFirstChild();
+            while ((node = node.getNextNode()) != null) {
+                Source s = ((Source) ((IEntityWrapper) node.getUserObject()).getEntity());
+                Source[] children = s.getChildren();
+                for (Source child : children) {
+                    node.add(new DefaultMutableTreeNode(new EntityWrapper(child)));
+                }
+            }
         }
         ((DefaultTreeModel)sourcesTree.getModel()).setRoot(root);
 
@@ -111,8 +111,12 @@ public class SourceSelector extends javax.swing.JPanel {
      * Creates new form SourceSelector
      */
     public SourceSelector(ChangeSupport changeSupport, IEntityWrapper source) {
+        this(changeSupport, source, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+    }
+    public SourceSelector(ChangeSupport changeSupport, IEntityWrapper source, IAuthenticatedDataStoreCoordinator dsc) {
         initComponents();
         this.cs = changeSupport;
+        this.dsc = dsc;
         //TODO: find the relative paths
         resetButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/Browser/build/classes/us/physion/ovation/browser/reset-query24.png"));
         runQueryButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/QueryTools/build/classes/us/physion/ovation/query/query24.png"));
@@ -127,33 +131,43 @@ public class SourceSelector extends javax.swing.JPanel {
         sourcesTree.setRootVisible(false);
         sourcesTree.setShowsRootHandles(true);
         sourcesTree.setEditable(false);
-        if (source != null)
-        {
-            selected = source;
-            cs.fireChange();
-        }
+        
+        setSource(source);
         sourcesTree.addTreeSelectionListener(new TreeSelectionListener() {
 
             @Override
             public void valueChanged(TreeSelectionEvent tse) {
                 TreePath path = tse.getPath();
                 DefaultMutableTreeNode n = (DefaultMutableTreeNode)path.getLastPathComponent();
-                if (n.getUserObject() instanceof IEntityWrapper)
-                {
-                    selected = (IEntityWrapper)n.getUserObject();
-                    cs.fireChange();
-                }else{
-                    selected = null;
-                    cs.fireChange();
+                Object o = n.getUserObject();
+                if (o instanceof IEntityWrapper)
+                    setSource((IEntityWrapper)o);
+                else{
+                    setSource(null);
                 }
             }
         });
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Sources");
-        dsc = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection();
         resetSources();
         
     }
 
+    public void setSource(IEntityWrapper w)//this should be an IEntityWrapper containing a source
+    {
+        if (w == null || !w.getType().equals(Source.class))
+        {
+            if (selected != null)
+            {
+                selected = null;
+                cs.fireChange();
+            }
+        }
+        else {
+            selected = w;
+            cs.fireChange();
+        }
+    }
+    
     public IEntityWrapper getSource()
     {
         return selected;
@@ -272,12 +286,13 @@ public class SourceSelector extends javax.swing.JPanel {
     }//GEN-LAST:event_runQueryButtonActionPerformed
 
     private void sourcesTreeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_sourcesTreeMouseReleased
-        TreePath p = sourcesTree.getPathForLocation(evt.getX(), evt.getY());
+        /* TODO: unselect the tree
+         * TreePath p = sourcesTree.getPathForLocation(evt.getX(), evt.getY());
         if (p == null || evt.getID() == MouseEvent.BUTTON2)
         {
             selected = null;
             cs.fireChange();
-        }
+        }*/ 
     }//GEN-LAST:event_sourcesTreeMouseReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

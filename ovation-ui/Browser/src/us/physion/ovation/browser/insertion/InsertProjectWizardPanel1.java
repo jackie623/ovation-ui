@@ -4,6 +4,7 @@
  */
 package us.physion.ovation.browser.insertion;
 
+import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.openide.WizardDescriptor;
@@ -16,7 +17,7 @@ public class InsertProjectWizardPanel1 extends BasicWizardPanel{
     // is kept separate. This can be more efficient: if the wizard is created
     // but never displayed, or not all panels are displayed, it is better to
     // create only those which really need to be visible.
-    public InsertProjectVisualPanel1 getComponent() {
+    public JPanel getComponent() {
         if (component == null) {
             component = new InsertProjectVisualPanel1(changeSupport);
         }
@@ -36,27 +37,24 @@ public class InsertProjectWizardPanel1 extends BasicWizardPanel{
         InsertProjectVisualPanel1 c = (InsertProjectVisualPanel1)component;
         if (c != null)
         {
-           return (c.getProjectName() != null && !c.getProjectName().isEmpty() 
-                   && c.getProjectPurpose() != null && !c.getProjectPurpose().isEmpty() );
-                   //&& component.getStart() != null);
+           boolean valid = (c.getProjectName() != null && !c.getProjectName().isEmpty() 
+                   && c.getPurpose() != null && !c.getPurpose().isEmpty() 
+                   && c.getStart() != null);
+           if (c.getEnd() != null)
+           {
+               return valid && !c.getStart().isAfter(c.getEnd());
+           }
+           return valid;
         }
         return false;
-        // If it depends on some condition (form filled out...) and
-        // this condition changes (last form field filled in...) then
-        // use ChangeSupport to implement add/removeChangeListener below.
-        // WizardDescriptor.ERROR/WARNING/INFORMATION_MESSAGE will also be useful.
     }
-    
-    public String getName()
-    {
-        return "Project Data";
-    }
+   
 
     @Override
     public void storeSettings(WizardDescriptor wiz) {
         InsertProjectVisualPanel1 c = (InsertProjectVisualPanel1)component;
         wiz.putProperty("project.name", c.getProjectName());
-        wiz.putProperty("project.purpose", c.getProjectPurpose());
+        wiz.putProperty("project.purpose", c.getPurpose());
         wiz.putProperty("project.start", c.getStart());
         wiz.putProperty("project.end", c.getEnd());
         // use wiz.putProperty to remember current panel state

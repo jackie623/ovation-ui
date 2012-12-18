@@ -33,21 +33,10 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
      * Creates new form InsertEpochGroupVisualPanel2
      */
     public InsertEpochGroupVisualPanel2(ChangeSupport cs) {
-        Set<String> ids = DateTimeZone.getAvailableIDs();
-        List<String> idList = new ArrayList(ids);
-        Collections.sort(idList);
-        availableIDs = idList.toArray(new String[idList.size()]);
         initComponents();
 
         this.cs = cs;
-        startPicker = new DateTimePicker();
-	startPicker.setTimeZone(TimeZone.getTimeZone("UTC"));
-        startPicker.setFormats(
-                new DateFormat[]{DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
-                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)}
-        );
-        startPicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
-        //startPicker.addActionListener(this);
+        startPicker = DatePickerUtilities.createDateTimePicker();
         startPicker.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
@@ -56,14 +45,7 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
                 }
             }
         });
-        startPicker.setVisible(true);
-        endPicker = new DateTimePicker();
-	endPicker.setTimeZone(TimeZone.getTimeZone("UTC"));
-        endPicker.setFormats(
-                new DateFormat[]{DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
-                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)}
-        );
-        endPicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
+        endPicker = DatePickerUtilities.createDateTimePicker();
         endPicker.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
@@ -73,25 +55,23 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
             }
         });
         
-        jComboBox1.setSelectedItem(startPicker.getTimeZone().getID());
-        jComboBox2.setSelectedItem(endPicker.getTimeZone().getID());
-        startTimePane.setBackground(this.getBackground());
-        endTimePane.setBackground(this.getBackground());
+        jComboBox1.setSelectedItem(DatePickerUtilities.getID(startPicker));
+        jComboBox2.setSelectedItem(DatePickerUtilities.getID(endPicker));
         startTimePane.setViewportView(startPicker);
         endTimePane.setViewportView(endPicker);
     }
 
     protected void startDateTimeChanged() {
-        start = new DateTime(startPicker.getDate(),  DateTimeZone.forTimeZone(startPicker.getTimeZone()));
-        cs.fireChange();
+        start = new DateTime(startPicker.getDate(), DateTimeZone.forID(((String)jComboBox1.getSelectedItem())));
+        setStart(start);
     }
     protected void endDateTimeChanged() {
-        end = new DateTime(endPicker.getDate(), DateTimeZone.forTimeZone(endPicker.getTimeZone()));
-        cs.fireChange();
+        end = new DateTime(endPicker.getDate(), DateTimeZone.forID(((String)jComboBox2.getSelectedItem())));
+        setEnd(end);
     }
     @Override
     public String getName() {
-        return "Set Epoch Group Data";
+        return "Insert Epoch Group";
     }
 
     String getLabel() {
@@ -104,6 +84,22 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
 
     DateTime getEnd() {
         return end;
+    }
+    
+    protected void setLabel(String l)
+    {
+        label = l;
+        cs.fireChange();
+    }
+    protected void setStart(DateTime t)
+    {
+        start = t;
+        cs.fireChange();
+    }
+    protected void setEnd(DateTime t)
+    {
+        end = t;
+        cs.fireChange();
     }
 
     /**
@@ -147,7 +143,7 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
         endTimePane.setBackground(new java.awt.Color(204, 204, 204));
         endTimePane.setBorder(null);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(availableIDs));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(DatePickerUtilities.getTimeZoneIDs()));
         jComboBox1.setMaximumSize(new java.awt.Dimension(300, 32767));
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -155,7 +151,7 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
             }
         });
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(availableIDs));
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(DatePickerUtilities.getTimeZoneIDs()));
         jComboBox2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox2ActionPerformed(evt);
@@ -174,20 +170,19 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
                     .addComponent(jLabel3))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(labelTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(14, 14, 14)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(endTimePane)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(startTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(startTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(labelTextField))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -198,20 +193,20 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
                     .addComponent(jLabel1))
                 .addGap(20, 20, 20)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGap(13, 13, 13)
-                            .addComponent(jLabel2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(startTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(endTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(7, 7, 7)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(startTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jComboBox2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(endTimePane, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap(166, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -226,12 +221,12 @@ public final class InsertEpochGroupVisualPanel2 extends JPanel{
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
         start = new DateTime(startPicker.getDate(),  DateTimeZone.forID(((String)jComboBox1.getSelectedItem())));
-        cs.fireChange();
+        setStart(start);
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
         end = new DateTime(endPicker.getDate(),  DateTimeZone.forID(((String)jComboBox2.getSelectedItem())));
-        cs.fireChange();
+        setEnd(end);
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

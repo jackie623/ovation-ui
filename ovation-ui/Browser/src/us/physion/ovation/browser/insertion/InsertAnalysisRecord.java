@@ -21,7 +21,7 @@ import us.physion.ovation.browser.moveme.EntityInsertable;
 import us.physion.ovation.browser.moveme.ProjectInsertable;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
-@ServiceProvider(service=ProjectInsertable.class)
+//@ServiceProvider(service=ProjectInsertable.class)
 /**
  *
  * @author huecotanks

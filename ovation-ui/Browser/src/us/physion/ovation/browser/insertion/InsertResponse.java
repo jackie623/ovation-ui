@@ -17,7 +17,7 @@ import us.physion.ovation.browser.moveme.EpochInsertable;
 import us.physion.ovation.browser.moveme.ProjectInsertable;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
-@ServiceProvider(service=EpochInsertable.class)
+//@ServiceProvider(service=EpochInsertable.class)
 /**
  *
  * @author huecotanks

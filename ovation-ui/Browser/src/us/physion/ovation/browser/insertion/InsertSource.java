@@ -33,18 +33,20 @@ public class InsertSource extends InsertEntity implements SourceInsertable, Epoc
         putValue(NAME, "Insert Source...");
     }
 
-    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    @Override
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent)
     {
         List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
-        panels.add(new InsertAnalysisRecordWizardPanel1());
-        panels.add(new InsertAnalysisRecordWizardPanel2());
-        panels.add(new InsertAnalysisRecordWizardPanel3()); 
+        panels.add(new InsertSourceWizardPanel1());
         return panels;
     }
 
     @Override
     public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper parent)
     {
-        ((Source)parent.getEntity()).insertSource(((String)wiz.getProperty("Source.label")));
+        if (parent == null)
+            dsc.getContext().insertSource(((String)wiz.getProperty("source.label")));
+        else
+            ((Source)parent.getEntity()).insertSource(((String)wiz.getProperty("source.label")));
     }
 }

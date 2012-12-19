@@ -34,12 +34,10 @@ public class InsertExperiment extends InsertEntity implements ProjectInsertable{
         putValue(NAME, "Insert Experiment...");
     }
     
-    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels()
+    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent)
     {
         List<WizardDescriptor.Panel<WizardDescriptor>> panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
-        panels.add(new InsertAnalysisRecordWizardPanel1());
-        panels.add(new InsertAnalysisRecordWizardPanel2());
-        panels.add(new InsertAnalysisRecordWizardPanel3()); 
+        panels.add(new InsertExperimentWizardPanel1());
         return panels;
     }
 

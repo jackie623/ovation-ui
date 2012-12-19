@@ -29,6 +29,10 @@ public class DummyChangeListener implements ChangeListener{
     boolean getStateChanged() {
         return stateChanged;
     }
+    void resetStateChanged()
+    {
+        stateChanged = false;
+    }
 
     ChangeSupport getChangeSupport() {
         return cs;

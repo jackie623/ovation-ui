@@ -27,6 +27,8 @@ public final class InsertProjectVisualPanel1 extends JPanel {
     public InsertProjectVisualPanel1(ChangeSupport cs) {
         initComponents();
         change = cs;
+        projectName = "";
+        projectPurpose = "";
         
         startPicker = DatePickerUtilities.createDateTimePicker();
         startPicker.addPropertyChangeListener(new PropertyChangeListener() {
@@ -80,13 +82,23 @@ public final class InsertProjectVisualPanel1 extends JPanel {
     
     protected void setProjectName(String name)
     {
+        boolean fireChange = true;
+        if (projectName.isEmpty() == name.isEmpty())
+            fireChange = false;
         projectName = name;
-        change.fireChange();
+        
+        if (fireChange)
+            change.fireChange();
     }
     protected void setPurpose(String p)
     {
+        boolean fireChange = true;
+        if (projectPurpose.isEmpty() == p.isEmpty())
+            fireChange = false;
         projectPurpose = p;
-        change.fireChange();
+        
+        if (fireChange)
+            change.fireChange();
     }
     protected void setStart(DateTime d)
     {
@@ -100,12 +112,10 @@ public final class InsertProjectVisualPanel1 extends JPanel {
     }
     
     protected void startDateTimeChanged() {
-        start = new DateTime(startPicker.getDate(), DateTimeZone.forID(((String)startTimezoneComboBox.getSelectedItem())));
-        setStart(start);
+        setStart(new DateTime(startPicker.getDate(), DateTimeZone.forID(((String)startTimezoneComboBox.getSelectedItem()))));
     }
     protected void endDateTimeChanged() {
-        end = new DateTime(endPicker.getDate(), DateTimeZone.forID(((String)endTimezoneComboBox.getSelectedItem())));
-        setEnd(end);
+        setEnd(new DateTime(endPicker.getDate(), DateTimeZone.forID(((String)endTimezoneComboBox.getSelectedItem()))));
     }
     
     /**
@@ -251,21 +261,19 @@ public final class InsertProjectVisualPanel1 extends JPanel {
     }//GEN-LAST:event_purposeTextAreaKeyTyped
 
     private void purposeTextAreaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_purposeTextAreaKeyReleased
-        projectPurpose = BasicWizardPanel.updateTextArea(purposeTextArea, change, projectPurpose);
+        setPurpose(purposeTextArea.getText());
     }//GEN-LAST:event_purposeTextAreaKeyReleased
 
     private void projectNameTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_projectNameTextFieldKeyReleased
-        projectName = BasicWizardPanel.updateTextField(projectNameTextField, change, projectName);
+        setProjectName(projectNameTextField.getText());
     }//GEN-LAST:event_projectNameTextFieldKeyReleased
 
     private void startTimezoneComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startTimezoneComboBoxActionPerformed
-        start = new DateTime(startPicker.getDate(), DateTimeZone.forTimeZone(startPicker.getTimeZone()));
-        setStart(start);
+        setStart(new DateTime(startPicker.getDate(), DateTimeZone.forID(((String)startTimezoneComboBox.getSelectedItem()))));
     }//GEN-LAST:event_startTimezoneComboBoxActionPerformed
 
     private void endTimezoneComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_endTimezoneComboBoxActionPerformed
-        end = new DateTime(endPicker.getDate(), DateTimeZone.forID(((String)endTimezoneComboBox.getSelectedItem())));
-        setEnd(end);
+        setEnd(new DateTime(endPicker.getDate(), DateTimeZone.forID(((String)endTimezoneComboBox.getSelectedItem()))));
     }//GEN-LAST:event_endTimezoneComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

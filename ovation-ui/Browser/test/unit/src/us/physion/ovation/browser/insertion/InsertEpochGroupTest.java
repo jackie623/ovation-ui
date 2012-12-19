@@ -164,11 +164,17 @@ public class InsertEpochGroupTest extends OvationTestCase{
     public void testSourceSelectorValidity()
     {
         DummyPanel1 p = new DummyPanel1();
-        SourceSelector ss = new SourceSelector(new ChangeSupport(p), null, dsc);
+        ChangeSupport cs = new ChangeSupport(p);
+        SourceSelector ss = new SourceSelector(cs, null, dsc);
+        DummyChangeListener l = new DummyChangeListener();
+        cs.addChangeListener(l);
         p.component = ss;
         
         TestCase.assertFalse(p.isValid());
+        l.resetStateChanged();
         ss.setSource( new TestEntityWrapper(dsc, dsc.getContext().insertSource("label")));
+        TestCase.assertTrue(l.getStateChanged());
+        l.resetStateChanged();
         TestCase.assertTrue(p.isValid());
         
     }
@@ -236,13 +242,24 @@ public class InsertEpochGroupTest extends OvationTestCase{
     public void testPanel2Validity()
     {
         DummyPanel2 p = new DummyPanel2();
-        InsertEpochGroupVisualPanel2 panel = new InsertEpochGroupVisualPanel2(new ChangeSupport(p));
+        ChangeSupport cs = new ChangeSupport(p);
+        InsertEpochGroupVisualPanel2 panel = new InsertEpochGroupVisualPanel2(cs);
+        DummyChangeListener l = new DummyChangeListener();
+        cs.addChangeListener(l);
+
         p.component = panel;
         
         TestCase.assertFalse(p.isValid());// no label
+        l.resetStateChanged();
         panel.setLabel("label");
+        TestCase.assertTrue(l.getStateChanged());
+        l.resetStateChanged();
         panel.setStart(null);
+        TestCase.assertTrue(l.getStateChanged());
+        l.resetStateChanged();
         panel.setEnd(null);
+        TestCase.assertTrue(l.getStateChanged());
+        l.resetStateChanged();
         TestCase.assertFalse(p.isValid());// no start time
         
         panel.setStart(new DateTime());
@@ -271,7 +288,7 @@ public class InsertEpochGroupTest extends OvationTestCase{
         DateTime end = new DateTime(1);
         
         p.storeSettings(d);
-        TestCase.assertNull(d.getProperty("epochGroup.label"));
+        TestCase.assertTrue(((String)d.getProperty("epochGroup.label")).isEmpty());
         TestCase.assertFalse(d.getProperty("epochGroup.start").equals(start));
         TestCase.assertFalse(d.getProperty("epochGroup.end").equals(end));
         

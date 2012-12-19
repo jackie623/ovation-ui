@@ -179,20 +179,8 @@ public final class TagsViewTopComponent extends TopComponent {
                 data[i][0] = tags[i];
             }
             model.setDataVector(data, new Object[]{"Value"});
-
-            EventQueueUtilities.runOnEDT(new Runnable() {
-
-                @Override
-                public void run() {
-                    try{
-                    ((ScrollableTableTree)tagTree).resizeEditableNode(node);
-                    ((DefaultTreeModel)((ScrollableTableTree)tagTree).getTree().getModel()).nodeStructureChanged(node);
-                    } catch (Exception e)
-                    {
-                        System.out.println("Error: " + e.getMessage());
-                    }
-                }
-            });
+            
+            ((ScrollableTableTree)tagTree).resizeNode(node);
         }
     }
     

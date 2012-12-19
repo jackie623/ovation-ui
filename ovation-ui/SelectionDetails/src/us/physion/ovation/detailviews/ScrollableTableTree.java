@@ -218,14 +218,19 @@ public class ScrollableTableTree extends JScrollPane {
         return ((PropertiesTreeUI) tree.getUI()).getCellWidth();
     }
     
-    public void resizeEditableNode(TableNode node)
+    public void resizeNode(final TableNode node)
     {
-        EditableTable p = (EditableTable) node.getPanel();
-        JScrollPane sp = p.getScrollPane();
-        if (sp != null) {
-            sp.setSize(sp.getPreferredSize());
+        if (node.getPanel() instanceof ResizableTable)
+        {
+            EventQueueUtilities.runOnEDT(new Runnable(){
+
+                @Override
+                public void run() {
+                    ((ResizableTable) node.getPanel()).resize();
+                    ((DefaultTreeModel) tree.getModel()).nodeStructureChanged(node);
+                }
+            });
         }
-        p.setSize(p.getPreferredSize());
     }
 
     //Getters, currently used for tests

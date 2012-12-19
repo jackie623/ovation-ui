@@ -24,7 +24,7 @@ import us.physion.ovation.interfaces.EventQueueUtilities;
  *
  * @author huecotanks
  */
-public class EditableTable extends javax.swing.JPanel implements TablePanel {
+public class EditableTable extends javax.swing.JPanel implements TablePanel,ResizableTable {
 
     private JTable table;
     private ScrollableTableTree treeUtils;
@@ -38,6 +38,15 @@ public class EditableTable extends javax.swing.JPanel implements TablePanel {
         this.table = table;
         this.treeUtils = t;
         //this.setBorder(BorderFactory.createEtchedBorder());
+    }
+    
+    public void resize()
+    {
+        JScrollPane sp = getScrollPane();
+        if (sp != null) {
+            sp.setSize(sp.getPreferredSize());
+        }
+        setSize(getPreferredSize());
     }
 
     /**

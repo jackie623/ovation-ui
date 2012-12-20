@@ -37,7 +37,6 @@ import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.browser.ResetQueryAction;
 import us.physion.ovation.interfaces.*;
 import us.physion.ovation.ui.*;
-import us.physion.ovation.interfaces.*;
 
 /**
  *

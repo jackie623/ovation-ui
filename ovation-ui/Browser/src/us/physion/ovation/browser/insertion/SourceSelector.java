@@ -31,11 +31,13 @@ import org.openide.util.Lookup;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import ovation.Source;
+import ovation.User;
 import us.physion.ovation.browser.BrowserUtilities;
 import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.browser.ResetQueryAction;
 import us.physion.ovation.interfaces.*;
-
+import us.physion.ovation.ui.*;
+import us.physion.ovation.interfaces.*;
 
 /**
  *
@@ -147,7 +149,6 @@ public class SourceSelector extends javax.swing.JPanel {
                 }
             }
         });
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Sources");
         resetSources();
         
     }
@@ -160,12 +161,39 @@ public class SourceSelector extends javax.swing.JPanel {
             {
                 selected = null;
                 cs.fireChange();
+                EventQueueUtilities.runOffEDT(new Runnable(){
+                    public void run()
+                    {
+                        ((ScrollableTableTree)propertiesPane).setKeys(new ArrayList<TableTreeKey>());
+                    }
+                });
             }
         }
         else {
             selected = w;
             cs.fireChange();
+            /*EventQueueUtilities.runOffEDT(new Runnable() {
+
+                public void run() {*/
+                    ArrayList<TableTreeKey> keys = new ArrayList<TableTreeKey>();
+                    Iterator<User> itr = dsc.getContext().getUsersIterator();
+                    while(itr.hasNext())
+                    {
+                    
+                        User u = itr.next();
+
+                        if (!selected.getEntity().getUserProperties(u).isEmpty())
+                        {
+                            System.out.println("Got Properties");
+                            keys.add(new PerUserPropertySet(u, selected));
+                        }
+                    }
+                    ((ScrollableTableTree) propertiesPane).setKeys(keys);
+                    
+                /*}
+            });*/
         }
+        
     }
     
     public IEntityWrapper getSource()
@@ -185,7 +213,7 @@ public class SourceSelector extends javax.swing.JPanel {
         resetButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         sourcesTree = new javax.swing.JTree();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        propertiesPane = new us.physion.ovation.ui.ScrollableTableTree();
 
         runQueryButton.setText(org.openide.util.NbBundle.getMessage(SourceSelector.class, "SourceSelector.runQueryButton.text")); // NOI18N
         runQueryButton.setBorderPainted(false);
@@ -227,7 +255,7 @@ public class SourceSelector extends javax.swing.JPanel {
                     .add(layout.createSequentialGroup()
                         .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 211, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(18, 18, 18)
-                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)))
+                        .add(propertiesPane, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -239,7 +267,7 @@ public class SourceSelector extends javax.swing.JPanel {
                     .add(resetButton))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(jScrollPane2)
+                    .add(propertiesPane)
                     .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -310,7 +338,7 @@ public class SourceSelector extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane propertiesPane;
     private javax.swing.JButton resetButton;
     private javax.swing.JButton runQueryButton;
     private javax.swing.JTree sourcesTree;

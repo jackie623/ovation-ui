@@ -36,10 +36,11 @@ public class InsertEpochGroupWizardPanel1 extends BasicWizardPanel {
 
     @Override
     public boolean isValid() {
-        IEntityWrapper src = ((SourceSelector)component).getSource();
+        return true;
+        /*IEntityWrapper src = ((SourceSelector)component).getSource();
         if (src != null && src.getType().equals(Source.class))
             return true;
-        return false;
+        return false;*/
     }
 
 

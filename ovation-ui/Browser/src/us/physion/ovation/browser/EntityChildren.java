@@ -78,6 +78,11 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
         });
     }
     
+    public void resetNode()
+    {
+        initKeys();
+    }
+    
     protected void initKeys()
     {
         EventQueueUtilities.runOffEDT(new Runnable(){

@@ -12,9 +12,13 @@ import javax.swing.AbstractAction;
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.Panel;
+import org.openide.nodes.Children;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import ovation.IAuthenticatedDataStoreCoordinator;
+import us.physion.ovation.browser.BrowserUtilities;
+import us.physion.ovation.browser.EntityChildren;
+import us.physion.ovation.browser.EntityNode;
 import us.physion.ovation.browser.moveme.EntityInsertable;
 import us.physion.ovation.browser.moveme.ProjectInsertable;
 import us.physion.ovation.interfaces.ConnectionProvider;
@@ -36,6 +40,23 @@ public class InsertEntity extends AbstractAction implements EntityInsertable{
         wiz.setTitle("Insert Entity");
         if (DialogDisplayer.getDefault().notify(wiz) == WizardDescriptor.FINISH_OPTION) {
             wizardFinished(wiz, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection(), parent);
+            EntityNode node = getEntityNode();
+            if (node == null)
+            {
+                //we've just inserted a root Source or Project, so reset the entire view for now?
+                BrowserUtilities.resetView();
+                if (this instanceof InsertSource)
+                {
+                    BrowserUtilities.switchToSourceView();
+                }
+                else if (this instanceof InsertProject)
+                {
+                    BrowserUtilities.switchToProjectView();
+                }
+                           
+            }else{
+                node.resetNode();
+            }
         }
     }
 
@@ -56,6 +77,16 @@ public class InsertEntity extends AbstractAction implements EntityInsertable{
     public IEntityWrapper getEntity()
     {
         Collection<? extends IEntityWrapper> entities = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class).allInstances();
+        if (entities.size() == 1)
+        {
+            return entities.iterator().next();
+        }
+        return null;
+    }
+    
+    public EntityNode getEntityNode()
+    {
+        Collection<? extends EntityNode> entities = Utilities.actionsGlobalContext().lookupResult(EntityNode.class).allInstances();
         if (entities.size() == 1)
         {
             return entities.iterator().next();

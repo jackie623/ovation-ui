@@ -50,6 +50,17 @@ public class EntityNode extends AbstractNode{
        this.parent = parent;
    }
    
+   public void resetNode()
+   {
+       Children c = getChildren();
+       if (c == null || this.isLeaf())
+           return;
+       if (c instanceof EntityChildren)
+       {
+           ((EntityChildren)c).initKeys();
+       }
+   }
+   
    protected void setActionList(Action[] actions)
    {
        actionList = actions;
@@ -184,24 +195,4 @@ public class EntityNode extends AbstractNode{
         });
         return added;
     }*/
-    
-    private class InsertAction extends AbstractAction{
-        
-        public InsertAction() {
-            putValue(NAME, "Insert");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent ae) {
-            //get selected 
-            Lookup.Result global = Utilities.actionsGlobalContext().lookupResult(IEntityWrapper.class);
-            Collection<? extends IEntityWrapper> entities = global.allInstances();
-            String selection = "";
-            if (entities.size() == 1) {
-                String uri = entities.iterator().next().getURI();
-                System.out.println("Insert uri " + uri);
-            }
-        }
-
-    }
 }

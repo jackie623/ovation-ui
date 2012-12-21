@@ -35,8 +35,11 @@ import ovation.User;
 import us.physion.ovation.browser.BrowserUtilities;
 import us.physion.ovation.browser.EntityWrapper;
 import us.physion.ovation.browser.ResetQueryAction;
-import us.physion.ovation.interfaces.*;
 import us.physion.ovation.ui.*;
+import us.physion.ovation.interfaces.IEntityWrapper;
+import us.physion.ovation.interfaces.ConnectionProvider;
+import us.physion.ovation.interfaces.EventQueueUtilities;
+import us.physion.ovation.interfaces.ExpressionTreeProvider;
 
 /**
  *
@@ -71,6 +74,7 @@ public class SourceSelector extends javax.swing.JPanel {
                 }
             }
         }
+        root.add(new DefaultMutableTreeNode("<None>"));
         ((DefaultTreeModel)sourcesTree.getModel()).setRoot(root);
 
     }
@@ -119,8 +123,8 @@ public class SourceSelector extends javax.swing.JPanel {
         this.cs = changeSupport;
         this.dsc = dsc;
         //TODO: find the relative paths
-        resetButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/Browser/build/classes/us/physion/ovation/browser/reset-query24.png"));
-        runQueryButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/QueryTools/build/classes/us/physion/ovation/query/query24.png"));
+        resetButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/Browser/src/us/physion/ovation/browser/reset-query24.png"));
+        runQueryButton.setIcon(new ImageIcon("/Users/huecotanks/Ovation/ui/ovation-ui/QueryTools/src/us/physion/ovation/query/query24.png"));
             
         //save Browser regisetered ems
         
@@ -171,9 +175,9 @@ public class SourceSelector extends javax.swing.JPanel {
         else {
             selected = w;
             cs.fireChange();
-            /*EventQueueUtilities.runOffEDT(new Runnable() {
+            EventQueueUtilities.runOffEDT(new Runnable() {
 
-                public void run() {*/
+                public void run() {
                     ArrayList<TableTreeKey> keys = new ArrayList<TableTreeKey>();
                     Iterator<User> itr = dsc.getContext().getUsersIterator();
                     while(itr.hasNext())
@@ -183,14 +187,12 @@ public class SourceSelector extends javax.swing.JPanel {
 
                         if (!selected.getEntity().getUserProperties(u).isEmpty())
                         {
-                            System.out.println("Got Properties");
                             keys.add(new PerUserPropertySet(u, selected));
                         }
                     }
                     ((ScrollableTableTree) propertiesPane).setKeys(keys);
-                    
-                /*}
-            });*/
+                }   
+            });
         }
         
     }
@@ -210,6 +212,7 @@ public class SourceSelector extends javax.swing.JPanel {
 
         runQueryButton = new javax.swing.JButton();
         resetButton = new javax.swing.JButton();
+        jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         sourcesTree = new javax.swing.JTree();
         propertiesPane = new us.physion.ovation.ui.ScrollableTableTree();
@@ -230,8 +233,12 @@ public class SourceSelector extends javax.swing.JPanel {
             }
         });
 
+        jSplitPane1.setDividerLocation(235);
+        jSplitPane1.setPreferredSize(new java.awt.Dimension(500, 300));
+
         jScrollPane1.setBorder(null);
 
+        sourcesTree.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 255)));
         sourcesTree.setOpaque(false);
         sourcesTree.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
@@ -240,34 +247,32 @@ public class SourceSelector extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(sourcesTree);
 
+        jSplitPane1.setLeftComponent(jScrollPane1);
+
+        propertiesPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 255)));
+        jSplitPane1.setRightComponent(propertiesPane);
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(layout.createSequentialGroup()
-                        .add(resetButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 33, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                        .add(runQueryButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 32, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(0, 0, Short.MAX_VALUE))
-                    .add(layout.createSequentialGroup()
-                        .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 211, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(18, 18, 18)
-                        .add(propertiesPane, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)))
+                .addContainerGap()
+                .add(runQueryButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 32, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(18, 18, 18)
+                .add(resetButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 33, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+            .add(jSplitPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(runQueryButton)
-                    .add(resetButton))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(propertiesPane)
-                    .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)))
+                    .add(resetButton)
+                    .add(runQueryButton))
+                .add(18, 18, 18)
+                .add(jSplitPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -320,6 +325,7 @@ public class SourceSelector extends javax.swing.JPanel {
                          parentNode.add(childNode);
                      }
                  }
+                root.add(new DefaultMutableTreeNode("<None>"));
                 ((DefaultTreeModel)sourcesTree.getModel()).setRoot(root);
             }
         });
@@ -337,6 +343,7 @@ public class SourceSelector extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JScrollPane propertiesPane;
     private javax.swing.JButton resetButton;
     private javax.swing.JButton runQueryButton;

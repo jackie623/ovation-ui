@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.swing.AbstractAction;
 import org.joda.time.DateTime;
 import org.openide.WizardDescriptor;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import ovation.*;
@@ -50,7 +51,11 @@ public class InsertEpochGroup extends InsertEntity implements EpochGroupInsertab
     @Override
     public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper parent)
     {
-        Source source = ((Source)((IEntityWrapper)wiz.getProperty("epochGroup.source")).getEntity());
+        IEntityWrapper s = (IEntityWrapper)wiz.getProperty("epochGroup.source");
+        Source source = null;
+        if (s != null)
+            source = (Source)(s.getEntity());
+            
         if (parent.getType().isAssignableFrom(Experiment.class))
             ((Experiment)parent.getEntity()).insertEpochGroup(source,
                     ((String)wiz.getProperty("epochGroup.label")),

@@ -23,6 +23,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import us.physion.ovation.interfaces.ConnectionListener;
@@ -92,11 +93,36 @@ public class BrowserUtilities{
         resetView(em, projectView);
     }
     
-    protected static void resetView()
+    public static void resetView()
     {
         browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
             mgr.setRootContext(new EntityNode(new EntityChildren(null, registeredViewManagers.get(mgr), null), null));
+        }
+    }
+    
+    public static void switchToSourceView()
+    {
+        Set<TopComponent> components = TopComponent.getRegistry().getOpened();
+        for (TopComponent c : components)
+        {
+            if (c instanceof SourceBrowserTopComponent)
+            {
+                c.toFront();
+                break;
+            }
+        }
+    }
+    public static void switchToProjectView()
+    {
+        Set<TopComponent> components = TopComponent.getRegistry().getOpened();
+        for (TopComponent c : components)
+        {
+            if (c instanceof BrowserTopComponent)
+            {
+                c.toFront();
+                break;
+            }
         }
     }
 

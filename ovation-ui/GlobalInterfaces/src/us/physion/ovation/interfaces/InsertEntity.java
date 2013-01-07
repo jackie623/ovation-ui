@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.physion.ovation.browser.insertion;
+package us.physion.ovation.interfaces;
 
 import java.awt.event.ActionEvent;
 import java.text.MessageFormat;
@@ -12,25 +12,15 @@ import javax.swing.AbstractAction;
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.Panel;
-import org.openide.nodes.Children;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 import ovation.IAuthenticatedDataStoreCoordinator;
-import us.physion.ovation.browser.BrowserUtilities;
-import us.physion.ovation.browser.EntityChildren;
-import us.physion.ovation.browser.EntityNode;
-import us.physion.ovation.browser.moveme.EntityInsertable;
-import us.physion.ovation.browser.moveme.ProjectInsertable;
-import us.physion.ovation.interfaces.ConnectionProvider;
-import us.physion.ovation.interfaces.IEntityWrapper;
-import us.physion.ovation.interfaces.ResetBrowser;
-import us.physion.ovation.interfaces.ResettableNode;
 
 /**
  *
  * @author jackie
  */
-public class InsertEntity extends AbstractAction implements EntityInsertable{
+public abstract class InsertEntity extends AbstractAction implements EntityInsertable{
 
     @Override
     public void actionPerformed(ActionEvent ae) {
@@ -101,13 +91,4 @@ public class InsertEntity extends AbstractAction implements EntityInsertable{
         return null;
     }
 
-    @Override
-    public List<WizardDescriptor.Panel<WizardDescriptor>> getPanels(IEntityWrapper parent){
-        throw new UnsupportedOperationException("Subclasses of InsertEntity should implement the getPanels method");
-    }
-
-    @Override
-    public void wizardFinished(WizardDescriptor wiz, IAuthenticatedDataStoreCoordinator dsc, IEntityWrapper ew) {
-        throw new UnsupportedOperationException("Subclasses of InsertEntity should implement the wizardFinished method");
-    }
 }

@@ -14,6 +14,7 @@ import org.openide.awt.ActionID;
 import org.openide.nodes.Children;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import us.physion.ovation.interfaces.ResetBrowser;
 
 @ActionID(category = "Edit",
 id = "us.physion.ovation.browser.ResetQueryAction")
@@ -25,7 +26,7 @@ displayName = "#CTL_ResetQueryAction")
     @ActionReference(path = "Shortcuts", name = "SM-R")
 })
 @Messages("CTL_ResetQueryAction=Reset Query")
-public final class ResetQueryAction implements ActionListener {
+public final class ResetQueryAction implements ResetBrowser{
 
     public void actionPerformed(ActionEvent e) {
         BrowserUtilities.resetView();

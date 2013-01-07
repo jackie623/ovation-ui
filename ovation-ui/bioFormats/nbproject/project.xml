@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>bioFormats</code-name-base>
+            <suite-component/>
+            <module-dependencies/>
+            <public-packages>
+                <package>loci.common</package>
+                <package>loci.common.enumeration</package>
+                <package>loci.common.services</package>
+                <package>loci.common.xml</package>
+                <package>loci.formats</package>
+                <package>loci.formats.in</package>
+                <package>loci.formats.services</package>
+                <package>loci.formats.tools</package>
+                <package>ome.xml</package>
+                <package>ome.xml.model</package>
+                <package>ome.xml.model.enums</package>
+                <package>ome.xml.model.enums.handlers</package>
+                <package>ome.xml.model.primitives</package>
+                <package>ome.xml.r2003fc.ome</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/bioFormats.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/bioFormats.jar</binary-origin>
+            </class-path-extension>
+        </data>
+    </configuration>
+</project>

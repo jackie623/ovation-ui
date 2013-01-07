@@ -25,15 +25,13 @@ import org.openide.util.datatransfer.ExTransferable;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 import ovation.*;
-import us.physion.ovation.browser.moveme.*;
-import us.physion.ovation.interfaces.ConnectionProvider;
-import us.physion.ovation.interfaces.IEntityWrapper;
+import us.physion.ovation.interfaces.*;
 
 /**
  *
  * @author huecotanks
  */
-public class EntityNode extends AbstractNode{
+public class EntityNode extends AbstractNode implements ResettableNode{
 
     private Action[] actionList;
     private IEntityWrapper parent;
@@ -49,7 +47,7 @@ public class EntityNode extends AbstractNode{
        super(c);
        this.parent = parent;
    }
-   
+   @Override
    public void resetNode()
    {
        Children c = getChildren();

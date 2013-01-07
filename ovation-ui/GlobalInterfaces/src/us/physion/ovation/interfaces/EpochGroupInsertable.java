@@ -2,12 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package us.physion.ovation.browser.moveme;
+package us.physion.ovation.interfaces;
 
 /**
  *
  * @author huecotanks
  */
-public interface StimulusInsertable extends EntityInsertable{
+public interface EpochGroupInsertable extends EntityInsertable{
     
 }

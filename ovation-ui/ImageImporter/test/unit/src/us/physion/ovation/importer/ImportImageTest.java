@@ -41,9 +41,7 @@ public class ImportImageTest extends OvationTestCase{
     @Before
     public void setUp() {
         dsc = setUpTest();
-
     }
-    
     
     @After
     public void tearDown()
@@ -51,7 +49,7 @@ public class ImportImageTest extends OvationTestCase{
         tearDownTest();
     }
     
-     @AfterClass
+    @AfterClass
     public static void tearDownClass() throws Exception {
         OvationTestCase.tearDownDatabase(mgr);
     }

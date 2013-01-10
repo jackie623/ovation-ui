@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
+import org.openide.WizardDescriptor.Iterator;
 import org.openide.WizardDescriptor.Panel;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
@@ -22,16 +23,21 @@ import ovation.IAuthenticatedDataStoreCoordinator;
  */
 public abstract class InsertEntity extends AbstractAction implements EntityInsertable{
 
+    public WizardDescriptor.Iterator getPanelIterator() {
+	IEntityWrapper parent = getEntity();
+	return new InsertEntityIterator(getPanels(parent));
+    }
+
     @Override
     public void actionPerformed(ActionEvent ae) {
-        IEntityWrapper parent =  getEntity();
-        WizardDescriptor wiz = new WizardDescriptor(new InsertEntityIterator(getPanels(parent)));
+	IEntityWrapper parent = getEntity();
+        WizardDescriptor wiz = new WizardDescriptor(getPanelIterator());
         // {0} will be replaced by WizardDescriptor.Panel.getComponent().getName()
         // {1} will be replaced by WizardDescriptor.Iterator.name()
         wiz.setTitleFormat(new MessageFormat("{0} ({1})"));
         wiz.setTitle("Insert Entity");
         if (DialogDisplayer.getDefault().notify(wiz) == WizardDescriptor.FINISH_OPTION) {
-            wizardFinished(wiz, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection(), parent);
+            wizardFinished(wiz, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection(), getEntity());
             ResettableNode node = getEntityNode();
             if (node == null)
             {

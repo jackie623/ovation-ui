@@ -17,6 +17,7 @@
     <property name="ui-elements.jar" value="../ScrollableTableTree/dist/ScrollableTableTree.jar"/>
     <property name="wizard-dialogs.jar" value="${harness.dir}/../platform/modules/org-openide-dialogs.jar"/>
     <property name="utilities.jar" value="${harness.dir}/../platform/lib/org-openide-util.jar"/>
+    <property name="swingx.jar" value="lib/swingx-1.6.1.jar"/>
 
     <property name="utilities.jar.local" value="netbeans/platform/lib/org-openide-util.jar"/>
     
@@ -42,7 +43,7 @@
         <javac srcdir="${interfaces.src.dir}"
                includes="**/*"
                destdir="${interfaces.class.dir}"
-               classpath="${ovation.jar}:${lookup.jar}:${junit.jar}:${test-manager.jar}:${exceptions.jar}:${jdesktop.jar}:${wizard-dialogs.jar}:${wizard-dialogs.local}:${utilities.jar}:${utilities.jar.local}"
+               classpath="${ovation.jar}:${lookup.jar}:${junit.jar}:${test-manager.jar}:${exceptions.jar}:${jdesktop.jar}:${wizard-dialogs.jar}:${wizard-dialogs.local}:${utilities.jar}:${utilities.jar.local}:${swingx.jar}"
                includeAntRuntime="no"
                 />
 

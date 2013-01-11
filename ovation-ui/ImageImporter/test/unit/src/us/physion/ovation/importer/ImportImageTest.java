@@ -4,9 +4,21 @@
  */
 package us.physion.ovation.importer;
 
+import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import loci.common.services.DependencyException;
+import loci.common.services.ServiceException;
+import loci.common.services.ServiceFactory;
+import loci.formats.FormatException;
+import loci.formats.IFormatReader;
+import loci.formats.in.PrairieReader;
+import loci.formats.meta.IMetadata;
+import loci.formats.meta.MetadataRetrieve;
+import loci.formats.services.OMEXMLService;
 import org.junit.*;
 import static org.junit.Assert.*;
 import ovation.LogLevel;
@@ -56,7 +68,34 @@ public class ImportImageTest extends OvationTestCase{
 
     @Test
     public void testSomeMethod() {
-        ImportImage img = new ImportImage();
-        img.getPanels(null);
+        ServiceFactory factory = null;
+        OMEXMLService service = null;
+        IMetadata meta = null;
+        try {
+            factory = new ServiceFactory();
+
+            service = factory.getInstance(OMEXMLService.class);
+            try {
+                meta = service.createOMEXMLMetadata();
+            } catch (ServiceException ex) {
+                Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (DependencyException ex) {
+            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // create format reader
+        IFormatReader reader = new PrairieReader();
+        reader.setMetadataStore(meta);
+        try {
+            // initialize file
+            reader.setId("/Users/huecotanks/Documents/ZSeries-12062012-1229-002/ZSeries-12062012-1229-002_Cycle00004_CurrentSettings_Ch2_001000.tif");
+        } catch (FormatException ex) {
+            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        MetadataRetrieve ret = service.asRetrieve(reader.getMetadataStore());
     }
 }

@@ -23,6 +23,7 @@ import loci.formats.FormatReader;
 import loci.formats.IFormatReader;
 import loci.formats.ImageReader;
 import loci.formats.meta.IMetadata;
+import loci.formats.meta.MetadataRetrieve;
 import loci.formats.ome.OMEXMLMetadata;
 import loci.formats.services.OMEXMLService;
 /**
@@ -38,35 +39,7 @@ public class ImportImage extends InsertEntity implements ProjectInsertable
     
     @Override
     public List<Panel<WizardDescriptor>> getPanels(IEntityWrapper iew) {
-        ServiceFactory factory = null;
-        IMetadata meta = null;
-        try {
-            factory = new ServiceFactory();
-
-            OMEXMLService service = factory.getInstance(OMEXMLService.class);
-            try {
-                meta = service.createOMEXMLMetadata();
-            } catch (ServiceException ex) {
-                Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (DependencyException ex) {
-            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // create format reader
-        IFormatReader reader = new ImageReader();
-        reader.setMetadataStore(meta);
-        try {
-            // initialize file
-            reader.setId("file://Users.huecotanks/Downloads/test-dicom.dcm");
-        } catch (FormatException ex) {
-            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        reader.getGlobalMetadata();
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     @Override

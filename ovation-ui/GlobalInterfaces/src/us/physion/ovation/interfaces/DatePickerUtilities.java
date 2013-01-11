@@ -18,7 +18,7 @@ import org.joda.time.DateTimeZone;
  */
 public class DatePickerUtilities {
     static String[] availableIDs;
-    static DateTimePicker createDateTimePicker()
+    public static DateTimePicker createDateTimePicker()
     {
         DateTimePicker startPicker = new DateTimePicker();
 	startPicker.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -29,7 +29,7 @@ public class DatePickerUtilities {
         startPicker.setTimeFormat(DateFormat.getTimeInstance(DateFormat.MEDIUM));
         return startPicker;
     }
-    static String getID(DateTimePicker p)
+    public static String getID(DateTimePicker p)
     {
         boolean found = false;
         String id = TimeZone.getDefault().getID();
@@ -47,7 +47,7 @@ public class DatePickerUtilities {
         }
         return id;
     }
-    static String[] getTimeZoneIDs()
+    public static String[] getTimeZoneIDs()
     {
         if (availableIDs == null)
         {

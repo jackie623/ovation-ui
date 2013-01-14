@@ -7,6 +7,7 @@ package us.physion.ovation.importer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import loci.common.services.DependencyException;
@@ -23,7 +24,6 @@ import ome.xml.model.primitives.Timestamp;
 import org.joda.time.DateTime;
 import org.openide.util.Exceptions;
 import ovation.OvationException;
-
 /**
  *
  * @author huecotanks
@@ -31,6 +31,7 @@ import ovation.OvationException;
 public class FileMetadata {
     File file;
     MetadataRetrieve retrieve;
+    Hashtable original;
     FileMetadata(File f)
     {
         file = f;
@@ -38,6 +39,9 @@ public class FileMetadata {
         OMEXMLService service = null;
         IMetadata meta = null;
         try {
+            //LoggerFactory l;
+            //LoggerFactory.getLogger(FileMetadata.class);
+            //ILoggerFactory iLoggerFactory = LoggerFactory.getILoggerFactory();
             factory = new ServiceFactory();
 
             service = factory.getInstance(OMEXMLService.class);
@@ -51,13 +55,7 @@ public class FileMetadata {
             Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
             throw new OvationException("Unable to create metadata. " + ex.getMessage());
         }
-        IFormatReader r;
-        if (file.getName().endsWith(".lsm"))
-            r = new PrairieReader();
-        /*else if (file.getName().endsWith(".zeiss"))
-            r = new ZeissReader();*/
-        else
-            r = new ImageReader();
+        IFormatReader r = new ImageReader(); //maybe checkbox for prairie images?
         
         r.setMetadataStore(meta);
         try {
@@ -68,6 +66,11 @@ public class FileMetadata {
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             throw new OvationException("Unable to read file. " + ex.getMessage());
+        }
+        try {
+            original = service.getOriginalMetadata(service.createOMEXMLMetadata());
+        } catch (ServiceException ex) {
+            throw new OvationException("Unable to read original metadata. " + ex.getMessage());
         }
         retrieve = service.asRetrieve(r.getMetadataStore());
     }
@@ -89,7 +92,7 @@ public class FileMetadata {
             Date newDate = retrieve.getImageAcquisitionDate(i).asDate();
             if (newDate != null)
             {
-                if (min != null)
+                if (min == null)
                 {
                     min = newDate;
                 }
@@ -110,7 +113,7 @@ public class FileMetadata {
             Date newDate = retrieve.getImageAcquisitionDate(i).asDate();
             if (newDate != null)
             {
-                if (max != null)
+                if (max == null)
                 {
                     max = newDate;
                 }
@@ -121,5 +124,10 @@ public class FileMetadata {
             }
         }
         return new DateTime(max);
+    }
+    
+    public Hashtable getOriginalMetadata()
+    {
+        return original;
     }
 }

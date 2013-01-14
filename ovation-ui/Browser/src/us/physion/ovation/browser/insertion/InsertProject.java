@@ -16,8 +16,7 @@ import org.openide.WizardDescriptor;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 import ovation.IAuthenticatedDataStoreCoordinator;
-import us.physion.ovation.browser.moveme.ProjectInsertable;
-import us.physion.ovation.browser.moveme.RootInsertable;
+import us.physion.ovation.interfaces.RootInsertable;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 

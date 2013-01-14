@@ -19,7 +19,7 @@ import ovation.AnalysisRecord;
 import ovation.Epoch;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.Project;
-import us.physion.ovation.browser.moveme.ProjectInsertable;
+import us.physion.ovation.interfaces.ProjectInsertable;
 import us.physion.ovation.interfaces.ConnectionProvider;
 import us.physion.ovation.interfaces.IEntityWrapper;
 

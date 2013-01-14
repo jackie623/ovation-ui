@@ -14,7 +14,7 @@ import org.openide.WizardDescriptor;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.util.lookup.ServiceProviders;
 import ovation.*;
-import us.physion.ovation.browser.moveme.*;
+import us.physion.ovation.interfaces.*;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 @ServiceProviders(value={

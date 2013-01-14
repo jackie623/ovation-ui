@@ -6,12 +6,14 @@ package us.physion.ovation.importer;
 
 import java.awt.Component;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 import javax.swing.*;
+import javax.swing.event.CellEditorListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import org.openide.util.ChangeSupport;
 import us.physion.ovation.interfaces.DatePickerUtilities;
 import us.physion.ovation.interfaces.DateTimePicker;
@@ -42,7 +44,7 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
         }
     }
 
-    private FileTableModel fileTableModel = new FileTableModel();
+    private FileTableModel fileTableModel;
     class FileTableModel extends DefaultTableModel 
     {
         ArrayList<FileMetadata> files = new ArrayList<FileMetadata>();
@@ -53,10 +55,43 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             return files.size();
         }
 
+        public int getRowCount()
+        {
+            if (files == null)
+                return 0;
+            return files.size();
+        }
+        
+        public int getColumnCount()
+        {
+            return 4;
+        }
+        
+        public String getColumnName(int i)
+        {
+            if (i == 0)
+            {
+                return "File";
+            }
+            if (i == 1)
+            {
+                return "Start";
+            }
+            if (i == 2)
+            {
+                return "End";
+            }
+            if (i == 3)
+            {
+                return "Timezone";
+            }
+            return "";
+        }
+        
         public Object getValueAt(int row, int column) {
             FileMetadata meta = files.get(row);
             if (column == 0)
-                return meta.getFile().getName();
+                return new JLabel(meta.getFile().getName());
             if (column == 1)
             {
                 DateTimePickerPanel p = getPicker(row, column);
@@ -85,6 +120,8 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             startPickers.add(new DateTimePickerPanel(DatePickerUtilities.createDateTimePicker()));
             endPickers.add(new DateTimePickerPanel(DatePickerUtilities.createDateTimePicker()));
             timezoneComboBoxes.add(new JComboBox(new DefaultComboBoxModel(){}));
+            fireTableRowsInserted(files.size()-1, files.size() -1);
+            fireTableDataChanged();
         }
         
         public void remove(int i)
@@ -93,6 +130,7 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             startPickers.remove(i);
             endPickers.remove(i);
             timezoneComboBoxes.remove(i);
+            fireTableRowsDeleted(files.size(), files.size());
         }
         public List<FileMetadata> getFiles()
         {
@@ -119,7 +157,32 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
      */
     public GetImageFilesPanel(ChangeSupport cs) {
         this.cs = cs;
+        fileTableModel = new FileTableModel();
         initComponents();
+        jTable1.setRowHeight(40);
+        Enumeration e = jTable1.getColumnModel().getColumns();
+        int count = 0;
+        while (e.hasMoreElements())
+        {
+            TableColumn col = (TableColumn) e.nextElement();
+
+            col.setCellRenderer(new TableCellRenderer() {
+
+                @Override
+                public Component getTableCellRendererComponent(JTable jtable, Object o, boolean bln, boolean bln1, int row, int column) {
+                    FileTableModel model = (FileTableModel) jtable.getModel();
+                    return (Component) model.getValueAt(row, column);
+                }
+            });
+            
+            if (count == 1 || count == 2)
+                col.setPreferredWidth(200);
+            if (count == 3)
+                col.setPreferredWidth(180);
+            count++;
+            
+            //col.setCellEditor(new DefaultCellEditor());
+        }
     }
 
     public List<FileMetadata> getFiles()
@@ -137,8 +200,6 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         addImagesButton = new javax.swing.JButton();
-        upButton = new javax.swing.JButton();
-        downButton = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
 
@@ -149,15 +210,6 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             }
         });
 
-        upButton.setText(org.openide.util.NbBundle.getMessage(GetImageFilesPanel.class, "GetImageFilesPanel.upButton.text")); // NOI18N
-        upButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                upButtonActionPerformed(evt);
-            }
-        });
-
-        downButton.setText(org.openide.util.NbBundle.getMessage(GetImageFilesPanel.class, "GetImageFilesPanel.downButton.text")); // NOI18N
-
         jTable1.setModel(fileTableModel
         );
         jScrollPane2.setViewportView(jTable1);
@@ -167,29 +219,17 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(layout.createSequentialGroup()
-                        .add(addImagesButton)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 193, Short.MAX_VALUE)
-                        .add(upButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 34, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(downButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 35, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                .add(addImagesButton)
                 .addContainerGap())
+            .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(addImagesButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(downButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(upButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .add(addImagesButton)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
-                .addContainerGap())
+                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -199,6 +239,11 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
         chooser.setFileFilter(filter);
         int returnVal = chooser.showOpenDialog(new JPanel());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            if (file != null)
+            {
+                fileTableModel.add(new FileMetadata(file));
+            }
             for (File f : chooser.getSelectedFiles())
             {
                 fileTableModel.add(new FileMetadata(f));
@@ -206,15 +251,9 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_addImagesButtonActionPerformed
 
-    private void upButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_upButtonActionPerformed
-        
-    }//GEN-LAST:event_upButtonActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addImagesButton;
-    private javax.swing.JButton downButton;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
-    private javax.swing.JButton upButton;
     // End of variables declaration//GEN-END:variables
 }

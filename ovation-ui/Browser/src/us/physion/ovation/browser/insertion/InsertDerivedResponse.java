@@ -13,8 +13,7 @@ import javax.swing.AbstractAction;
 import org.openide.WizardDescriptor;
 import org.openide.util.lookup.ServiceProvider;
 import ovation.*;
-import us.physion.ovation.browser.moveme.EpochInsertable;
-import us.physion.ovation.browser.moveme.ProjectInsertable;
+import us.physion.ovation.interfaces.EpochInsertable;
 import us.physion.ovation.interfaces.IEntityWrapper;
 
 //@ServiceProvider(service=EpochInsertable.class)

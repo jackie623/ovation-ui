@@ -14,6 +14,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.openide.util.ChangeSupport;
 import us.physion.ovation.interfaces.DatePickerUtilities;
 import us.physion.ovation.interfaces.DateTimePicker;
@@ -51,6 +53,14 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
         ArrayList<DateTimePickerPanel> startPickers = new ArrayList<DateTimePickerPanel>();
         ArrayList<DateTimePickerPanel> endPickers = new ArrayList<DateTimePickerPanel>();
         ArrayList<JComboBox> timezoneComboBoxes = new ArrayList<JComboBox>();
+        
+        String[] timezoneIDs;
+        FileTableModel()
+        {
+            super();
+            timezoneIDs = DatePickerUtilities.getTimeZoneIDs();
+        }
+        
         public int getSize() {
             return files.size();
         }
@@ -75,11 +85,11 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             }
             if (i == 1)
             {
-                return "Start";
+                return "Epoch Start";
             }
             if (i == 2)
             {
-                return "End";
+                return "Epoch End";
             }
             if (i == 3)
             {
@@ -95,33 +105,40 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             if (column == 1)
             {
                 DateTimePickerPanel p = getPicker(row, column);
-                p.getPicker().setDate(meta.getStart());
                 return p.getPane();
             }
             if (column == 2)
             {
                 DateTimePickerPanel p = getPicker(row, column);
-                p.getPicker().setDate(meta.getEnd());
                 return p.getPane();
             }
             if (column == 3)
             {
                 JComboBox b = timezoneComboBoxes.get(row);
-                b.getModel().setSelectedItem(Calendar.getInstance().getTimeZone());
                 return b;
             }
             else
                 return null;
         }
        
-        public void add(FileMetadata s)
+        public void add(FileMetadata meta)
         {
-            files.add(s);
-            startPickers.add(new DateTimePickerPanel(DatePickerUtilities.createDateTimePicker()));
-            endPickers.add(new DateTimePickerPanel(DatePickerUtilities.createDateTimePicker()));
-            timezoneComboBoxes.add(new JComboBox(new DefaultComboBoxModel(){}));
+            files.add(meta);
+            
+            DateTimePickerPanel start = new DateTimePickerPanel(DatePickerUtilities.createDateTimePicker());
+            start.getPicker().setDate(meta.getStart());
+            startPickers.add(start);
+            
+            DateTimePickerPanel end = new DateTimePickerPanel(DatePickerUtilities.createDateTimePicker());
+            end.getPicker().setDate(meta.getEnd());
+            endPickers.add(end); 
+            
+            JComboBox timezones = new JComboBox(new DefaultComboBoxModel(timezoneIDs));
+            timezones.setSelectedItem(TimeZone.getDefault().getID());
+            timezoneComboBoxes.add(timezones);
+            
             fireTableRowsInserted(files.size()-1, files.size() -1);
-            fireTableDataChanged();
+            cs.fireChange();
         }
         
         public void remove(int i)
@@ -131,6 +148,7 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             endPickers.remove(i);
             timezoneComboBoxes.remove(i);
             fireTableRowsDeleted(files.size(), files.size());
+            cs.fireChange();
         }
         public List<FileMetadata> getFiles()
         {
@@ -160,29 +178,91 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
         fileTableModel = new FileTableModel();
         initComponents();
         jTable1.setRowHeight(40);
+        jTable1.setDefaultRenderer(Object.class, new TableCellRenderer() {
+
+            @Override
+            public Component getTableCellRendererComponent(JTable jtable, Object o, boolean bln, boolean bln1, int row, int column) {
+                FileTableModel model = (FileTableModel) jtable.getModel();
+                return (Component) model.getValueAt(row, column);
+            }
+        });
+        
+        jTable1.setDefaultEditor(Object.class, new TableCellEditor() {
+
+            Component c;
+            @Override
+            public Component getTableCellEditorComponent(JTable jtable, Object o, boolean bln, int row, int column) {
+                FileTableModel model = (FileTableModel) jtable.getModel();
+                c = (Component) model.getValueAt(row, column);
+                return c;
+            }
+
+            @Override
+            public Object getCellEditorValue() {
+                return c;
+            }
+
+            @Override
+            public boolean isCellEditable(EventObject eo) {
+                if (c instanceof JLabel)
+                    return false;
+                return true;
+            }
+
+            @Override
+            public boolean shouldSelectCell(EventObject eo) {
+                return false;
+            }
+
+            @Override
+            public boolean stopCellEditing() {
+                return true;
+            }
+
+            @Override
+            public void cancelCellEditing() {
+            }
+
+            @Override
+            public void addCellEditorListener(CellEditorListener cl) {
+            }
+            
+            @Override
+            public void removeCellEditorListener(CellEditorListener cl) {
+            }
+
+            
+        });
+        
         Enumeration e = jTable1.getColumnModel().getColumns();
         int count = 0;
         while (e.hasMoreElements())
         {
             TableColumn col = (TableColumn) e.nextElement();
 
-            col.setCellRenderer(new TableCellRenderer() {
-
-                @Override
-                public Component getTableCellRendererComponent(JTable jtable, Object o, boolean bln, boolean bln1, int row, int column) {
-                    FileTableModel model = (FileTableModel) jtable.getModel();
-                    return (Component) model.getValueAt(row, column);
-                }
-            });
-            
             if (count == 1 || count == 2)
-                col.setPreferredWidth(200);
-            if (count == 3)
                 col.setPreferredWidth(180);
+            if (count == 3)
+            {
+                col.setPreferredWidth(180);
+            }
             count++;
-            
-            //col.setCellEditor(new DefaultCellEditor());
         }
+    }
+    
+    
+    public DateTime getStart(int row)
+    {
+        DateTimePickerPanel p = (DateTimePickerPanel)(((FileTableModel)jTable1.getModel()).getValueAt(row, 1));
+        JComboBox box = (JComboBox)(((FileTableModel)jTable1.getModel()).getValueAt(row, 4));
+        return new DateTime(p.getPicker().getDate(), DateTimeZone.forID(((String)box.getSelectedItem())));
+    }
+    
+    public DateTime getEnd(int row)
+    {
+        DateTimePickerPanel p = (DateTimePickerPanel)(((FileTableModel)jTable1.getModel()).getValueAt(row, 2));
+        JComboBox box = (JComboBox)(((FileTableModel)jTable1.getModel()).getValueAt(row, 4));
+        return new DateTime(p.getPicker().getDate(), DateTimeZone.forID(((String)box.getSelectedItem())));
     }
 
     public List<FileMetadata> getFiles()

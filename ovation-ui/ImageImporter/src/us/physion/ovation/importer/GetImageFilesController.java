@@ -54,9 +54,17 @@ public class GetImageFilesController extends BasicWizardPanel{
     public void storeSettings(WizardDescriptor wiz) {
         GetImageFilesPanel c = (GetImageFilesPanel)component;
         List<FileMetadata> files = c.getFiles();
+        
+        //set the user-approved start and end times
+        int count =0;
+        for (FileMetadata f : files)
+        {
+            f.setStart(c.getStart(count));
+            f.setEnd(c.getEnd(count++));
+        }
         Collections.sort(files, new FileMetadataComparator());
         
-        setInstrumentData(files, wiz);
+        /*setInstrumentData(files, wiz);
         
         for (int i=0; i< files.size(); i++)
         {
@@ -396,6 +404,6 @@ public class GetImageFilesController extends BasicWizardPanel{
         put("imageDescription", retrieve.getImageDescription(imageNumber), properties);
         put("imageID", retrieve.getImageID(imageNumber), properties);
         
-        wiz.putProperty(responseName + ".properties", properties);
+        wiz.putProperty(responseName + ".properties", properties);*/
     }
 }

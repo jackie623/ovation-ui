@@ -25,7 +25,7 @@ import us.physion.ovation.interfaces.DateTimePicker;
  * @author huecotanks
  */
 public class GetImageFilesPanel extends javax.swing.JPanel {
-
+    
     private static class DateTimePickerPanel {
 
         private DateTimePicker picker;
@@ -169,11 +169,16 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             return null;
         }
     }
+    
+    @Override
+    public String getName() {
+        return "Insert Epochs";
+    }
     ChangeSupport cs;
     /**
      * Creates new form GetImageFilesPanel
      */
-    public GetImageFilesPanel(ChangeSupport cs) {
+    public GetImageFilesPanel(ChangeSupport cs, ArrayList<FileMetadata> files) {
         this.cs = cs;
         fileTableModel = new FileTableModel();
         initComponents();
@@ -248,20 +253,26 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
             }
             count++;
         }
+        
+        if (files != null) {
+            for (FileMetadata file : files) {
+                fileTableModel.add(file);
+            }
+        }
     }
     
     
     public DateTime getStart(int row)
     {
-        DateTimePickerPanel p = (DateTimePickerPanel)(((FileTableModel)jTable1.getModel()).getValueAt(row, 1));
-        JComboBox box = (JComboBox)(((FileTableModel)jTable1.getModel()).getValueAt(row, 4));
+        DateTimePickerPanel p = ((FileTableModel)jTable1.getModel()).startPickers.get(row);
+        JComboBox box = (JComboBox)(((FileTableModel)jTable1.getModel()).getValueAt(row, 3));
         return new DateTime(p.getPicker().getDate(), DateTimeZone.forID(((String)box.getSelectedItem())));
     }
     
     public DateTime getEnd(int row)
     {
-        DateTimePickerPanel p = (DateTimePickerPanel)(((FileTableModel)jTable1.getModel()).getValueAt(row, 2));
-        JComboBox box = (JComboBox)(((FileTableModel)jTable1.getModel()).getValueAt(row, 4));
+        DateTimePickerPanel p = ((FileTableModel)jTable1.getModel()).endPickers.get(row);
+        JComboBox box = (JComboBox)(((FileTableModel)jTable1.getModel()).getValueAt(row, 3));
         return new DateTime(p.getPicker().getDate(), DateTimeZone.forID(((String)box.getSelectedItem())));
     }
 
@@ -279,16 +290,8 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        addImagesButton = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-
-        addImagesButton.setText(org.openide.util.NbBundle.getMessage(GetImageFilesPanel.class, "GetImageFilesPanel.addImagesButton.text")); // NOI18N
-        addImagesButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addImagesButtonActionPerformed(evt);
-            }
-        });
 
         jTable1.setModel(fileTableModel
         );
@@ -298,41 +301,15 @@ public class GetImageFilesPanel extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(addImagesButton)
-                .addContainerGap())
             .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .addContainerGap()
-                .add(addImagesButton)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE))
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 455, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void addImagesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addImagesButtonActionPerformed
-        JFileChooser chooser = new JFileChooser();
-        FileFilter filter = new ImageFileFilter();
-        chooser.setFileFilter(filter);
-        int returnVal = chooser.showOpenDialog(new JPanel());
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            if (file != null)
-            {
-                fileTableModel.add(new FileMetadata(file));
-            }
-            for (File f : chooser.getSelectedFiles())
-            {
-                fileTableModel.add(new FileMetadata(f));
-            }
-        }
-    }//GEN-LAST:event_addImagesButtonActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addImagesButton;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables

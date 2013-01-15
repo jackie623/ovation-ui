@@ -12,7 +12,7 @@ import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import org.openide.WizardDescriptor;
 
-public final class InsertEntityIterator implements WizardDescriptor.Iterator<WizardDescriptor> {
+public class InsertEntityIterator implements WizardDescriptor.Iterator<WizardDescriptor> {
 
     public InsertEntityIterator(List<WizardDescriptor.Panel<WizardDescriptor>> panels)
     {

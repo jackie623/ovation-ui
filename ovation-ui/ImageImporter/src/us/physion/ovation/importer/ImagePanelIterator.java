@@ -17,29 +17,11 @@ import us.physion.ovation.interfaces.InsertEntityIterator;
  *
  * @author jackie
  */
-public class ImagePanelIterator {
+public class ImagePanelIterator extends InsertEntityIterator{
     
     public ImagePanelIterator(List<WizardDescriptor.Panel<WizardDescriptor>> panels)
     {
-        this.panels = panels;
-        if (panels == null)
-        {
-            panels = new ArrayList<WizardDescriptor.Panel<WizardDescriptor>>();
-        }
-        String[] steps = new String[panels.size()];
-        for (int i = 0; i < panels.size(); i++) {
-            Component c = panels.get(i).getComponent();
-            // Default step name to component name of panel.                                                                                                        
-            steps[i] = c.getName();
-            if (c instanceof JComponent) { // assume Swing components                                                                                               
-                JComponent jc = (JComponent) c;
-                jc.putClientProperty(WizardDescriptor.PROP_CONTENT_SELECTED_INDEX, i);
-                jc.putClientProperty(WizardDescriptor.PROP_CONTENT_DATA, steps);
-                jc.putClientProperty(WizardDescriptor.PROP_AUTO_WIZARD_STYLE, true);
-                jc.putClientProperty(WizardDescriptor.PROP_CONTENT_DISPLAYED, true);
-                jc.putClientProperty(WizardDescriptor.PROP_CONTENT_NUMBERED, true);
-            }
-        }
+        super(panels);
     }
     private int index;
     private List<WizardDescriptor.Panel<WizardDescriptor>> panels;

@@ -41,7 +41,7 @@ public class ImportTestManager extends TestManager{
         });
         if (pwd == null)
         {
-            pwd = "/Users/huecotanks/Ovation/ui/";
+            pwd = "/Users/jackie/Ovation/ovation-ui/";
         }
         String path = pwd + "data" + File.separator
                 + "import" + File.separator
@@ -59,5 +59,4 @@ public class ImportTestManager extends TestManager{
     public String getFirstUserPassword() {
         return "password";
     }
-
 }

@@ -15,7 +15,9 @@ import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
 import loci.formats.FormatException;
 import loci.formats.IFormatReader;
+import loci.formats.ImageReader;
 import loci.formats.in.PrairieReader;
+import loci.formats.in.ZeissLSMReader;
 import loci.formats.meta.IMetadata;
 import loci.formats.meta.MetadataRetrieve;
 import loci.formats.services.OMEXMLService;
@@ -78,22 +80,24 @@ public class ImportImageTest extends OvationTestCase{
             try {
                 meta = service.createOMEXMLMetadata();
             } catch (ServiceException ex) {
-                Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println(ex.getMessage());
             }
         } catch (DependencyException ex) {
-            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
         }
 
         // create format reader
-        IFormatReader reader = new PrairieReader();
+        IFormatReader reader = new ImageReader();//ZeissLSMReader();//PrairieReader();
         reader.setMetadataStore(meta);
         try {
             // initialize file
-            reader.setId("/Users/huecotanks/Documents/ZSeries-12062012-1229-002/ZSeries-12062012-1229-002_Cycle00004_CurrentSettings_Ch2_001000.tif");
+            //reader.setId("/Users/jackie/Documents/ZSeries-12062012-1229-002/ZSeries-12062012-1229-002_Cycle00004_CurrentSettings_Ch2_001000.tif");
+            reader.setId("/Users/jackie/Documents/Stack&Tile_Stitched.lsm");
+
         } catch (FormatException ex) {
-            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(ImportImage.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
         }
 
         MetadataRetrieve ret = service.asRetrieve(reader.getMetadataStore());

@@ -58,7 +58,7 @@ public abstract class BasicWizardPanel implements WizardDescriptor.Panel<WizardD
         // use wiz.getProperty to retrieve previous panel state
     }
         
-    static String updateTextField(JTextField f, ChangeSupport cs, String value){
+    public static String updateTextField(JTextField f, ChangeSupport cs, String value){
         if (f.getText().isEmpty())
         {
             value = "";
@@ -78,7 +78,7 @@ public abstract class BasicWizardPanel implements WizardDescriptor.Panel<WizardD
         return value;
     }
     
-    static String updateTextArea(JTextArea f, ChangeSupport cs, String value){
+    public static String updateTextArea(JTextArea f, ChangeSupport cs, String value){
         if (f.getText().isEmpty())
         {
             value = "";

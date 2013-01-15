@@ -167,18 +167,22 @@ public class FileMetadata {
 
         for (int j = 0; j < retrieve.getImageCount(); j++) {
             Map<String, Object> responseStruct = new HashMap<String, Object>();
-            put("name", "response" + j, responseStruct);
-            put("properties", getResponseProperties(j), responseStruct);
+            put("name", "response" + j, responseStruct, true);
+            put("properties", getResponseProperties(j), responseStruct, true);
 
-            //TODO: get instrument ref and look it up that way
-            //NOTE: I'm not using microbeamManipulation right now
-            put("device.name", retrieve.getInstrumentID(0), responseStruct);
-            //put("device.manufacturer", retrieve.getMicroscopeManufacturer(0), responseStruct);
+            String ref = retrieve.getImageInstrumentRef(j);
+            for(Map<String, Object> device : instruments){
+                if (device.get("ID").equals(ref))
+                {
+                    put("device.name", device.get("ID"), responseStruct, true);
+                    put("device.manufacturer", device.get("manufacturer"), responseStruct, true);
+                }
+            }
 
-            put("device.parameters", getDeviceParameters(j), responseStruct);
+            put("device.parameters", getDeviceParameters(j), responseStruct, true);
 
             try {
-                put("url", getFile().toURI().toURL().toExternalForm(), responseStruct);
+                put("url", getFile().toURI().toURL().toExternalForm(), responseStruct, true);
             } catch (MalformedURLException ex) {
                 throw new OvationException("Unable to get url for image file. " + ex.getMessage());
             }
@@ -187,7 +191,7 @@ public class FileMetadata {
                 retrieve.getPixelsSizeZ(j).getValue().longValue(),
                 retrieve.getPixelsSizeC(j).getValue().longValue(),
                 retrieve.getPixelsSizeT(j).getValue().longValue()};
-            put("shape", shape, responseStruct);
+            put("shape", shape, responseStruct, true);
             //data type doesn't actually matter, since this is not a NumericData object
             ByteOrder b;
             if (retrieve.getPixelsBinDataBigEndian(j, 0)) {
@@ -195,23 +199,23 @@ public class FileMetadata {
             } else {
                 b = ByteOrder.LITTLE_ENDIAN;
             }
-            put("dataType", new NumericDataType(NumericDataFormat.SignedFixedPointDataType, (short) 4, b), responseStruct);
-            put("units", "pixels", responseStruct);
+            put("dataType", new NumericDataType(NumericDataFormat.SignedFixedPointDataType, (short) 4, b), responseStruct, true);
+            put("units", "pixels", responseStruct, true);
 
-            put("dimensionLabels", new String[]{"X", "Y", "Z", "Channels", "Time"}, responseStruct);
+            put("dimensionLabels", new String[]{"X", "Y", "Z", "Channels", "Time"}, responseStruct, true);
             double timeIncrement = retrieve.getPixelsTimeIncrement(j).doubleValue();
             put("samplingRates", new double[]{
                         shape[0] == 0 ? 0 : retrieve.getPixelsPhysicalSizeX(j).getValue() / shape[0],
                         shape[1] == 0 ? 0 : retrieve.getPixelsPhysicalSizeY(j).getValue() / shape[1],
                         shape[2] == 0 ? 0 : retrieve.getPixelsPhysicalSizeZ(j).getValue() / shape[2],
                         1,
-                        timeIncrement == 0 ? 0 : (1 / timeIncrement)}, responseStruct);
+                        timeIncrement == 0 ? 0 : (1 / timeIncrement)}, responseStruct, true);
             put("samplingRateUnits", new String[]{"microns",
                         "microns",
                         "frames",
                         "channels",
-                        "Hz"}, responseStruct);//TODO not sure about Hz
-            put("uti", "public.bioFormats", responseStruct);//TODO: fix - get file type?
+                        "Hz"}, responseStruct, true);//TODO not sure about Hz
+            put("uti", "public.bioFormats", responseStruct, true);//TODO: fix - get file type?
 
             //TODO: planes (represent images in time)
             //TODO: plates -- start and end time information?
@@ -235,10 +239,9 @@ public class FileMetadata {
         try{put("imagingEnvironment.temperature", retrieve.getImagingEnvironmentTemperature(imageNum), parameters);
         } catch (NullPointerException e){}
         try{
-            put("stageLabel.name", retrieve.getStageLabelName(imageNum), parameters);
-            put("stageLabel.x", retrieve.getStageLabelX(imageNum), parameters);
-            put("stageLabel.y", retrieve.getStageLabelY(imageNum), parameters);
-            put("stageLabel.z", retrieve.getStageLabelZ(imageNum), parameters);
+            put("stage." + retrieve.getStageLabelName(imageNum) +".x", retrieve.getStageLabelX(imageNum), parameters);
+            put("stage." + retrieve.getStageLabelName(imageNum) +".y", retrieve.getStageLabelY(imageNum), parameters);
+            put("stage." + retrieve.getStageLabelName(imageNum) +".z", retrieve.getStageLabelZ(imageNum), parameters);
         } catch (NullPointerException e){}
         
         try {
@@ -282,17 +285,19 @@ public class FileMetadata {
             } catch (NullPointerException e) {}
         }
 
-        for (int i = 0; i < retrieve.getMicrobeamManipulationCount(imageNum); i++) {
-            put("microbeamManipulation" + i + ".ID", retrieve.getMicrobeamManipulationID(imageNum, i), parameters);
-            put("microbeamManipulation" + i + ".description", retrieve.getMicrobeamManipulationDescription(imageNum, i), parameters);
-            put("microbeamManipulation" + i + ".type", retrieve.getMicrobeamManipulationType(imageNum, i), parameters);
+        try{
+            for (int i = 0; i < retrieve.getMicrobeamManipulationCount(imageNum); i++) {
+                put("microbeamManipulation" + i + ".ID", retrieve.getMicrobeamManipulationID(imageNum, i), parameters);
+                put("microbeamManipulation" + i + ".description", retrieve.getMicrobeamManipulationDescription(imageNum, i), parameters);
+                put("microbeamManipulation" + i + ".type", retrieve.getMicrobeamManipulationType(imageNum, i), parameters);
 
-            //for each light source ?
-            //put("microbeamManipulation" + i+"."+ "lightSourceSettingsAttenuation", retrieve.getMicrobeamManipulationLightSourceSettingsAttenuation(imageNumber, i), parameters);
-            //put("microbeamManipulation" + i+"."+ "lightSourceSettingsID", retrieve.getMicrobeamManipulationLightSourceSettingsID(imageNumber, i), parameters);
-            //put("microbeamManipulation" + i+"."+ "lightSourceSettingnWavelength", retrieve.getMicrobeamManipulationLightSourceSettingsWavelength(imageNumber, i), parameters);
+                //for each light source ?
+                //put("microbeamManipulation" + i+"."+ "lightSourceSettingsAttenuation", retrieve.getMicrobeamManipulationLightSourceSettingsAttenuation(imageNumber, i), parameters);
+                //put("microbeamManipulation" + i+"."+ "lightSourceSettingsID", retrieve.getMicrobeamManipulationLightSourceSettingsID(imageNumber, i), parameters);
+                //put("microbeamManipulation" + i+"."+ "lightSourceSettingnWavelength", retrieve.getMicrobeamManipulationLightSourceSettingsWavelength(imageNumber, i), parameters);
 
-        }
+            }
+        }catch (IndexOutOfBoundsException e){}
 
         for (int k = 0; k < retrieve.getLightSourceCount(imageNum); k++) {
             String type = retrieve.getLightSourceType(imageNum, k).toLowerCase();
@@ -310,12 +315,14 @@ public class FileMetadata {
             
             if (type.equals("laser"))
             {
-                String laserName = ".laser_" + retrieve.getLaserID(imageNum, k);
+                String laserName = "laser_" + retrieve.getLaserID(imageNum, k);
                 put(laserName + ".frequencyMultiplication", retrieve.getLaserFrequencyMultiplication(imageNum, k), parameters);
                 put(laserName + ".medium", retrieve.getLaserLaserMedium(imageNum, k), parameters);
-                put(laserName + ".pockelCell", retrieve.getLaserPockelCell(imageNum, k), parameters);
+                try{put(laserName + ".pockelCell", retrieve.getLaserPockelCell(imageNum, k), parameters);
+                } catch (NullPointerException e){}
                 put(laserName + ".power", retrieve.getLaserPower(imageNum, k), parameters);
-                put(laserName + ".pump", retrieve.getLaserPump(imageNum, k), parameters);
+                try{put(laserName + ".pump", retrieve.getLaserPump(imageNum, k), parameters);
+                } catch (NullPointerException e){}
                 put(laserName + ".repetitionRate", retrieve.getLaserRepetitionRate(imageNum, k), parameters);
                 put(laserName + ".tuneable", retrieve.getLaserTuneable(imageNum, k), parameters);
                 put(laserName + ".wavelength", retrieve.getLaserWavelength(imageNum, k), parameters);
@@ -384,113 +391,154 @@ public class FileMetadata {
         List<Map<String, Object>> instrumentStructs = new ArrayList<Map<String, Object>>();
 
         for (int j = 0; j < retrieve.getInstrumentCount(); j++) {
+            Map<String, Object> instrumentProperties = new HashMap<String, Object>();
             Map<String, Object> instrumentStruct = new HashMap<String, Object>();
-
             put("ID", retrieve.getInstrumentID(j), instrumentStruct);
 
             if (isMicroscope(retrieve, j)) {
-                put("microscopeLotNumber", retrieve.getMicroscopeLotNumber(j), instrumentStruct);
-                put("microscopeManufacturer", retrieve.getMicroscopeManufacturer(j), instrumentStruct);
-                put("microscopeModel", retrieve.getMicroscopeModel(j), instrumentStruct);
-                put("microscopeSerialNumber", retrieve.getMicroscopeSerialNumber(j), instrumentStruct);
-                put("microscopeType", retrieve.getMicroscopeType(j), instrumentStruct);
+                put("microscopeLotNumber", retrieve.getMicroscopeLotNumber(j), instrumentProperties);
+                put("microscopeManufacturer", retrieve.getMicroscopeManufacturer(j), instrumentProperties);
+                setManufacturer(retrieve.getMicroscopeManufacturer(j), instrumentStruct);
+                put("microscopeModel", retrieve.getMicroscopeModel(j), instrumentProperties);
+                put("microscopeSerialNumber", retrieve.getMicroscopeSerialNumber(j), instrumentProperties);
+                put("microscopeType", retrieve.getMicroscopeType(j), instrumentProperties);
             }
 
             for (int k = 0; k < retrieve.getLightSourceCount(j); k++) {
 
                 String type = retrieve.getLightSourceType(j, k).toLowerCase();
-                put("lightSource" + k + ".type", type, instrumentStruct);
+                put("lightSource" + k + ".type", type, instrumentProperties);
 
                 if (type.equals("arc")) {
                     String arcName = "arc_" + retrieve.getArcID(j, k);
-                    put(arcName + ".ID", retrieve.getArcID(j, k), instrumentStruct);
-                    put(arcName + ".lotNumber", retrieve.getArcLotNumber(j, k), instrumentStruct);
-                    put(arcName + ".manufacturer", retrieve.getArcManufacturer(j, k), instrumentStruct);
-                    put(arcName + ".model", retrieve.getArcModel(j, k), instrumentStruct);
-                    put(arcName + ".serialNumber", retrieve.getArcSerialNumber(j, k), instrumentStruct);
-                    put(arcName + ".type", retrieve.getArcType(j, k), instrumentStruct);
+                    put(arcName + ".ID", retrieve.getArcID(j, k), instrumentProperties);
+                    put(arcName + ".lotNumber", retrieve.getArcLotNumber(j, k), instrumentProperties);
+                    put(arcName + ".manufacturer", retrieve.getArcManufacturer(j, k), instrumentProperties);
+                    setManufacturer(retrieve.getArcManufacturer(j, k), instrumentStruct);
+
+                    put(arcName + ".model", retrieve.getArcModel(j, k), instrumentProperties);
+                    put(arcName + ".serialNumber", retrieve.getArcSerialNumber(j, k), instrumentProperties);
+                    put(arcName + ".type", retrieve.getArcType(j, k), instrumentProperties);
                 }
 
                 if (type.equals("filament")) {
                     String filamentName = "filament_" + retrieve.getFilamentID(j, k);
-                    put(filamentName + ".ID", retrieve.getFilamentID(j, k), instrumentStruct);
-                    put(filamentName + ".lotNumber", retrieve.getFilamentLotNumber(j, k), instrumentStruct);
-                    put(filamentName + ".manufacturer", retrieve.getFilamentManufacturer(j, k), instrumentStruct);
-                    put(filamentName + ".model", retrieve.getFilamentModel(j, k), instrumentStruct);
-                    put(filamentName + ".serialNumber", retrieve.getFilamentSerialNumber(j, k), instrumentStruct);
-                    put(filamentName + ".type", retrieve.getFilamentType(j, k), instrumentStruct);
+                    put(filamentName + ".ID", retrieve.getFilamentID(j, k), instrumentProperties);
+                    put(filamentName + ".lotNumber", retrieve.getFilamentLotNumber(j, k), instrumentProperties);
+                    put(filamentName + ".manufacturer", retrieve.getFilamentManufacturer(j, k), instrumentProperties);
+                    setManufacturer(retrieve.getFilamentManufacturer(j, k), instrumentStruct);
+                    put(filamentName + ".model", retrieve.getFilamentModel(j, k), instrumentProperties);
+                    put(filamentName + ".serialNumber", retrieve.getFilamentSerialNumber(j, k), instrumentProperties);
+                    put(filamentName + ".type", retrieve.getFilamentType(j, k), instrumentProperties);
                 }
 
                 if (type.equals("laser")) {
                     String laserName = "laser_" + retrieve.getLaserID(j, k);
-                    put(laserName + ".ID", retrieve.getLaserID(j, k), instrumentStruct);
-                    put(laserName + ".medium", retrieve.getLaserLaserMedium(j, k), instrumentStruct);
-                    put(laserName + ".lotNumber", retrieve.getLaserLotNumber(j, k), instrumentStruct);
-                    put(laserName + ".manufacturer", retrieve.getLaserManufacturer(j, k), instrumentStruct);
-                    put(laserName + ".model", retrieve.getLaserModel(j, k), instrumentStruct);
-                    put(laserName + ".serialNumber", retrieve.getLaserSerialNumber(j, k), instrumentStruct);
-                    put(laserName + ".tuneable", retrieve.getLaserTuneable(j, k), instrumentStruct);
-                    put(laserName + ".type", retrieve.getLaserType(j, k), instrumentStruct);
+                    put(laserName + ".ID", retrieve.getLaserID(j, k), instrumentProperties);
+                    put(laserName + ".medium", retrieve.getLaserLaserMedium(j, k), instrumentProperties);
+                    put(laserName + ".lotNumber", retrieve.getLaserLotNumber(j, k), instrumentProperties);
+                    put(laserName + ".manufacturer", retrieve.getLaserManufacturer(j, k), instrumentProperties);
+                    setManufacturer(retrieve.getLaserManufacturer(j, k), instrumentStruct);
+                    put(laserName + ".model", retrieve.getLaserModel(j, k), instrumentProperties);
+                    put(laserName + ".serialNumber", retrieve.getLaserSerialNumber(j, k), instrumentProperties);
+                    put(laserName + ".tuneable", retrieve.getLaserTuneable(j, k), instrumentProperties);
+                    put(laserName + ".type", retrieve.getLaserType(j, k), instrumentProperties);
                 }
 
                 if (type.equals("lightEmittingDiode")) {
                     String lightEmittingDiodeName = "lightEmittingDiodeName_" + retrieve.getLightEmittingDiodeID(j, k);
-                    put(lightEmittingDiodeName + ".ID", retrieve.getLightEmittingDiodeID(j, k), instrumentStruct);
-                    put(lightEmittingDiodeName + ".lotNumber", retrieve.getLightEmittingDiodeLotNumber(j, k), instrumentStruct);
-                    put(lightEmittingDiodeName + ".manufacturer", retrieve.getLightEmittingDiodeManufacturer(j, k), instrumentStruct);
-                    put(lightEmittingDiodeName + ".model", retrieve.getLightEmittingDiodeModel(j, k), instrumentStruct);
-                    put(lightEmittingDiodeName + ".serialNumber", retrieve.getLightEmittingDiodeSerialNumber(j, k), instrumentStruct);
+                    put(lightEmittingDiodeName + ".ID", retrieve.getLightEmittingDiodeID(j, k), instrumentProperties);
+                    put(lightEmittingDiodeName + ".lotNumber", retrieve.getLightEmittingDiodeLotNumber(j, k), instrumentProperties);
+                    put(lightEmittingDiodeName + ".manufacturer", retrieve.getLightEmittingDiodeManufacturer(j, k), instrumentProperties);
+                    setManufacturer(retrieve.getLightEmittingDiodeManufacturer(j, k), instrumentStruct);
+                    put(lightEmittingDiodeName + ".model", retrieve.getLightEmittingDiodeModel(j, k), instrumentProperties);
+                    put(lightEmittingDiodeName + ".serialNumber", retrieve.getLightEmittingDiodeSerialNumber(j, k), instrumentProperties);
                 }
+            }
+            
+            for (int k = 0; k < retrieve.getDichroicCount(j); k++) {
+                String filterName = "dichroic_" + retrieve.getDichroicID(j, k);
+                put(filterName + ".ID", retrieve.getDichroicID(j, k), instrumentProperties);
+                put(filterName + ".lotNumber", retrieve.getDichroicLotNumber(j, k), instrumentProperties);
+                put(filterName + ".manufacturer", retrieve.getDichroicManufacturer(j, k), instrumentProperties);
+                setManufacturer(retrieve.getDichroicManufacturer(j, k), instrumentStruct);
+                put(filterName + ".model", retrieve.getDichroicModel(j, k), instrumentProperties);
+                put(filterName + ".serialNumber", retrieve.getDichroicSerialNumber(j, k), instrumentProperties);
             }
 
             for (int k = 0; k < retrieve.getObjectiveCount(j); k++) {
                 String objName = "objective_" + retrieve.getObjectiveID(j, k);
-                put(objName + ".ID", retrieve.getObjectiveID(j, k), instrumentStruct);
-                put(objName + ".lotNumber", retrieve.getObjectiveLotNumber(j, k), instrumentStruct);
-                put(objName + ".manufacturer", retrieve.getObjectiveManufacturer(j, k), instrumentStruct);
-                put(objName + ".model", retrieve.getObjectiveModel(j, k), instrumentStruct);
-                put(objName + ".serialNumber", retrieve.getObjectiveSerialNumber(j, k), instrumentStruct);
+                put(objName + ".ID", retrieve.getObjectiveID(j, k), instrumentProperties);
+                put(objName + ".lotNumber", retrieve.getObjectiveLotNumber(j, k), instrumentProperties);
+                put(objName + ".manufacturer", retrieve.getObjectiveManufacturer(j, k), instrumentProperties);
+                setManufacturer(retrieve.getObjectiveManufacturer(j, k), instrumentStruct);
+                put(objName + ".model", retrieve.getObjectiveModel(j, k), instrumentProperties);
+                put(objName + ".serialNumber", retrieve.getObjectiveSerialNumber(j, k), instrumentProperties);
             }
 
             for (int k = 0; k < retrieve.getFilterCount(j); k++) {
                 String filterName = "filter_" + retrieve.getFilterID(j, k);
-                put(filterName + ".wheel", retrieve.getFilterFilterWheel(j, k), instrumentStruct);
-                put(filterName + ".ID", retrieve.getFilterID(j, k), instrumentStruct);
-                put(filterName + ".lotNumber", retrieve.getFilterLotNumber(j, k), instrumentStruct);
-                put(filterName + ".model", retrieve.getFilterModel(j, k), instrumentStruct);
-                put(filterName + ".serialNumber", retrieve.getFilterSerialNumber(j, k), instrumentStruct);
-                put(filterName + ".manufacturer", retrieve.getFilterManufacturer(j, k), instrumentStruct);
-                put(filterName + ".type", retrieve.getFilterType(j, k), instrumentStruct);
+                put(filterName + ".wheel", retrieve.getFilterFilterWheel(j, k), instrumentProperties);
+                put(filterName + ".ID", retrieve.getFilterID(j, k), instrumentProperties);
+                put(filterName + ".lotNumber", retrieve.getFilterLotNumber(j, k), instrumentProperties);
+                put(filterName + ".model", retrieve.getFilterModel(j, k), instrumentProperties);
+                put(filterName + ".serialNumber", retrieve.getFilterSerialNumber(j, k), instrumentProperties);
+                put(filterName + ".manufacturer", retrieve.getFilterManufacturer(j, k), instrumentProperties);
+                setManufacturer(retrieve.getFilterManufacturer(j, k), instrumentStruct);
+                put(filterName + ".type", retrieve.getFilterType(j, k), instrumentProperties);
             }
 
             for (int k = 0; k < retrieve.getDetectorCount(j); k++) {
                 String filterName = "detector_" + retrieve.getDetectorID(j, k);
-                put(filterName + ".ID", retrieve.getDetectorID(j, k), instrumentStruct);
-                put(filterName + ".lotNumber", retrieve.getDetectorLotNumber(j, k), instrumentStruct);
-                put(filterName + ".model", retrieve.getDetectorModel(j, k), instrumentStruct);
-                put(filterName + ".manufacturer", retrieve.getDetectorManufacturer(j, k), instrumentStruct);
-                put(filterName + ".serialNumber", retrieve.getDetectorSerialNumber(j, k), instrumentStruct);
-                put(filterName + ".type", retrieve.getDetectorType(j, k), instrumentStruct);
+                put(filterName + ".ID", retrieve.getDetectorID(j, k), instrumentProperties);
+                put(filterName + ".lotNumber", retrieve.getDetectorLotNumber(j, k), instrumentProperties);
+                put(filterName + ".model", retrieve.getDetectorModel(j, k), instrumentProperties);
+                put(filterName + ".manufacturer", retrieve.getDetectorManufacturer(j, k), instrumentProperties);
+                setManufacturer(retrieve.getDetectorManufacturer(j, k), instrumentStruct);
+                put(filterName + ".serialNumber", retrieve.getDetectorSerialNumber(j, k), instrumentProperties);
+                put(filterName + ".type", retrieve.getDetectorType(j, k), instrumentProperties);
             }
 
-            for (int k = 0; k < retrieve.getDichroicCount(j); k++) {
-                String filterName = "dichroic_" + retrieve.getDichroicID(j, k);
-                put(filterName + ".ID", retrieve.getDichroicID(j, k), instrumentStruct);
-                put(filterName + ".lotNumber", retrieve.getDichroicLotNumber(j, k), instrumentStruct);
-                put(filterName + ".manufacturer", retrieve.getDichroicManufacturer(j, k), instrumentStruct);
-                put(filterName + ".model", retrieve.getDichroicModel(j, k), instrumentStruct);
-                put(filterName + ".serialNumber", retrieve.getDichroicSerialNumber(j, k), instrumentStruct);
-            }
-
+            put("properties", instrumentProperties, instrumentStruct, true);
             instrumentStructs.add(instrumentStruct);
         }
         return instrumentStructs;
     }
 
     private void put(String name, Object value, Map<String, Object> map) {
+        put(name, value, map, false);
+    }
+    
+    private void put(String name, Object value, Map<String, Object> map, boolean putDirectly) {
         if (value != null) {
-            //TODO: handle Enums, PositiveIntegers, etc
-            map.put(name, value);
+            if (putDirectly || value instanceof String)
+            {
+                map.put(name, value);
+                return;
+            }
+            
+            //cast to string then to int
+            //TODO: handle each OME enum, PositiveInteger, etc separately
+            String val = value.toString();
+            try{
+                int v = Integer.valueOf(val);
+                 map.put(name, v);
+                 return;
+            } catch (NumberFormatException e){}
+            
+            try{
+                long v = Long.valueOf(val);
+                 map.put(name, v);
+                 return;
+            } catch (NumberFormatException e){}
+            
+            try{
+                double v = Double.valueOf(val);
+                 map.put(name, v);
+                 return;
+            } catch (NumberFormatException e){}
+            
+            map.put(name, val);
         }
     }
 
@@ -510,5 +558,10 @@ public class FileMetadata {
             return false;
         }
         return true;
+    }
+
+    private void setManufacturer(String manufacturer, Map<String, Object> instrumentStruct) {
+        if (instrumentStruct.get("manufacturer") == null)
+            put("manufacturer", manufacturer, instrumentStruct);
     }
 }

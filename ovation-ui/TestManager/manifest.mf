@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: us.physion.ovation.test
 OpenIDE-Module-Localizing-Bundle: us/physion/ovation/test/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
+OpenIDE-Module-Specification-Version: 1.2
 

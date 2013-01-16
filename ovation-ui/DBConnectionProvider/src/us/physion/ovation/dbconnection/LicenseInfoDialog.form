@@ -36,7 +36,7 @@
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jScrollPane1" alignment="0" pref="275" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" alignment="0" pref="313" max="32767" attributes="0"/>
                           <Component id="labTextField" alignment="0" max="32767" attributes="0"/>
                           <Component id="institutionTextField" alignment="0" max="32767" attributes="0"/>
                       </Group>

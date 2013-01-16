@@ -4,12 +4,19 @@
  */
 package us.physion.ovation.editor;
 
+import ij.ImagePlus;
+import ij.gui.ImageCanvas;
+import ij.io.Opener;
+import imagej.ImageJ;
+import imagej.display.DisplayService;
 import java.awt.Component;
 import java.io.File;
 import javax.swing.JPanel;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.io.ImgOpener;
 import org.openide.util.lookup.ServiceProvider;
 import ovation.Response;
+import ovation.URLResponse;
 
 
 /**
@@ -18,13 +25,31 @@ import ovation.Response;
  */
 public class ImageJVisualization implements Visualization{
 
-    ImageJVisualization(String s)
+    JPanel panel;
+    ImageJVisualization(String url)
     {
+        // open a file with ImageJ
+        /*try{
+            url = url.substring("file:".length());
+        final ImagePlus imp = new Opener().openImage( url );
+        ImageCanvas ic = new ImageCanvas(imp);
+        panel = new JPanel();
+        panel.add(ic);
+        } catch(Exception e)
+        {*/
+            try{
+            ImgPlus ip = ImgOpener.open(url);
+		// display the dataset
+                DisplayService displayService = new ImageJ().getService(DisplayService.class);
+                displayService.getActiveDisplay().display(ip);
+            } catch (Exception ex){
+            }
+        //}
     }
     
     @Override
     public Component generatePanel() {
-        return new JPanel();
+        return panel;
     }
 
     @Override

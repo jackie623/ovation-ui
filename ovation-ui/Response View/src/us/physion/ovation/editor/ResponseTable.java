@@ -16,14 +16,6 @@ public class ResponseTable extends JTable{
     int[] heights;
     public void setHeights(int[] heights)
     {
-        /*if (this.heights != null)
-        {
-        for (int i=0; i< this.heights.length && i < heights.length; i++)
-        {
-            if (heights[i] != this.heights[i])
-                setRowHeight(i, heights[i]);
-        }
-        }*/
         this.heights = heights;
     }
     @Override

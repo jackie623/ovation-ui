@@ -12,10 +12,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.openide.actions.CopyAction;
@@ -28,28 +25,85 @@ import org.openide.util.datatransfer.ExTransferable;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 import ovation.*;
-import us.physion.ovation.interfaces.ConnectionProvider;
-import us.physion.ovation.interfaces.IEntityWrapper;
+import us.physion.ovation.interfaces.*;
 
 /**
  *
  * @author huecotanks
  */
-public class EntityNode extends AbstractNode{
+public class EntityNode extends AbstractNode implements ResettableNode{
 
     private Action[] actionList;
-
+    private IEntityWrapper parent;
+    private static Map<Class, Class> insertableMap = createMap();
         
-    public EntityNode(Children c, Lookup l) {
+    public EntityNode(Children c, Lookup l, IEntityWrapper parent) {
         super (c, l);
-        actionList = new Action[] {CopyAction.get(CopyAction.class)};
+        this.parent = parent;
     }
   
-   public EntityNode(Children c)
+   public EntityNode(Children c, IEntityWrapper parent)
    {
        super(c);
-       actionList = new Action[] {CopyAction.get(CopyAction.class)};
+       this.parent = parent;
    }
+   @Override
+   public void resetNode()
+   {
+       Children c = getChildren();
+       if (c == null || this.isLeaf())
+           return;
+       if (c instanceof EntityChildren)
+       {
+           ((EntityChildren)c).initKeys();
+       }
+   }
+   
+   protected void setActionList(Action[] actions)
+   {
+       actionList = actions;
+   }
+   
+   @Override
+    public Action[] getActions(boolean popup) {
+       if (actionList == null)
+       {
+           if (parent == null)// root node
+           {
+               Collection<? extends RootInsertable> insertables = Lookup.getDefault().lookupAll(RootInsertable.class);
+               List<RootInsertable> l = new ArrayList(insertables);
+               Collections.sort(l);
+               actionList = l.toArray(new RootInsertable[l.size()]);
+           }
+           else{
+               Class entityClass = parent.getType();
+               Class insertableClass = insertableMap.get(entityClass);
+               if (insertableClass == null)
+               {
+                   actionList = new Action[0];
+               } else {
+                   Collection insertables = Lookup.getDefault().lookupAll(insertableClass);
+                   List<? extends Comparable> l = new ArrayList(insertables);
+                   Collections.sort(l);
+                   actionList = l.toArray(new EntityInsertable[l.size()]);
+               }
+           }
+       }
+        return actionList;
+    }
+
+    private static Map<Class, Class> createMap() {
+        Map<Class, Class> insertables = new HashMap<Class, Class>();
+        insertables.put(Project.class, ProjectInsertable.class);
+        insertables.put(Source.class, SourceInsertable.class);
+        insertables.put(Experiment.class, ExperimentInsertable.class);
+        insertables.put(EpochGroup.class, EpochGroupInsertable.class);
+        insertables.put(Epoch.class, EpochInsertable.class);
+        insertables.put(Response.class, ResponseInsertable.class);
+        insertables.put(Stimulus.class, StimulusInsertable.class);
+        insertables.put(DerivedResponse.class, DerivedResponseInsertable.class);
+        return insertables;
+    }
    
    /*@Override
    public Sheet createSheet()
@@ -139,17 +193,4 @@ public class EntityNode extends AbstractNode{
         });
         return added;
     }*/
-    
-    private class OpenAction extends AbstractAction{
-        
-        public OpenAction() {
-            putValue(NAME, "Open");
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent ae) {
-            
-        }
-
-    }
 }

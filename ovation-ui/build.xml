@@ -9,11 +9,18 @@
     <property name="interfaces.jar.dir" value="lib"/>
     <property name="interfaces.src.dir" value="GlobalInterfaces/src/"/>
     <property name="interfaces.class.dir" value="GlobalInterfaces/build/classes/"/>
-    <property name="ovation.jar.path" value="lib/ovation.jar"/>
-    <property name="test-manager.jar.path" value="lib/test-manager.jar"/>
-    <property name="lookup.jar.path" value="${harness.dir}/../platform/lib/org-openide-util-lookup.jar"/>
-    <property name="junit.jar.path" value="${harness.dir}/../platform/modules/org-netbeans-libs-junit4.jar"/>
+    <property name="ovation.jar" value="lib/ovation.jar"/>
+    <property name="test-manager.jar" value="lib/test-manager.jar"/>
+    <property name="lookup.jar" value="${harness.dir}/../platform/lib/org-openide-util-lookup.jar"/>
+    <property name="junit.jar" value="${harness.dir}/../platform/modules/org-netbeans-libs-junit4.jar"/>
+    <property name="jdesktop.jar" value="${harness.dir}/../platform/modules/org-jdesktop-layout.jar"/>
+    <property name="ui-elements.jar" value="../ScrollableTableTree/dist/ScrollableTableTree.jar"/>
+    <property name="wizard-dialogs.jar" value="${harness.dir}/../platform/modules/org-openide-dialogs.jar"/>
+    <property name="utilities.jar" value="${harness.dir}/../platform/lib/org-openide-util.jar"/>
+    <property name="swingx.jar" value="lib/swingx-1.6.1.jar"/>
 
+    <property name="utilities.jar.local" value="netbeans/platform/lib/org-openide-util.jar"/>
+    
     <property name="bootstrap.url"
               value="http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/lastStableBuild/artifact/nbbuild/netbeans/harness/tasks.jar"/>
 
@@ -36,7 +43,7 @@
         <javac srcdir="${interfaces.src.dir}"
                includes="**/*"
                destdir="${interfaces.class.dir}"
-               classpath="${ovation.jar.path}:${lookup.jar.path}:${junit.jar.path}:${test-manager.jar.path}"
+               classpath="${ovation.jar}:${lookup.jar}:${junit.jar}:${test-manager.jar}:${exceptions.jar}:${jdesktop.jar}:${wizard-dialogs.jar}:${wizard-dialogs.local}:${utilities.jar}:${utilities.jar.local}:${swingx.jar}"
                includeAntRuntime="no"
                 />
 
@@ -44,6 +51,7 @@
 
         <jar destfile="${interfaces.jar.dir}/interfaces.jar">
             <fileset dir="${interfaces.class.dir}"/>
+	    <zipfileset includes="**/*" src="${ui-elements.jar}"/>
         </jar>
     </target>
 

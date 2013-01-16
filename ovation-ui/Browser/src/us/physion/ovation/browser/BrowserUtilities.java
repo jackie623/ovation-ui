@@ -23,6 +23,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
 import ovation.IAuthenticatedDataStoreCoordinator;
 import ovation.IEntityBase;
 import us.physion.ovation.interfaces.ConnectionListener;
@@ -65,7 +66,7 @@ public class BrowserUtilities{
         executorService.submit(runnable);
     }
     
-    protected static void initBrowser(final ExplorerManager em, 
+    public static void initBrowser(final ExplorerManager em, 
                                    final boolean projectView)
     {
         registeredViewManagers.put(em, projectView);//TODO: don't need this. we should be able to look up the explorerManagers from TopComponents
@@ -88,21 +89,46 @@ public class BrowserUtilities{
                 etp.addQueryListener(ql);
             }
         }
-        em.setRootContext(new EntityNode(new EntityChildren(null, projectView, null)));
+        em.setRootContext(new EntityNode(new EntityChildren(null, projectView, null), null));
         resetView(em, projectView);
     }
     
-    protected static void resetView()
+    public static void resetView()
     {
         browserMap.clear();
         for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-            mgr.setRootContext(new EntityNode(new EntityChildren(null, registeredViewManagers.get(mgr), null)));
+            mgr.setRootContext(new EntityNode(new EntityChildren(null, registeredViewManagers.get(mgr), null), null));
+        }
+    }
+    
+    public static void switchToSourceView()
+    {
+        Set<TopComponent> components = TopComponent.getRegistry().getOpened();
+        for (TopComponent c : components)
+        {
+            if (c instanceof SourceBrowserTopComponent)
+            {
+                c.toFront();
+                break;
+            }
+        }
+    }
+    public static void switchToProjectView()
+    {
+        Set<TopComponent> components = TopComponent.getRegistry().getOpened();
+        for (TopComponent c : components)
+        {
+            if (c instanceof BrowserTopComponent)
+            {
+                c.toFront();
+                break;
+            }
         }
     }
 
     protected static void resetView(ExplorerManager e, boolean projectView)
     {
-        e.setRootContext(new EntityNode(new EntityChildren(null, projectView, null)));
+        e.setRootContext(new EntityNode(new EntityChildren(null, projectView, null), null));
     }
     
     protected static void setTrees(final ExpressionTree result)
@@ -113,7 +139,7 @@ public class BrowserUtilities{
         Set<ExplorerManager> mgrs = new HashSet<ExplorerManager>();
         for (ExplorerManager em : registeredViewManagers.keySet())
         {
-            em.setRootContext(new EntityNode(new QueryChildren(registeredViewManagers.get(em))));
+            em.setRootContext(new EntityNode(new QueryChildren(registeredViewManagers.get(em)), null));
             mgrs.add(em);
         }
         

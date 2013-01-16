@@ -72,7 +72,6 @@ public class EntityWrapper implements IEntityWrapper {
     @Override
     public Class getType() { return type;}
 
-   
     public static String inferDisplayName(IEntityBase e) {
 	Class type = e.getClass();
         if (type.isAssignableFrom(Source.class))

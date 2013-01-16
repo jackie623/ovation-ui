@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: us.physion.ovation.importer
+OpenIDE-Module-Localizing-Bundle: us/physion/ovation/importer/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.3
+

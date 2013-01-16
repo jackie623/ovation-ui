@@ -2,5 +2,5 @@ Manifest-Version: 1.0
 OpenIDE-Module: us.physion.ovation.dbconnection
 OpenIDE-Module-Install: us/physion/ovation/dbconnection/Installer.class
 OpenIDE-Module-Localizing-Bundle: us/physion/ovation/dbconnection/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.1
+OpenIDE-Module-Specification-Version: 1.2
 

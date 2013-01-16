@@ -66,7 +66,6 @@ public final class TagsViewTopComponent extends TopComponent {
                 update();
             }
         }
-
     };
 
     protected void addTags(final Collection<? extends IEntityWrapper> entities, String tags) {
@@ -84,17 +83,19 @@ public final class TagsViewTopComponent extends TopComponent {
         entities = global.allInstances();
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.getConnection().getContext(); //getContext
-        update(entities, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+        EventQueueUtilities.runOffEDT(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                update(entities, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection());
+            }
+        });
     }
 
     protected List<TableTreeKey> update(Collection<? extends IEntityWrapper> entities, IAuthenticatedDataStoreCoordinator dsc)
     {
-        DataContext c;
-        if (dsc == null) {
-            c = Lookup.getDefault().lookup(ConnectionProvider.class).getConnection().getContext();
-        }else{
-            c = dsc.getContext();
-        }
+        DataContext c = dsc.getContext();
 
         ArrayList<TableTreeKey> tags = new ArrayList<TableTreeKey>();
         Set<String> uris = new HashSet<String>();
@@ -178,20 +179,8 @@ public final class TagsViewTopComponent extends TopComponent {
                 data[i][0] = tags[i];
             }
             model.setDataVector(data, new Object[]{"Value"});
-
-            EventQueueUtilities.runOnEDT(new Runnable() {
-
-                @Override
-                public void run() {
-                    try{
-                    ((ScrollableTableTree)tagTree).resizeEditableNode(node);
-                    ((DefaultTreeModel)((ScrollableTableTree)tagTree).getTree().getModel()).nodeStructureChanged(node);
-                    } catch (Exception e)
-                    {
-                        System.out.println("Error: " + e.getMessage());
-                    }
-                }
-            });
+            
+            ((ScrollableTableTree)tagTree).resizeNode(node);
         }
     }
     

@@ -4,11 +4,18 @@
  */
 package us.physion.ovation.dbconnection;
 
+import com.objy.db.DatabaseNotFoundException;
+import com.objy.db.DatabaseOpenException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
+import java.util.prefs.Preferences;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import ovation.*;
+import ovation.database.DatabaseManager;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IUpgradeDB;
 import us.physion.ovation.interfaces.UpdateInfo;
@@ -99,7 +106,64 @@ class DBConnectionManager {
         try {
             dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
             c = dsc.getContext();
-        } catch (SchemaVersionException ex2)
+        } catch(DatabaseNotFoundException ex)
+        {
+            Preferences p = Preferences.userNodeForPackage(Ovation.class);                        
+            String idString = p.get("local_fd_ids", "");
+            String[] idStrings = idString.split(",");
+            Set ids = new HashSet();
+            for (String s : idStrings)
+            {
+                if (s.isEmpty())
+                    continue;
+                ids.add(Integer.valueOf(s));
+            }
+            int fdid = 5000;
+            while(ids.contains(fdid))
+            {
+                fdid++;
+            }
+            idString += ","+ fdid;
+            p.put("local_fd_ids", idString);
+                       
+            String lockserver;
+            try {
+                lockserver = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException ex1) {
+                lockserver = "127.0.0.1";
+            }
+            DatabaseManager.createLocalDatabase(connectionFile, lockserver, fdid);
+            
+            //license database, and add user
+            try {
+                dsc = DataStoreCoordinator.coordinatorWithConnectionFile(connectionFile);
+                String institution = p.get("ovation_license_institution", "");
+                String lab = p.get("ovation_license_lab", "");
+                String text = p.get("ovation_license_licenseText", "");
+                dsc.licenseDatabase(institution, lab, text, false);
+                
+                c = dsc.getContext();
+                c.addUser(username, password);
+                try {
+                    c.authenticateUser(username, password);
+                } catch (UserAuthenticationException ex1) {
+                    cancelled = true;
+                    connectionDialog.showErrors(ex1, dsc);
+                    return c;
+                }
+                return c;
+
+            } catch (DatabaseOpenException ex1) {
+                cancelled = true;
+                connectionDialog.showErrors(ex1, dsc);
+                return c;
+            } catch (DatabaseNotFoundException ex1) {
+                cancelled = true;
+                connectionDialog.showErrors(ex1, dsc);
+                return c;
+            }
+        }
+        catch (SchemaVersionException ex2)
         {
             int databaseVersion = ex2.getDatabaseSchemaNumber();
             int apiVersion = ex2.getAPISchemaNumber();

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.prefs.Preferences;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
@@ -94,6 +95,17 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
                  */
 
                 try {
+                    //If licensing information is not set in the java preferences, set it now
+                    Preferences p = Preferences.userNodeForPackage(Ovation.class);
+                    if (p.get("ovation_license_licenseText", null) == null)
+                    {
+                        LicenseInfoDialog licenseDialog = new LicenseInfoDialog();
+                        licenseDialog.showDialog();
+                        p.put("ovation_license_institution", licenseDialog.getInstitution());
+                        p.put("ovation_license_lab", licenseDialog.getLab());
+                        p.put("ovation_license_licenseText", licenseDialog.getLicenseText());
+                    }
+                    
                     DBConnectionDialog dialog = new DBConnectionDialog();
                     DBConnectionManager manager = new DBConnectionManager();
                     dialog.setConnectionManager(manager);

@@ -106,6 +106,9 @@
       <BindingProperties>
         <BindingProperty name="selectedItem" source="viewModel" sourcePath="${connection}" target="connectionFileComboBox" targetPath="selectedItem" updateStrategy="0" immediately="false"/>
       </BindingProperties>
+      <Events>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="connectionFileComboBoxItemStateChanged"/>
+      </Events>
     </Component>
     <Container class="javax.swing.JPanel" name="credentialsPanel">
       <Properties>

@@ -1,4 +1,7 @@
+#!/bin/bash
+
 function force_copy {
+	mkdir -p $(dirname $2)
     if [ -f $2 ] && [ $1 != $2 ]; then
 	echo "Removing file"
 	rm -f $2

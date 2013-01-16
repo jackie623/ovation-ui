@@ -48,6 +48,7 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
     
     public void showDialog()
     {
+        setLocationRelativeTo(null);
         setVisible(true);
     }
     /**
@@ -65,8 +66,9 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         institutionTextField = new javax.swing.JTextField();
         labTextField = new javax.swing.JTextField();
-        licenseTextField = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        licenseTextField = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -92,19 +94,21 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
             }
         });
 
-        licenseTextField.setText(org.openide.util.NbBundle.getMessage(LicenseInfoDialog.class, "LicenseInfoDialog.licenseTextField.text")); // NOI18N
-        licenseTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                licenseTextFieldKeyReleased(evt);
-            }
-        });
-
         jButton1.setText(org.openide.util.NbBundle.getMessage(LicenseInfoDialog.class, "LicenseInfoDialog.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
+
+        licenseTextField.setColumns(20);
+        licenseTextField.setRows(5);
+        licenseTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                licenseTextFieldKeyReleased(evt);
+            }
+        });
+        jScrollPane1.setViewportView(licenseTextField);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -117,23 +121,18 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
                         .add(jLabel1)
                         .add(0, 77, Short.MAX_VALUE))
                     .add(layout.createSequentialGroup()
+                        .add(10, 10, 10)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                            .add(jLabel2)
+                            .add(jLabel3)
+                            .add(jLabel4))
+                        .add(18, 18, 18)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(layout.createSequentialGroup()
-                                .add(16, 16, 16)
-                                .add(jLabel4)
-                                .add(37, 37, 37))
-                            .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(jLabel3)
-                                    .add(jLabel2))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)))
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(licenseTextField)
                             .add(labTextField)
-                            .add(institutionTextField)))
+                            .add(org.jdesktop.layout.GroupLayout.TRAILING, institutionTextField)
+                            .add(jScrollPane1)))
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .add(0, 0, Short.MAX_VALUE)
+                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(jButton1)))
                 .addContainerGap())
         );
@@ -151,13 +150,15 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
                     .add(labTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jLabel3))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(licenseTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jLabel4))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jLabel4)
+                    .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(18, 18, 18)
                 .add(jButton1)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jButton1.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(LicenseInfoDialog.class, "LicenseInfoDialog.jButton1.AccessibleContext.accessibleName")); // NOI18N
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -173,14 +174,14 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_labTextFieldKeyReleased
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     private void licenseTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_licenseTextFieldKeyReleased
         license = licenseTextField.getText();
         checkSave();
     }//GEN-LAST:event_licenseTextFieldKeyReleased
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -238,8 +239,9 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField labTextField;
-    private javax.swing.JTextField licenseTextField;
+    private javax.swing.JTextArea licenseTextField;
     // End of variables declaration//GEN-END:variables
 
     private void checkSave() {

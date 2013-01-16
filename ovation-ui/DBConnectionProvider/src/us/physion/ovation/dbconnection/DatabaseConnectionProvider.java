@@ -97,7 +97,7 @@ public class DatabaseConnectionProvider implements ConnectionProvider {
                 try {
                     //If licensing information is not set in the java preferences, set it now
                     Preferences p = Preferences.userNodeForPackage(Ovation.class);
-                    if (p.get("ovation_license_licenseText", null) == null)
+                    //if (p.get("ovation_license_licenseText", null) == null)
                     {
                         LicenseInfoDialog licenseDialog = new LicenseInfoDialog();
                         licenseDialog.showDialog();

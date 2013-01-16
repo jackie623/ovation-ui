@@ -23,3 +23,13 @@
 ovation-ui/nbproject/private/platform-private.properties
 /ovation-ui/dist/
 /ovation-ui/JFreeChart/build/
+/ScrollableTableTree/build/
+ovation-ui/Browser/release/modules/ext/ovation.jar
+
+ovation-ui/DBConnectionProvider/release/modules/ext/ovation.jar
+
+ovation-ui/GlobalInterfaceLibrary/release/modules/ext/interfaces.jar
+
+ovation-ui/OvationAPI/release/modules/ext/ovation.jar
+
+ovation-ui/OvationAPI/release/modules/ext/ovation.jar

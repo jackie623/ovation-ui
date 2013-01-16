@@ -140,6 +140,7 @@
                 <package>org.joda.time.format</package>
                 <package>org.joda.time.tz</package>
                 <package>ovation</package>
+		<package>ovation.database</package>
                 <package>ovation.license</package>
                 <package>ovation.utils</package>
                 <package>scala</package>

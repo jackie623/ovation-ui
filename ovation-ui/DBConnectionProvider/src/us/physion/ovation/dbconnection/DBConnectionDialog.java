@@ -9,6 +9,7 @@ import com.objy.db.DatabaseOpenException;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -188,6 +189,12 @@ public class DBConnectionDialog extends javax.swing.JDialog implements Connectio
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, viewModel, org.jdesktop.beansbinding.ELProperty.create("${connection}"), connectionFileComboBox, org.jdesktop.beansbinding.BeanProperty.create("selectedItem"));
         bindingGroup.addBinding(binding);
+
+        connectionFileComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                connectionFileComboBoxItemStateChanged(evt);
+            }
+        });
 
         credentialsPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -398,6 +405,19 @@ public class DBConnectionDialog extends javax.swing.JDialog implements Connectio
         manager.cancel();
         disposeOnEDT();      
     }//GEN-LAST:event_cancelAction
+
+    private void connectionFileComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_connectionFileComboBoxItemStateChanged
+        String path = (String)connectionFileComboBox.getSelectedItem();
+        if (path == null || path.isEmpty())
+            return;
+        File f = new File(path);
+        if (!f.exists())
+        {
+            connectButton.setText("Create DB");
+        }else{
+            connectButton.setText("Connect");
+        }
+    }//GEN-LAST:event_connectionFileComboBoxItemStateChanged
 
     
    

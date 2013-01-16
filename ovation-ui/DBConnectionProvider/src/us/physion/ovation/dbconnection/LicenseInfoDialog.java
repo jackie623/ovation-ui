@@ -60,7 +60,6 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -71,8 +70,7 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
         licenseTextField = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(LicenseInfoDialog.class, "LicenseInfoDialog.jLabel1.text")); // NOI18N
+        setTitle(org.openide.util.NbBundle.getMessage(LicenseInfoDialog.class, "LicenseInfoDialog.title")); // NOI18N
 
         jLabel2.setText(org.openide.util.NbBundle.getMessage(LicenseInfoDialog.class, "LicenseInfoDialog.jLabel2.text")); // NOI18N
 
@@ -117,10 +115,6 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
             .add(layout.createSequentialGroup()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(layout.createSequentialGroup()
-                        .add(111, 111, 111)
-                        .add(jLabel1)
-                        .add(0, 77, Short.MAX_VALUE))
-                    .add(layout.createSequentialGroup()
                         .add(10, 10, 10)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
                             .add(jLabel2)
@@ -128,9 +122,9 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
                             .add(jLabel4))
                         .add(18, 18, 18)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
                             .add(labTextField)
-                            .add(org.jdesktop.layout.GroupLayout.TRAILING, institutionTextField)
-                            .add(jScrollPane1)))
+                            .add(institutionTextField)))
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                         .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(jButton1)))
@@ -139,9 +133,7 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(16, 16, 16)
-                .add(jLabel1)
-                .add(15, 15, 15)
+                .addContainerGap()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jLabel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 22, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(institutionTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
@@ -235,7 +227,6 @@ public class LicenseInfoDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField institutionTextField;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

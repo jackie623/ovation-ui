@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: us.physion.beansbinding
 OpenIDE-Module-Localizing-Bundle: us/physion/beansbinding/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
+OpenIDE-Module-Specification-Version: 1.3
 

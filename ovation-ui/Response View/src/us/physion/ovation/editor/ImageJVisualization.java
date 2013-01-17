@@ -10,6 +10,8 @@ import ij.io.Opener;
 import imagej.ImageJ;
 import imagej.display.DisplayService;
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.swing.JPanel;
 import net.imglib2.img.ImgPlus;
@@ -28,23 +30,25 @@ public class ImageJVisualization implements Visualization{
     JPanel panel;
     ImageJVisualization(String url)
     {
+        url = url.substring("file:".length());
         // open a file with ImageJ
-        /*try{
-            url = url.substring("file:".length());
-        final ImagePlus imp = new Opener().openImage( url );
-        ImageCanvas ic = new ImageCanvas(imp);
-        panel = new JPanel();
-        panel.add(ic);
-        } catch(Exception e)
-        {*/
-            try{
-            ImgPlus ip = ImgOpener.open(url);
-		// display the dataset
+        try {
+            final ImagePlus imp = new Opener().openImage(url);
+            panel = new BufferedImagePanel(imp.getBufferedImage());
+            /*ImageCanvas ic = new ImageCanvas(imp);
+            panel = new JPanel();
+            panel.add(ic);
+            */
+        } catch (Exception e) {
+            /*try {
+                ImgPlus ip = ImgOpener.open(url);
+                // display the dataset
                 DisplayService displayService = new ImageJ().getService(DisplayService.class);
                 displayService.getActiveDisplay().display(ip);
             } catch (Exception ex){
-            }
-        //}
+                System.out.println(ex);
+            }*/
+        }
     }
     
     @Override
@@ -63,3 +67,4 @@ public class ImageJVisualization implements Visualization{
     }
     
 }
+

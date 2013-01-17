@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.swing.*;
@@ -52,11 +53,14 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.Dataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.ui.RectangleInsets;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.util.*;
 import us.physion.ovation.interfaces.EventQueueUtilities;
 import us.physion.ovation.interfaces.IEntityWrapper;
+import us.physion.ovation.interfaces.QueryListener;
 
 /**
  * Top component which displays something.
@@ -170,20 +174,45 @@ public final class ResponseViewTopComponent extends TopComponent {
 
     protected void updateEntitySelection() {
         final Collection<? extends IEntityWrapper> entities = global.allInstances();
+        
         Runnable r = new Runnable() {
 
             @Override
             public void run() {
-                updateEntitySelection(entities);
+                ProgressHandle ph = null;
+                String displayName = "Loading Image";
+                if (entities.size() > 1) {
+                    displayName += "s";
+                }
+                ph = ProgressHandleFactory.createHandle(displayName, new Cancellable() {
+
+                    @Override
+                    public boolean cancel() {
+                        cancelDisplay();
+                        return true;
+                    }
+                });
+                ph.setDisplayName(displayName);
+                ph.switchToIndeterminate();
+                ph.start();
+                try {
+                    updateEntitySelection(entities);
+                } finally {
+                    ph.finish();
+                }
             }
         };
 
+        cancelDisplay();
+        updateEntitySelection = EventQueueUtilities.runOffEDT(r);
+    }
+    
+    private void cancelDisplay() {
         if (updateEntitySelection != null && !updateEntitySelection.isDone())
         {
             updateEntitySelection.cancel(true);
-            Ovation.getLogger().debug("Cancelled other thread");
+            Ovation.getLogger().debug("Cancelled display thread");
         }
-        updateEntitySelection = EventQueueUtilities.runOffEDT(r);
     }
 
     protected List<Visualization> updateEntitySelection(Collection<? extends IEntityWrapper> entities) {

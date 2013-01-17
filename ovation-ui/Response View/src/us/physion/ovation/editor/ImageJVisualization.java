@@ -17,8 +17,10 @@ import javax.swing.JPanel;
 import net.imglib2.img.ImgPlus;
 import net.imglib2.io.ImgOpener;
 import org.openide.util.lookup.ServiceProvider;
+import ovation.OvationException;
 import ovation.Response;
 import ovation.URLResponse;
+import imagej.data.Dataset;
 
 
 /**

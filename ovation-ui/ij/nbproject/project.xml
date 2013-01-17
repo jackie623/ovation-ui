@@ -7,15 +7,67 @@
             <suite-component/>
             <module-dependencies/>
             <public-packages>
+                <package>ij</package>
+                <package>ij.gui</package>
+                <package>ij.io</package>
+                <package>ij.macro</package>
+                <package>ij.measure</package>
+                <package>ij.plugin</package>
+                <package>ij.plugin.filter</package>
+                <package>ij.plugin.frame</package>
+                <package>ij.plugin.tool</package>
+                <package>ij.process</package>
+                <package>ij.text</package>
+                <package>ij.util</package>
                 <package>imagej</package>
+                <package>imagej.build</package>
+                <package>imagej.build.minimaven</package>
                 <package>imagej.command</package>
                 <package>imagej.config</package>
+                <package>imagej.console</package>
+                <package>imagej.core.commands.app</package>
+                <package>imagej.core.commands.assign</package>
+                <package>imagej.core.commands.assign.noisereduce</package>
+                <package>imagej.core.commands.axispos</package>
+                <package>imagej.core.commands.convolve</package>
+                <package>imagej.core.commands.dataset</package>
+                <package>imagej.core.commands.debug</package>
+                <package>imagej.core.commands.display</package>
+                <package>imagej.core.commands.display.interactive</package>
+                <package>imagej.core.commands.imglib</package>
+                <package>imagej.core.commands.misc</package>
+                <package>imagej.core.commands.neigh</package>
+                <package>imagej.core.commands.overlay</package>
+                <package>imagej.core.commands.restructure</package>
+                <package>imagej.core.commands.rotate</package>
+                <package>imagej.core.commands.typechange</package>
+                <package>imagej.core.commands.zoom</package>
+                <package>imagej.core.options</package>
+                <package>imagej.core.platforms.macosx</package>
+                <package>imagej.core.platforms.windows</package>
+                <package>imagej.core.tools</package>
+                <package>imagej.data</package>
+                <package>imagej.data.display</package>
+                <package>imagej.data.display.event</package>
+                <package>imagej.data.event</package>
+                <package>imagej.data.measure</package>
+                <package>imagej.data.options</package>
+                <package>imagej.data.overlay</package>
+                <package>imagej.data.sampler</package>
+                <package>imagej.data.table</package>
                 <package>imagej.display</package>
                 <package>imagej.display.event</package>
                 <package>imagej.display.event.input</package>
                 <package>imagej.display.event.window</package>
                 <package>imagej.event</package>
                 <package>imagej.input</package>
+                <package>imagej.io</package>
+                <package>imagej.io.event</package>
+                <package>imagej.io.plugins</package>
+                <package>imagej.legacy</package>
+                <package>imagej.legacy.patches</package>
+                <package>imagej.legacy.plugin</package>
+                <package>imagej.legacy.translate</package>
                 <package>imagej.log</package>
                 <package>imagej.menu</package>
                 <package>imagej.menu.event</package>
@@ -31,14 +83,146 @@
                 <package>imagej.plugin.event</package>
                 <package>imagej.render</package>
                 <package>imagej.script</package>
+                <package>imagej.script.editor</package>
+                <package>imagej.script.editor.command</package>
+                <package>imagej.script.java</package>
                 <package>imagej.service</package>
                 <package>imagej.service.event</package>
                 <package>imagej.thread</package>
                 <package>imagej.tool</package>
                 <package>imagej.tool.event</package>
+                <package>imagej.ui</package>
+                <package>imagej.ui.common.awt</package>
+                <package>imagej.ui.swing</package>
+                <package>imagej.ui.swing.commands</package>
+                <package>imagej.ui.swing.commands.debug</package>
+                <package>imagej.ui.swing.mdi</package>
+                <package>imagej.ui.swing.mdi.viewer</package>
+                <package>imagej.ui.swing.menu</package>
+                <package>imagej.ui.swing.overlay</package>
+                <package>imagej.ui.swing.sdi</package>
+                <package>imagej.ui.swing.sdi.viewer</package>
+                <package>imagej.ui.swing.tools</package>
+                <package>imagej.ui.swing.tools.overlay</package>
+                <package>imagej.ui.swing.viewer.image</package>
+                <package>imagej.ui.swing.viewer.table</package>
+                <package>imagej.ui.swing.viewer.text</package>
+                <package>imagej.ui.swing.widget</package>
+                <package>imagej.ui.viewer</package>
+                <package>imagej.ui.viewer.image</package>
+                <package>imagej.ui.viewer.table</package>
+                <package>imagej.ui.viewer.text</package>
+                <package>imagej.updater.core</package>
+                <package>imagej.updater.gui</package>
+                <package>imagej.updater.ssh</package>
+                <package>imagej.updater.ui</package>
+                <package>imagej.updater.util</package>
                 <package>imagej.util</package>
+                <package>imagej.util.awt</package>
+                <package>imagej.util.swing</package>
+                <package>imagej.util.swing.tree</package>
                 <package>imagej.widget</package>
+                <package>imagescience.array</package>
+                <package>imagescience.color</package>
+                <package>imagescience.feature</package>
+                <package>imagescience.fourier</package>
+                <package>imagescience.image</package>
+                <package>imagescience.random</package>
+                <package>imagescience.segment</package>
+                <package>imagescience.shape</package>
+                <package>imagescience.transform</package>
+                <package>imagescience.utility</package>
+                <package>imageware</package>
+                <package>mpicbg.imglib</package>
+                <package>mpicbg.imglib.algorithm</package>
+                <package>mpicbg.imglib.algorithm.correlation</package>
+                <package>mpicbg.imglib.algorithm.extremafinder</package>
+                <package>mpicbg.imglib.algorithm.fft</package>
+                <package>mpicbg.imglib.algorithm.floydsteinberg</package>
+                <package>mpicbg.imglib.algorithm.function</package>
+                <package>mpicbg.imglib.algorithm.gauss</package>
+                <package>mpicbg.imglib.algorithm.histogram</package>
+                <package>mpicbg.imglib.algorithm.histogram.arbitrary</package>
+                <package>mpicbg.imglib.algorithm.histogram.discrete</package>
+                <package>mpicbg.imglib.algorithm.integral</package>
+                <package>mpicbg.imglib.algorithm.kdtree</package>
+                <package>mpicbg.imglib.algorithm.kdtree.node</package>
+                <package>mpicbg.imglib.algorithm.labeling</package>
+                <package>mpicbg.imglib.algorithm.math</package>
+                <package>mpicbg.imglib.algorithm.mirror</package>
+                <package>mpicbg.imglib.algorithm.pde</package>
+                <package>mpicbg.imglib.algorithm.peak</package>
+                <package>mpicbg.imglib.algorithm.projection</package>
+                <package>mpicbg.imglib.algorithm.roi</package>
+                <package>mpicbg.imglib.algorithm.scalespace</package>
+                <package>mpicbg.imglib.algorithm.transformation</package>
+                <package>mpicbg.imglib.container</package>
+                <package>mpicbg.imglib.container.array</package>
+                <package>mpicbg.imglib.container.basictypecontainer</package>
+                <package>mpicbg.imglib.container.basictypecontainer.array</package>
+                <package>mpicbg.imglib.container.cell</package>
+                <package>mpicbg.imglib.container.constant</package>
+                <package>mpicbg.imglib.container.dynamic</package>
+                <package>mpicbg.imglib.container.imageplus</package>
+                <package>mpicbg.imglib.container.planar</package>
+                <package>mpicbg.imglib.container.shapelist</package>
+                <package>mpicbg.imglib.cursor</package>
+                <package>mpicbg.imglib.cursor.array</package>
+                <package>mpicbg.imglib.cursor.cell</package>
+                <package>mpicbg.imglib.cursor.constant</package>
+                <package>mpicbg.imglib.cursor.dynamic</package>
+                <package>mpicbg.imglib.cursor.imageplus</package>
+                <package>mpicbg.imglib.cursor.link</package>
+                <package>mpicbg.imglib.cursor.planar</package>
+                <package>mpicbg.imglib.cursor.shapelist</package>
+                <package>mpicbg.imglib.cursor.special</package>
+                <package>mpicbg.imglib.cursor.vector</package>
+                <package>mpicbg.imglib.exception</package>
+                <package>mpicbg.imglib.function</package>
+                <package>mpicbg.imglib.image</package>
+                <package>mpicbg.imglib.image.display</package>
+                <package>mpicbg.imglib.image.display.imagej</package>
+                <package>mpicbg.imglib.interpolation</package>
+                <package>mpicbg.imglib.interpolation.dct</package>
+                <package>mpicbg.imglib.interpolation.lanczos</package>
+                <package>mpicbg.imglib.interpolation.linear</package>
+                <package>mpicbg.imglib.interpolation.nearestneighbor</package>
+                <package>mpicbg.imglib.io</package>
+                <package>mpicbg.imglib.labeling</package>
+                <package>mpicbg.imglib.multithreading</package>
+                <package>mpicbg.imglib.outofbounds</package>
+                <package>mpicbg.imglib.type</package>
+                <package>mpicbg.imglib.type.label</package>
+                <package>mpicbg.imglib.type.logic</package>
+                <package>mpicbg.imglib.type.numeric</package>
+                <package>mpicbg.imglib.type.numeric.complex</package>
+                <package>mpicbg.imglib.type.numeric.integer</package>
+                <package>mpicbg.imglib.type.numeric.real</package>
+                <package>mpicbg.imglib.util</package>
                 <package>net.imglib2</package>
+                <package>net.imglib2.algorithm</package>
+                <package>net.imglib2.algorithm.componenttree</package>
+                <package>net.imglib2.algorithm.componenttree.mser</package>
+                <package>net.imglib2.algorithm.componenttree.pixellist</package>
+                <package>net.imglib2.algorithm.edge</package>
+                <package>net.imglib2.algorithm.fft</package>
+                <package>net.imglib2.algorithm.fft2</package>
+                <package>net.imglib2.algorithm.floydsteinberg</package>
+                <package>net.imglib2.algorithm.function</package>
+                <package>net.imglib2.algorithm.gauss</package>
+                <package>net.imglib2.algorithm.gauss3</package>
+                <package>net.imglib2.algorithm.gradient</package>
+                <package>net.imglib2.algorithm.integral</package>
+                <package>net.imglib2.algorithm.kdtree</package>
+                <package>net.imglib2.algorithm.labeling</package>
+                <package>net.imglib2.algorithm.math</package>
+                <package>net.imglib2.algorithm.pde</package>
+                <package>net.imglib2.algorithm.region</package>
+                <package>net.imglib2.algorithm.region.hypersphere</package>
+                <package>net.imglib2.algorithm.region.localneighborhood</package>
+                <package>net.imglib2.algorithm.region.localneighborhood.old</package>
+                <package>net.imglib2.algorithm.stats</package>
+                <package>net.imglib2.algorithm.transformation</package>
                 <package>net.imglib2.collection</package>
                 <package>net.imglib2.concatenate</package>
                 <package>net.imglib2.converter</package>
@@ -52,6 +236,8 @@
                 <package>net.imglib2.img.basictypeaccess.array</package>
                 <package>net.imglib2.img.cell</package>
                 <package>net.imglib2.img.constant</package>
+                <package>net.imglib2.img.display.imagej</package>
+                <package>net.imglib2.img.imageplus</package>
                 <package>net.imglib2.img.list</package>
                 <package>net.imglib2.img.planar</package>
                 <package>net.imglib2.img.sparse</package>
@@ -66,8 +252,60 @@
                 <package>net.imglib2.meta</package>
                 <package>net.imglib2.multithreading</package>
                 <package>net.imglib2.neighborsearch</package>
+                <package>net.imglib2.ops.condition</package>
+                <package>net.imglib2.ops.data</package>
+                <package>net.imglib2.ops.function</package>
+                <package>net.imglib2.ops.function.bool</package>
+                <package>net.imglib2.ops.function.complex</package>
+                <package>net.imglib2.ops.function.general</package>
+                <package>net.imglib2.ops.function.real</package>
+                <package>net.imglib2.ops.img</package>
+                <package>net.imglib2.ops.input</package>
+                <package>net.imglib2.ops.operation</package>
+                <package>net.imglib2.ops.operation.bool.binary</package>
+                <package>net.imglib2.ops.operation.complex.binary</package>
+                <package>net.imglib2.ops.operation.complex.real.unary</package>
+                <package>net.imglib2.ops.operation.complex.unary</package>
+                <package>net.imglib2.ops.operation.img.binary</package>
+                <package>net.imglib2.ops.operation.img.unary</package>
+                <package>net.imglib2.ops.operation.imgplus.unary</package>
+                <package>net.imglib2.ops.operation.interval.binary</package>
+                <package>net.imglib2.ops.operation.interval.unary</package>
+                <package>net.imglib2.ops.operation.iterable.binary.localthresholder</package>
+                <package>net.imglib2.ops.operation.iterable.unary</package>
+                <package>net.imglib2.ops.operation.iterableinterval.binary</package>
+                <package>net.imglib2.ops.operation.iterableinterval.unary</package>
+                <package>net.imglib2.ops.operation.iterableinterval.unary.multilevelthresholder</package>
+                <package>net.imglib2.ops.operation.labeling.binary</package>
+                <package>net.imglib2.ops.operation.labeling.unary</package>
+                <package>net.imglib2.ops.operation.metadata.unary</package>
+                <package>net.imglib2.ops.operation.randomaccessible.binary</package>
+                <package>net.imglib2.ops.operation.randomaccessible.unary</package>
+                <package>net.imglib2.ops.operation.randomaccessibleinterval.binary</package>
+                <package>net.imglib2.ops.operation.randomaccessibleinterval.unary</package>
+                <package>net.imglib2.ops.operation.randomaccessibleinterval.unary.morph</package>
+                <package>net.imglib2.ops.operation.randomaccessibleinterval.unary.regiongrowing</package>
+                <package>net.imglib2.ops.operation.real.binary</package>
+                <package>net.imglib2.ops.operation.real.complex.unary</package>
+                <package>net.imglib2.ops.operation.real.unary</package>
+                <package>net.imglib2.ops.operation.subset.views</package>
+                <package>net.imglib2.ops.parse</package>
+                <package>net.imglib2.ops.parse.token</package>
+                <package>net.imglib2.ops.pointset</package>
+                <package>net.imglib2.ops.relation</package>
+                <package>net.imglib2.ops.relation.bool.binary</package>
+                <package>net.imglib2.ops.relation.complex.binary</package>
+                <package>net.imglib2.ops.relation.general.binary</package>
+                <package>net.imglib2.ops.relation.general.unary</package>
+                <package>net.imglib2.ops.relation.real.binary</package>
+                <package>net.imglib2.ops.relation.real.unary</package>
+                <package>net.imglib2.ops.sandbox</package>
+                <package>net.imglib2.ops.types</package>
+                <package>net.imglib2.ops.util</package>
+                <package>net.imglib2.ops.util.metadata</package>
                 <package>net.imglib2.outofbounds</package>
                 <package>net.imglib2.position.transform</package>
+                <package>net.imglib2.realtransform</package>
                 <package>net.imglib2.roi</package>
                 <package>net.imglib2.sampler.special</package>
                 <package>net.imglib2.transform</package>
@@ -81,6 +319,20 @@
                 <package>net.imglib2.type.numeric.real</package>
                 <package>net.imglib2.util</package>
                 <package>net.imglib2.view</package>
+                <package>ome.xml</package>
+                <package>ome.xml.model</package>
+                <package>ome.xml.model.enums</package>
+                <package>ome.xml.model.enums.handlers</package>
+                <package>ome.xml.model.primitives</package>
+                <package>ome.xml.r2003fc.ome</package>
+                <package>script.imglib</package>
+                <package>script.imglib.algorithm</package>
+                <package>script.imglib.algorithm.fn</package>
+                <package>script.imglib.analysis</package>
+                <package>script.imglib.color</package>
+                <package>script.imglib.color.fn</package>
+                <package>script.imglib.math</package>
+                <package>script.imglib.math.fn</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/ij-bundle.jar</runtime-relative-path>

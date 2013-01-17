@@ -85,7 +85,7 @@ public class ImageJVisualizationFactory implements VisualizationFactory{
     public int getPreferenceForDataContainer(Response r) {
         if (r.getUTI().toLowerCase().contains("tif"))
         {
-            return 180;
+            return 110;
         }
         return -1;
     }

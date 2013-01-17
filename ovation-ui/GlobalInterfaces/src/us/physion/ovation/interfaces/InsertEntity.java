@@ -36,6 +36,7 @@ public abstract class InsertEntity extends AbstractAction implements EntityInser
         // {1} will be replaced by WizardDescriptor.Iterator.name()
         wiz.setTitleFormat(new MessageFormat("{0} ({1})"));
         wiz.setTitle("Insert Entity");
+	
         if (DialogDisplayer.getDefault().notify(wiz) == WizardDescriptor.FINISH_OPTION) {
             wizardFinished(wiz, Lookup.getDefault().lookup(ConnectionProvider.class).getConnection(), getEntity());
             ResettableNode node = getEntityNode();

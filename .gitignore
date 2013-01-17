@@ -23,3 +23,8 @@
 ovation-ui/nbproject/private/platform-private.properties
 /ovation-ui/dist/
 /ovation-ui/JFreeChart/build/
+/ovation-ui/ovpredicate/nbproject/private/
+/ovation-ui/query-builder-1.0-SNAPSHOT/nbproject/private/
+/ScrollableTableTree/build/
+/ScrollableTableTree/dist/
+/ovation-ui/ij/nbproject/private/
